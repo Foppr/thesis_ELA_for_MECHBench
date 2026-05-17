@@ -6,15 +6,72 @@ import os
 import re
 from llamea import Solution
 import argparse
+from llamea.llm import Ollama_LLM
+from llamea.llamea import LLaMEA
+import joblib
+
+
+def ela_distance(s1, s2):
+    """
+    Calculate the ELA distance between two solutions based on their metadata.
+    """
+    if "ela_features" not in s1.metadata or "ela_features" not in s2.metadata:
+        return 0.0  # No features to compare
+
+    features1 = s1.metadata["ela_features"]
+    features2 = s2.metadata["ela_features"]
+
+    # Replace NaN values with zeros
+    features1 = np.nan_to_num(features1, nan=0.0)
+    features2 = np.nan_to_num(features2, nan=0.0)
+
+    try:
+        scaler = joblib.load(f"ela_scaler.joblib")
+        features1 = scaler.transform(features1)
+        features2 = scaler.transform(features2)
+    except:
+        pass
+
+    # Calculate the Manhattan distance between the two feature vectors
+    if len(features1) != len(features2):
+        # fallback to Euclidean distance if lengths differ
+        return np.linalg.norm(features1 - features2)
+    return np.sum(np.abs(features1 - features2))
 
 
 class ELAForMECHBench(ELAproblem):
-    def __init__(self, mechbench_points, mechbench_objective_values, mechbench_ela, feature_descriptions):
+    def __init__(self, mechbench_points, mechbench_objective_values, mechbench_ela, features):
         super().__init__()
         self.points = mechbench_points
         self.objective_values = mechbench_objective_values
         self.mechbench_ela = mechbench_ela
-        self.feature_descriptions = feature_descriptions
+        mechbench_means = self.mechbench_ela.mean()
+        self.features = features
+        self.feature_descriptions = {
+            'disp.ratio_mean_02': "From pflacco's calculate_dispersion['disp.ratio_mean_02']: The dispersion features compare the dispersion, i.e. the (aggregated) pairwise distances, of all points in the initial design with the dispersion among the best points in the initial design. Per default, this set of “best points” is based on the 2%, 5% and 10% quantile of the objectives. Those dispersions are then compared based on the ratio as well as on the difference. [ratio, diff]_[mean, median]_[02, 05, 10, 25]: ratio and difference of the mean / median distances of the distances of the ‘best’ objectives vs. ‘all’ objectives. Taken from https://pflacco.readthedocs.io/en/latest/dispersion.html.",
+            'ela_distr.skewness': "From pflacco's calculate_ela_distribution['ela_distr.skewness']: skewness of the objective values.",
+            'ela_meta.lin_simple.adj_r2': "From pflacco's calculate_ela_meta['ela_meta.lin_simple.adj_r2']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) lin_simple.adj_r2: adjusted R^2 (i.e. model fit) of a simple linear model.",
+            'ela_meta.lin_simple.intercept': "From pflacco's calculate_ela_meta['ela_meta.lin_simple.intercept']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.lin_simple.intercept': intercept of a simple linear model.",
+            'ela_meta.lin_simple.coef.max': "From pflacco's calculate_ela_meta['ela_meta.lin_simple.coef.max']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.lin_simple.coef.max': biggest (non-intercept) absolute coefficient of the simple linear model.",
+            'ela_meta.quad_simple.adj_r2': "From pflacco's calculate_ela_meta['ela_meta.quad_simple.adj_r2']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.quad_simple.adj_r2': adjusted R^2 (i.e. model fit) of a simple quadratic model (without interactions), i.e. the ratio of its (absolute) biggest and smallest coefficients.",
+            'ic.eps_ratio': "From pflacco's calculate_information_content['ic.eps_ratio']: Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach (Munoz et al., 2014). In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified. A neutral landscape has low IC, while a rugged landscape has high IC (Munoz et al., 2014). 'ic.eps_ratio': ratio of partial information sensitivity, cf. equation (8) in Munoz et al. (2014) where the ratio is 0.5.",
+            'ic.eps_s': "From pflacco's calculate_information_content['ic.eps_s']: Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach (Munoz et al., 2014). In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified. A neutral landscape has low IC, while a rugged landscape has high IC (Munoz et al., 2014). 'ic.eps_s': settling sensitivity, indicating the epsilon for which the sequence nearly consists of zeros only, cf. equation (6) in Munoz et al. (2014).",
+            'nbc.nb_fitness.cor': "From pflacco's calculate_nbc['nbc.nb_fitness.cor']: Nearest Better Clustering features. Computes features based on the comparison of nearest neighbour and nearest better neighbour, i.e., the nearest neighbor with a better performance / objective value value. nb_fitness.cor: correlation between fitness value and count of observations to whom the current observation is the nearest better neighbour (the so-called 'indegree').",
+            'pca.expl_var_PC1.cov_init': "From pflacco's calculate_pca['pca.expl_var_PC1.cov_init']: Principal component (analysis) features. expl_var_PC1.cov_init: proportion of variance, which is explained by the first principal component when applying PCA to the covariance matrix of the entire initial design.",
+            'ela_level.mmce_qda_25': "From pflacco's calculate_ela_level['ela_level.mmce_qda_25']: 'The initial data set D is split into two classes by a specific objective level which works as a threshold. One possibility is to use the median for this, which will result in equally sized classes. Other choices studied are the upper and lower quartiles of the distribution of y. Linear (LDA), quadratic (QDA) and mixture discriminant analysis (MDA) are used to predict whether the objective values Y fall below or exceed the calculated threshold. Multi-modal functions should result in several unconnected sublevel sets for the quantile of lower values, which can only be modeled by MDA, but not LDA or QDA. The extracted low-level features are based on the distribution of the resulting cross-validated mean misclassification errors of each classifier.' (Mersmann et al., 2011) 'ela_level.mmce_qda_25': mean misclassification error of quadratic discriminant analysis (QDA) in the lower quartile (25).",
+            'ela_level.lda_qda_25': "From pflacco's calculate_ela_level['ela_level.lda_qda_25']: 'The initial data set D is split into two classes by a specific objective level which works as a threshold. One possibility is to use the median for this, which will result in equally sized classes. Other choices studied are the upper and lower quartiles of the distribution of y. Linear (LDA), quadratic (QDA) and mixture discriminant analysis (MDA) are used to predict whether the objective values Y fall below or exceed the calculated threshold. Multi-modal functions should result in several unconnected sublevel sets for the quantile of lower values, which can only be modeled by MDA, but not LDA or QDA. The extracted low-level features are based on the distribution of the resulting cross-validated mean misclassification errors of each classifier.' (Mersmann et al., 2011) 'ela_level.lda_qda_25': mean misclassification error of linear discriminant analysis (QDA) in the lower quartile (25)."
+        }
+        self.task_prompt = f"""
+        Your task is to design novel mathematical functions (proxy functions) to be used as black-box optimization benchmark landscapes, with specific landscape properties.
+        The code you need to write is a class with a function `f` with one parameter `x` which is a realvalued sample (numpy array).
+        The proxy function's landscape will be quantified using Exploratory Landscape Analysis (ELA) features, using the pflacco Python library. The proxy's landscape should approach that of the original, expensive BBO problem as much as possible, meaning its ELA feature values should be as close as possible to those of the original problem.
+        The optimization function should have the following properties: \n- it will be used as minimization problem (so the global optimum should be the minimum value of the function)."""
+        for feature in self.features:
+            self.task_prompt += f"\n- {feature} should approach the value {mechbench_means[feature]: .3f}. Explanation: {self.feature_descriptions[feature]}"
+        self.task_prompt += """
+        The class should also have a __init__(dim) function, that received the number of dimensions for the function.
+        The function will be evaluated between per dimension lower bound of -5.0 and upper bound of 5.0.
+        """
 
     @staticmethod
     def compute_ela(X, y):
@@ -24,6 +81,7 @@ class ELAForMECHBench(ELAproblem):
         ela_ic = ela.calculate_information_content(X, y)
         ela_nbc = ela.calculate_nbc(X, y)
         ela_pca = ela.calculate_pca(X, y)
+        ela_level = ela.calculate_ela_level(X, y)
 
         ela_1 = ela_disp['disp.ratio_mean_02']  # 1) disp.ratio_mean_02
         ela_2 = ela_distr['ela_distr.skewness']  # 2) ela_distr.skewness
@@ -35,6 +93,8 @@ class ELAForMECHBench(ELAproblem):
         ela_8 = ela_ic['ic.eps_s']  # 8) ic.eps_s
         ela_9 = ela_nbc['nbc.nb_fitness.cor']  # 9) nbc.nb_fitness.cor
         ela_10 = ela_pca['pca.expl_var_PC1.cov_init']  # 10) Pca.expl_var_PC1.cov_init
+        ela_11 = ela_level['ela_level.mmce_qda_25']  # 11
+        ela_12 = ela_level['ela_level.lda_qda_25']  # 12
 
         ela_values = {
             'disp.ratio_mean_02': ela_1,
@@ -46,7 +106,9 @@ class ELAForMECHBench(ELAproblem):
             'ic.eps_ratio':  ela_7,
             'ic.eps_s': ela_8,
             'nbc.nb_fitness.cor': ela_9,
-            'pca.expl_var_PC1.cov_init': ela_10
+            'pca.expl_var_PC1.cov_init': ela_10,
+            'ela_level.mmce_qda_25': ela_11,
+            'ela_level.lda_qda_25': ela_12
         }
 
         return ela_values
@@ -58,7 +120,6 @@ class ELAForMECHBench(ELAproblem):
         exec(code, globals())
 
         algorithm = None
-        # Final validation
         feature_results = {}
         results = []
 
@@ -72,6 +133,8 @@ class ELAForMECHBench(ELAproblem):
 
         for seed, X in self.points.items():
             y = X.apply(problem, axis=1)  # Per seed, get y by evaluating the proxy on X
+            if not isinstance(y, pd.core.series.Series):
+                print(f"y for seed {seed} and problem {solution.name}: {y}")
 
             # Pre-processing and normalization
             y[y == 0] = 0.1 ** 100  # since y=0 breaks log
@@ -80,6 +143,7 @@ class ELAForMECHBench(ELAproblem):
                     y[i] = 0
                 y_scaled = y
             else:
+                # Scale y (X should already be scaled before!)
                 y_scaled = (y - y.min()) / (y.max() - y.min())
 
             objective_values[seed] = y_scaled
@@ -88,18 +152,35 @@ class ELAForMECHBench(ELAproblem):
             # Get the ELA features from the sample points and proxy objective values in format {name1: value1, name2: value2, ...}
             ela_per_seed[seed] = ela_proxy
 
+        # ela_per_seed = preprocces_data(ela_per_seed)
         ela_proxy_df = pd.DataFrame(ela_per_seed)
         ela_proxy_df = ela_proxy_df.T
-        # print(f"Proxy ELA df: \n{ela_proxy_df.to_string()}")
+        proxy_ela_means = ela_proxy_df.mean()
+        mechbench_ela_means = self.mechbench_ela.mean()
+        solution.add_metadata("ela_features", proxy_ela_means.to_numpy())
 
+        # print(f"MECHBench ELA df: \n{self.mechbench_ela.to_string()}\n")
+        # print(f"Proxy ELA df: \n{ela_proxy_df.to_string()}\n")
+        #
+        # print(f"MECHBench ela means: \n{mechbench_ela_means}\n")
+        # print(f"Proxy ela means: \n{proxy_ela_means}\n")
+
+        # Use pairwise distance as per-feature feedback
+        feedback = f"The optimization landscape {proxy_name} scored on:"
+        for i in range(len(proxy_ela_means)):
+            pairwise_distance = proxy_ela_means[i] - mechbench_ela_means[i]
+            solution.add_metadata(f"distance_{proxy_ela_means.index[i]}", pairwise_distance)
+            feedback += f"{proxy_ela_means.index[i]} {pairwise_distance: .3f}"
+
+        # Use mean distance from all z-standardized feature values as final score
         ela_full_df = pd.concat([self.mechbench_ela, ela_proxy_df], axis=0)
         # print(f"Full df: \n{ela_full_df.to_string()}")
 
         z_score_df = (ela_full_df - ela_full_df.mean()) / ela_full_df.std()
         # print(f"Full z-standardized df: \n{z_score_df.to_string()}")
 
-        z_mechbench = z_score_df.iloc[:11]
-        z_proxy = z_score_df.iloc[11:]
+        z_mechbench = z_score_df.iloc[:13]
+        z_proxy = z_score_df.iloc[13:]
 
         z_mean_mechbench = z_mechbench.mean()
         z_mean_proxy = z_proxy.mean()
@@ -111,17 +192,10 @@ class ELAForMECHBench(ELAproblem):
         solution.add_metadata("proxy_mean_z", z_mean_proxy.to_numpy())
         solution.add_metadata("proxy_mean_z", distance_series.to_numpy())
 
-        feedback = f"The optimization landscape {proxy_name} scored on:"
-        distances_dic = distance_series.to_dict()
-
-        for feature, distance in distances_dic.items():
-            solution.add_metadata(f"distance_{feature}", distance)
-            feedback += f"{feature} {distance:.3f}, "
-
         final_score = distance_series.mean()
         solution.set_scores(
             final_score,
-            f"{feedback} (lower is better, 0.0 is the best).",
+            f"{feedback}",
         )
 
         return solution
@@ -177,33 +251,38 @@ if __name__ == '__main__':
             'ic.eps_s',
             'nbc.nb_fitness.cor',
             'pca.expl_var_PC1.cov_init',
+            'ela_level.mmce_qda_25',
+            'ela_level.lda_qda_25'
         ]
 
-    ela_1 = f"From pflacco's calculate_dispersion['disp.ratio_mean_02']: The dispersion features compare the dispersion, i.e. the (aggregated) pairwise distances, of all points in the initial design with the dispersion among the best points in the initial design. Per default, this set of “best points” is based on the 2%, 5% and 10% quantile of the objectives. Those dispersions are then compared based on the ratio as well as on the difference. [ratio, diff]_[mean, median]_[02, 05, 10, 25]: ratio and difference of the mean / median distances of the distances of the ‘best’ objectives vs. ‘all’ objectives"
-    ela_2 = f"From pflacco's calculate_ela_distribution['ela_distr.skewness']: "
-    ela_3 = f""
-    ela_4 = f""
-    ela_5 = f""
-    ela_6 = f""
-    ela_7 = f""
-    ela_8 = f""
-    ela_9 = f""
-    ela_10 = f""
+    # Import the sample points
+    points = {}
+    path = "C:/Users/foppe/Documents/DSAI-3/Thesis/thesis_code/Folder_Points/samples/D250_5D"  # We only have objective values for 5D
+    for csv in os.listdir(path):
+        seed = csv[-6:-4]
+        X = pd.read_csv(f'{path}/{csv}')
 
-    feature_descriptions = {
-            'disp.ratio_mean_02': ela_1,
-            'ela_distr.skewness': ela_2,
-            'ela_meta.lin_simple.adj_r2': ela_3,
-            'ela_meta.lin_simple.intercept': ela_4,
-            'ela_meta.lin_simple.coef.max': ela_5,
-            'ela_meta.quad_simple.adj_r2': ela_6,
-            'ic.eps_ratio':  ela_7,
-            'ic.eps_s': ela_8,
-            'nbc.nb_fitness.cor': ela_9,
-            'pca.expl_var_PC1.cov_init': ela_10
-        }
+        # The whole row is one string, so convert to an array, skipping the id column
+        strings = [value[0].split(' ')[1:] for value in X.values]  # [['-4.14', '2.49', ..., '1.35'], ..., [...]]
+        X = pd.DataFrame([[float(value) for value in values] for values in strings], dtype=np.float64)
+        X_scaled = (X - X.min()) / (X.max() - X.min())
+        points[f'seed_{seed}'] = X_scaled
 
-    problem = ELAproblem(name=f"ELA", features=features, dims=[5], eval_timeout=1200)
+    # Import the objective values
+    objective_values = {}
+    path = "C:/Users/foppe/Documents/DSAI-3/Thesis/thesis_code/Folder_Points/data_problem_2_5D_1"
+    for csv in os.listdir(path):
+        seed = csv[-11:-4]
+        y = pd.read_csv(f'{path}/{csv}')
+        y = y['penalized_mass']  # objective values has to be a Series, not pd df
+        y_scaled = (y - y.min()) / (y.max() - y.min())
+        objective_values[f'{seed}'] = y_scaled
+
+    ela_mechbench = pd.read_csv("C:/Users/foppe/Documents/DSAI-3/Thesis/thesis_code/Folder_Points/ELA/problem_2_250D.csv", index_col=0)
+    problem = ELAForMECHBench(mechbench_points=points,
+                              mechbench_objective_values=objective_values,
+                              mechbench_ela=ela_mechbench,
+                              features=features)
 
     mutation_prompts = []
     for feature in problem.features:
@@ -215,9 +294,12 @@ if __name__ == '__main__':
     ai_model = "qwen3-coder:30b"
     llm = Ollama_LLM(ai_model)
 
+    role_prompt = "You are a highly skilled computer scientist in the field optimization and benchmarking."
+
     for experiment_i in [1]:
         es = LLaMEA(
-            problem.evaluate_function,
+            f=problem.evaluate_for_MECHBench,
+            role_prompt=role_prompt,
             n_parents=8,
             n_offspring=16,
             llm=llm,
@@ -228,7 +310,6 @@ if __name__ == '__main__':
             experiment_name=experiment_name,
             elitism=False,
             HPO=False,
-            budget=budget,
             max_workers=4,
             parallel_backend="loky",
             niching=niching,

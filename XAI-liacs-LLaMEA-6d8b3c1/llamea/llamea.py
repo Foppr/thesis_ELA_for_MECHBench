@@ -318,9 +318,10 @@ markdown code block labelled as diff:
         Returns:
             Solution: The updated solution with feedback, fitness and error information filled in.
         """
-        with contextlib.redirect_stdout(None):
-            updated_individual = self.f(individual, self.logger)
-            self.logevent(updated_individual)
+        # with contextlib.redirect_stdout(None):
+        print(f"Evaluating {individual.name}")
+        updated_individual = self.f(individual, self.logger)
+        self.logevent(updated_individual)
 
         return updated_individual
 

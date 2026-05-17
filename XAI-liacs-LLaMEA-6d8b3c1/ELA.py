@@ -404,7 +404,6 @@ Give a novel Python class with an optimization landscape function and a short de
                 solution.add_metadata(f"score_{feature}_{DIM}D", temp_res)
                 feedback += f"{feature} {temp_res:.3f}, "
 
-
         score = np.mean(results, axis=0)
         solution.set_scores(
             score,
