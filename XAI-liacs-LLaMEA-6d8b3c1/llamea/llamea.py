@@ -297,7 +297,7 @@ markdown code block labelled as diff:
         for p in population_gen:
             population.append(p)
 
-        if self.evaluate_population:
+        if self.evaluate_population:  # STANDARD FALSE
             population = self.evaluate_population_fitness(population)
 
         for p in population:
@@ -375,7 +375,7 @@ Provide an improved / rephrased / augmented task prompt only. The intent of the 
             list: A list of dictionaries simulating a conversation with the language model for the next evolutionary step.
         """
         # Generate the current population summary
-        population_summary = "\n".join([ind.get_summary() for ind in self.population])
+        population_summary = "\n".join([ind.get_summary() for ind in self.population])  # EVERY SOLUTION DESCRIPTION + FITNESS SCORE
         solution = individual.code
         description = individual.description
         feedback = individual.feedback
@@ -446,13 +446,14 @@ With code:
                 dists.append(self.distance_metric(population[i], population[j]))
         if dists:
             self.niche_radius = float(np.mean(dists))
+            self.logevent(f'Niche radius for offspring in generation {self.generation}: {self.niche_radius}')
 
     def apply_niching(self, population):
         """Apply the configured niching strategy to ``population``."""
         if self.niching not in {"sharing", "clearing"}:
             return population
 
-        self.adapt_niche_radius(population)
+        self.adapt_niche_radius(population)  # e.g. niche_radius=1.4 (avg. distance between vectors is 1.4)
 
         if self.niching == "sharing":
             for i, ind in enumerate(population):
@@ -460,8 +461,8 @@ With code:
                 for j, other in enumerate(population):
                     if i == j:
                         continue
-                    d = self.distance_metric(ind, other)
-                    if d < self.niche_radius and self.niche_radius > 0:
+                    d = self.distance_metric(ind, other)  # e.g. d = 0.7
+                    if d < self.niche_radius and self.niche_radius > 0:  # e.g. 0.7 < 1.4
                         niche_count += 1 - d / self.niche_radius
                 if self.minimization:
                     ind.fitness *= niche_count
@@ -512,8 +513,10 @@ With code:
         Evolves a single solution by constructing a new prompt,
         querying the LLM, and evaluating the fitness.
         """
+        self.logevent(f"Evolving solution for {individual.name} with \nDESCRIPTION: {individual.description} and \nFEEDBACK: {individual.feedback}")
         individual_copy = individual.copy()
-        if self.adaptive_prompt:
+        self.logevent(f"COPY: {individual.name} with \n{individual.description} and \n{individual.feedback}")
+        if self.adaptive_prompt:  # STANDARD FALSE
             individual_copy.task_prompt = self.optimize_task_prompt(individual_copy)
         new_prompt = self.construct_prompt(individual_copy)
 

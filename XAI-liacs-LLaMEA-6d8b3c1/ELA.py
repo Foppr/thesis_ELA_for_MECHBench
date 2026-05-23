@@ -514,7 +514,7 @@ if __name__ == "__main__":
             mutation_prompts.append(f"Create a new landscape class based on the selected code and improve the {feature} score, meaning: {problem.feature_descriptions[feature]}.")
         mutation_prompts.append("Create a new landscape class that is completely different from the selected solution but still adheres to the properties outlined in the task description.")
 
-        ai_model = "qwen3-coder:30b"
+        ai_model = "qwen3.5-coder:9b"
         llm = Ollama_LLM(ai_model)
 
         for experiment_i in [1]:

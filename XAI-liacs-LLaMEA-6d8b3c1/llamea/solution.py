@@ -97,6 +97,7 @@ class Solution:
         Returns:
             Individual: A new instance of Individual with the same attributes but a different ID.
         """
+
         new_solution = Solution(
             code=self.code,
             name=self.name,
@@ -108,6 +109,13 @@ class Solution:
             task_prompt=self.task_prompt,
         )
         new_solution.metadata = self.metadata.copy()  # Copy the metadata as well
+
+        # FOPPE: ADDING THESE TOO (why is feedback missing for the next prompt? then it doesn't know how far the ELA
+        # values are from the original)
+        new_solution.feedback = self.feedback
+        new_solution.error = self.error
+        new_solution.fitness = self.fitness
+
         return new_solution
 
     def empty_copy(self):
