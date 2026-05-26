@@ -183,32 +183,32 @@ class ELAForMECHBench(ELAproblem):
         # print(f"Z PROXY MEAN: \n{z_mean_proxy}")
 
         # NEW METHOD: Calculate Z-scores using MECHBench mean and std
-        mb_mean = self.mechbench_ela.mean()
-        mb_std = np.maximum(self.mechbench_ela.std(), 0.01)
+        # mb_mean = self.mechbench_ela.mean()
+        # mb_std = np.maximum(self.mechbench_ela.std(), 0.01)
+        #
+        # mb_std = mb_std.replace(0, 1.0)
+        #
+        # # Standardize both groups independently using the target's baseline metrics
+        # z_mean_mechbench = (self.mechbench_ela.mean() - mb_mean)  # vector of 0s
+        # z_mean_proxy = (proxy_ela_means - mb_mean)
 
-        mb_std = mb_std.replace(0, 1.0)
+        # print(f"Z MEAN MECHBENCH: \n{z_mean_mechbench}")
+        # print(f"Z MEAN PROXY: \n{z_mean_proxy}")
+        #
+        # distance_series = (z_mean_mechbench - z_mean_proxy).abs()
+        # print(f"DISTANCE SERIES: \n{distance_series}")
+        # distance_series.name = "feature_distance"
+        #
+        # print(f"MECHBENCH SD: \n{mb_std}")
+        #
+        # # Standardize both groups independently using the target's baseline metrics
+        # z_mean_mechbench = (self.mechbench_ela.mean() - mb_mean) / mb_std  # vector of 0s
+        # z_mean_proxy = (proxy_ela_means - mb_mean) / mb_std
+        #
+        # print(f"Z MEAN MECHBENCH (WITH SD): \n{z_mean_mechbench}")
+        # print(f"Z MEAN PROXY (WITH SD): \n{z_mean_proxy}")
 
-        # Standardize both groups independently using the target's baseline metrics
-        z_mean_mechbench = (self.mechbench_ela.mean() - mb_mean)  # vector of 0s
-        z_mean_proxy = (proxy_ela_means - mb_mean)
-
-        print(f"Z MEAN MECHBENCH: \n{z_mean_mechbench}")
-        print(f"Z MEAN PROXY: \n{z_mean_proxy}")
-
-        distance_series = (z_mean_mechbench - z_mean_proxy).abs()
-        print(f"DISTANCE SERIES: \n{distance_series}")
-        distance_series.name = "feature_distance"
-
-        print(f"MECHBENCH SD: \n{mb_std}")
-
-        # Standardize both groups independently using the target's baseline metrics
-        z_mean_mechbench = (self.mechbench_ela.mean() - mb_mean) / mb_std  # vector of 0s
-        z_mean_proxy = (proxy_ela_means - mb_mean) / mb_std
-
-        print(f"Z MEAN MECHBENCH (WITH SD): \n{z_mean_mechbench}")
-        print(f"Z MEAN PROXY (WITH SD): \n{z_mean_proxy}")
-
-        distance_series = (z_mean_mechbench - z_mean_proxy).abs()
+        distance_series = (mechbench_ela_means - proxy_ela_means).abs()
         print(f"DISTANCE SERIES WITH SD: \n{distance_series}")
         distance_series.name = "feature_distance"
 
