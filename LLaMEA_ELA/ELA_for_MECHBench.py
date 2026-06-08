@@ -276,30 +276,6 @@ class ELAForMECHBench(ELAproblem):
         return solution
 
 
-class SinusoidalHomogeneousLandscape:
-    def __init__(self, dim=5):
-        self.dim = dim
-        # Precompute frequency factors for different dimensions
-        self.frequencies = np.arange(1, dim + 1) * 0.5
-
-    def f(self, x):
-        # Normalize input to [-pi, pi] for sinusoidal functions
-        x_normalized = x * (np.pi / 5.0)
-
-        # Base quadratic term for conditioning
-        quadratic = np.sum(x ** 2)
-
-        # Sinusoidal components with different frequencies
-        sinusoidal = np.sum(np.sin(self.frequencies * x_normalized) *
-                            np.cos(self.frequencies * x_normalized) *
-                            np.exp(-0.1 * np.abs(x)))
-
-        # Add a small constant to ensure global minimum is at origin
-        # and create a smooth landscape with homogeneous basin sizes
-        result = quadratic + 0.5 * sinusoidal + 0.1 * np.sum(np.sin(x_normalized) ** 2)
-
-        return result
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run ELA problem with LLaMEA.")
@@ -373,114 +349,27 @@ if __name__ == '__main__':
         print(es.run())
 
 
-def test1():
-    features = [
-        'disp.ratio_mean_02',
-        'ela_distr.skewness',
-        'ela_meta.lin_simple.adj_r2',
-        'ela_meta.lin_simple.intercept',
-        'ela_meta.lin_simple.coef.max',
-        'ela_meta.quad_simple.adj_r2',
-        'ic.eps_ratio',
-        'ic.eps_s',
-        'nbc.nb_fitness.cor',
-        'pca.expl_var_PC1.cov_init',
-        'ela_level.mmce_qda_25',
-        'ela_level.lda_qda_25'
-    ]
+# Example code class
+class SinusoidalHomogeneousLandscape:
+    def __init__(self, dim=5):
+        self.dim = dim
+        # Precompute frequency factors for different dimensions
+        self.frequencies = np.arange(1, dim + 1) * 0.5
 
-    # Import the sample points
-    points = {}
-    path = "C:/Users/foppe/Documents/DSAI-3/Thesis/thesis_code/Folder_Points/samples/D250_5D"  # We only have objective values for 5D
-    for csv in os.listdir(path):
-        seed = csv[-6:-4]
-        X = pd.read_csv(f'{path}/{csv}')
+    def f(self, x):
+        # Normalize input to [-pi, pi] for sinusoidal functions
+        x_normalized = x * (np.pi / 5.0)
 
-        # The whole row is one string, so convert to an array, skipping the id column
-        strings = [value[0].split(' ')[1:] for value in X.values]  # [['-4.14', '2.49', ..., '1.35'], ..., [...]]
-        X = pd.DataFrame([[float(value) for value in values] for values in strings], dtype=np.float64)
-        X_scaled = (X - X.min()) / (X.max() - X.min())
-        points[f'seed_{seed}'] = X_scaled
+        # Base quadratic term for conditioning
+        quadratic = np.sum(x ** 2)
 
-    # Import the objective values
-    objective_values = {}
-    path = "C:/Users/foppe/Documents/DSAI-3/Thesis/thesis_code/Folder_Points/data_problem_2_5D_1"
-    for csv in os.listdir(path):
-        seed = csv[-11:-4]
-        y = pd.read_csv(f'{path}/{csv}')
-        y = y['penalized_mass']  # objective values has to be a Series, not pd df
-        y_scaled = (y - y.min()) / (y.max() - y.min())
-        objective_values[f'{seed}'] = y_scaled
+        # Sinusoidal components with different frequencies
+        sinusoidal = np.sum(np.sin(self.frequencies * x_normalized) *
+                            np.cos(self.frequencies * x_normalized) *
+                            np.exp(-0.1 * np.abs(x)))
 
-    ela_per_seed = {}
-    for seed, X in points.items():
-        ela_dic = ELAForMECHBench.compute_ela(X, objective_values[seed])
-        ela_per_seed[seed] = ela_dic
+        # Add a small constant to ensure global minimum is at origin
+        # and create a smooth landscape with homogeneous basin sizes
+        result = quadratic + 0.5 * sinusoidal + 0.1 * np.sum(np.sin(x_normalized) ** 2)
 
-    ela_df = pd.DataFrame(ela_per_seed)
-    ela_df = ela_df.T
-    ela_df.to_csv("C:/Users/foppe/Documents/DSAI-3/Thesis/thesis_code/Folder_Points/ELA_scaled/problem_2_250D.csv")
-
-    def extract_algorithm_code(message):
-        """
-        Extracts algorithm code from a given message string using regular expressions.
-
-        Args:
-            message (str): The message string containing the algorithm code.
-
-        Returns:
-            str: Extracted algorithm code.
-
-        Raises:
-            NoCodeException: If no code block is found within the message.
-        """
-        code_pattern = r"```(?:python|diff)?\n(.*?)\n```"
-        match = re.search(code_pattern, message, re.DOTALL | re.IGNORECASE)
-        if match:
-            return match.group(1)
-
-    message = "# Description: This benchmark function combines multiple sinusoidal components with varying frequencies and amplitudes to create a landscape with homogeneous basin sizes and smooth search space. The function features multiple local minima that are evenly distributed in terms of basin size, while maintaining a homogeneous structure throughout the search space. The sinusoidal components create a complex but predictable landscape that challenges optimization algorithms to escape local optima while maintaining consistent search behavior across dimensions.\n\n# Code: \n```python\nimport numpy as np\n\nclass SinusoidalHomogeneousLandscape:\n    \n    def __init__(self, dim=5):\n        self.dim = dim\n        # Precompute frequency factors for different dimensions\n        self.frequencies = np.arange(1, dim + 1) * 0.5\n        \n    def f(self, x):\n        # Normalize input to [-pi, pi] for sinusoidal functions\n        x_normalized = x * (np.pi / 5.0)\n        \n        # Base quadratic term for conditioning\n        quadratic = np.sum(x**2)\n        \n        # Sinusoidal components with different frequencies\n        sinusoidal = np.sum(np.sin(self.frequencies * x_normalized) * \n                           np.cos(self.frequencies * x_normalized) * \n                           np.exp(-0.1 * np.abs(x)))\n        \n        # Add a small constant to ensure global minimum is at origin\n        # and create a smooth landscape with homogeneous basin sizes\n        result = quadratic + 0.5 * sinusoidal + 0.1 * np.sum(np.sin(x_normalized)**2)\n        \n        return result\n```"
-    code = extract_algorithm_code(message)
-
-    new_individual = Solution(
-        name="SinusoidalHomogeneousLandscape",
-        description="This benchmark function combines multiple sinusoidal components with varying frequencies and amplitudes to create a landscape with homogeneous basin sizes and smooth search space. The function features multiple local minima that are evenly distributed in terms of basin size, while maintaining a homogeneous structure throughout the search space. The sinusoidal components create a complex but predictable landscape that challenges optimization algorithms to escape local optima while maintaining consistent search behavior across dimensions.",
-        code=code
-    )
-
-    efm = ELAForMECHBench(points, objective_values, ela_df, features)
-    distance_series_ = efm.evaluate_for_MECHBench(new_individual)
-
-
-def test2():
-    ela_mechbench_mean_z = {
-        'disp.ratio_mean_02': 0.947832,
-        'ela_distr.skewness': 0.973135,
-        'ela_meta.lin_simple.adj_r2': -0.976826,
-        'ela_meta.lin_simple.intercept': 0.969779,
-        'ela_meta.lin_simple.coef.max': -0.959217,
-        'ela_meta.quad_simple.adj_r2': -0.976516,
-        'ic.eps_ratio': -0.874767,
-        'ic.eps_s': 0.970102,
-        'nbc.nb_fitness.cor': 0.059940,
-        'pca.expl_var_PC1.cov_init': -0.910719
-    }
-
-    ela_proxy_mean_z = {
-        'disp.ratio_mean_02': -0.947832,
-        'ela_distr.skewness': -0.973135,
-        'ela_meta.lin_simple.adj_r2': 0.976826,
-        'ela_meta.lin_simple.intercept': -0.969779,
-        'ela_meta.lin_simple.coef.max': 0.959217,
-        'ela_meta.quad_simple.adj_r2': 0.976516,
-        'ic.eps_ratio': 0.874767,
-        'ic.eps_s': -0.970102,
-        'nbc.nb_fitness.cor': -0.059940,
-        'pca.expl_var_PC1.cov_init': 0.910719
-    }
-
-    df_MECHBench = pd.DataFrame.from_dict(ela_mechbench_mean_z)
-    df_proxy = pd.DataFrame.from_dict(ela_proxy_mean_z)
-
-    for e in df_MECHBench:
-        print(e)
+        return result
