@@ -289,9 +289,9 @@ class LLaMEAAnalyzer:
 if __name__ == "__main__":
     same_scales = "new_class"
 
-    name1 = "exp-06-04_002048-LLaMEA-qwen3-coder_30b-ELA_for_MECHBENCH"
-    name2 = "exp-06-04_122824-LLaMEA-qwen3-coder_30b-ELA_for_MECHBENCH"
-    name3 = "exp-06-05_110213-LLaMEA-qwen3-coder_30b-ELA_for_MECHBENCH"
+    name1 = "exp-06-04_002048_p1_budget800"
+    name2 = "exp-06-04_122824_p2_budget800"
+    name3 = "exp-06-05_110213_p3_budget800"
 
     # Initialize Class
     analyzer = LLaMEAAnalyzer(missing_niche_radius=True)
