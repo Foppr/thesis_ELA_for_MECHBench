@@ -6,7 +6,7 @@ points_path = "../Folder_Points/500D"
 abs_path = os.path.abspath(points_path)
 
 problem_type = 'data_p3'
-dataset = '500d15_p3_seed1312_upto3750.csv'
+dataset = '250d15_p3_seed1312.csv'
 
 points_df = pd.read_csv(f"{abs_path}/{problem_type}/points/{dataset}")
 X = points_df.iloc[:, 1:16]
@@ -38,7 +38,6 @@ ela_6 = ela_meta['ela_meta.quad_simple.adj_r2']  # 6) ela_meta.quad_simple.adj_r
 ela_7 = ela_ic['ic.eps_ratio']  # 7) ic.eps_ratio
 ela_8 = ela_ic['ic.eps_s']  # 8) ic.eps_s
 ela_9 = ela_nbc['nbc.nb_fitness.cor']  # 9) nbc.nb_fitness.cor
-ela_10 = ela_pca['pca.expl_var_PC1.cov_init']  # 10) Pca.expl_var_PC1.cov_init
 ela_11 = ela_level['ela_level.mmce_qda_25']
 ela_12 = ela_level['ela_level.lda_qda_25']
 

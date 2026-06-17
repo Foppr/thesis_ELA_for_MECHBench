@@ -616,6 +616,10 @@ With code:
             # Update population and the best solution
             self.population = self.selection(self.population, new_population)
 
+            # !! Log after niching to add penalized distance
+            if self.log:
+                self.logger.log_population(self.population)
+
             # CHECK: Count how many individuals in the new parent population have a generation tag equal to current gen
             successful_offspring = sum(1 for p in self.population if p.generation == self.generation)
             print(f"Offspring Success Rate: {successful_offspring} / {self.n_offspring} entered the elite pool.")
