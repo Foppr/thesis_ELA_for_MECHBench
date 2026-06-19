@@ -199,6 +199,7 @@ import numpy as np\n\nclass landscape:\n    \n    def __init__(self, dim=5):\n  
         print(f"PROXY ELA: \n{ela_proxy.to_string()}")
 
         feedback = f"The optimization landscape '{proxy_name}' had the following distances to the original ELA values: "
+        abs_distances = {}
         for i in range(len(ela_proxy)):
             # Grab the feature name from the index
             feature_name = ela_proxy.index[i]
@@ -210,8 +211,12 @@ import numpy as np\n\nclass landscape:\n    \n    def __init__(self, dim=5):\n  
             # This is now a simple float subtraction!
             pairwise_distance = proxy_val - original_val
 
-            solution.add_metadata(f"Distance to {feature_name}", round(pairwise_distance, 3))
+            # solution.add_metadata(f"Distance to {feature_name}", round(pairwise_distance, 3))
+            abs_distances[feature_name] = abs(pairwise_distance)
             feedback += f"{feature_name}: {pairwise_distance: .3f} (Original value: {original_val: .3f}, proxy value: {proxy_val: .3f}) \n"
+
+        solution.add_metadata('Absolute distances', abs_distances)
+
         # # OLD METHOD:
         # # Use mean distance from all z-standardized feature values as final score
         # ela_full_df = pd.concat([self.mechbench_ela, ela_proxy_df], axis=0)
@@ -303,11 +308,22 @@ if __name__ == '__main__':
 
     role_prompt = "You are a highly skilled computer scientist in the field optimization and benchmarking."
     mutation_prompts = []
+
+    # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
     for feature in features:
         mutation_prompts.append(
-            f"Create a new landscape class based on the selected code and improve the {feature} score, meaning: ELA feature {feature} {problem.feature_descriptions[feature]}.")
-    mutation_prompts.append(
-        "Create a new landscape class that is completely different from the selected solution but still adheres to the properties outlined in the task description.")
+            {feature: f"""
+Create a new landscape class based on the selected code and improve the {feature} score, meaning: ELA feature {feature} {problem.feature_descriptions[feature]}.
+"""}
+        )
+
+    # # OLD: Random mutations
+    # for feature in features:
+    #     mutation_prompts.append(
+    #         f"Create a new landscape class based on the selected code and improve the {feature} score, meaning: ELA feature {feature} {problem.feature_descriptions[feature]}.")
+    # mutation_prompts.append(
+    #     "Create a new landscape class that is completely different from the selected solution but still adheres to the properties outlined in the task description.")
+
 
     if problem_type == 1:
         example_prompt = problem.example_proxy1
@@ -341,7 +357,6 @@ if __name__ == '__main__':
             role_prompt=role_prompt,
             task_prompt=problem.task_prompt,
             example_prompt=example_prompt,
-            output_format_prompt="",  # Empty because the LLM should use the example proxy as the example format
             mutation_prompts=mutation_prompts,
             experiment_name=experiment_name,
             elitism=False,

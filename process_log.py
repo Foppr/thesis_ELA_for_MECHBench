@@ -2,11 +2,13 @@ import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import sys
 
 
 class LLaMEAAnalyzer:
-    def __init__(self, missing_niche_radius=True):
+    def __init__(self, missing_niche_radius=False, save_folder_name='', fitness_or_rawdist='fitness'):
         self.missing_niche_radius = missing_niche_radius
+        self.save_folder_name = save_folder_name
         self.features = [
             'disp.ratio_mean_02',
             'ela_distr.skewness',
@@ -21,6 +23,7 @@ class LLaMEAAnalyzer:
             'ela_level.lda_qda_25'
         ]
         self.experiments_data = {}
+        self.fitness_or_rawdist = fitness_or_rawdist
 
     def load_log(self, exp_name):
         """
@@ -74,7 +77,8 @@ class LLaMEAAnalyzer:
         for ind in log:
             record = {
                 'generation': ind['generation'],
-                'fitness': ind['fitness']
+                'fitness': ind['fitness'],
+                'raw_mean_distance': ind['metadata']['Raw mean distance']
             }
             proxy = ind['metadata']['Proxy ELA values']
             original = ind['metadata']['Original ELA values']
@@ -95,6 +99,7 @@ class LLaMEAAnalyzer:
 
             # Total fitness
             agg_total = df.groupby('generation')['fitness'].agg(['min', 'mean']).reset_index()
+            # This will either use 'fitness' or 'Raw mean distance' if the fitness is accidentally incorrect
             max_gens.append(agg_total['generation'].max())
             ubs_total.append(max(agg_total['mean'].max(), agg_total['min'].max()))
 
@@ -112,7 +117,7 @@ class LLaMEAAnalyzer:
         max_gen, ub_total, _ = global_stats
 
         df_filtered = df[df['generation'] <= max_gen]
-        agg_df = df_filtered.groupby('generation')['fitness'].agg(['min', 'mean']).reset_index()
+        agg_df = df_filtered.groupby('generation')[self.fitness_or_rawdist].agg(['min', 'mean']).reset_index()
         agg_df = agg_df.sort_values('generation')
 
         generations = agg_df['generation']
@@ -141,7 +146,7 @@ class LLaMEAAnalyzer:
         plt.legend(fontsize=11, loc='upper right', frameon=True, facecolor='white', edgecolor='none')
         plt.tight_layout()
 
-        filename = f'llamea_graphs/{save_suffix}.png'
+        filename = f'{self.save_folder_name}/{save_suffix}.png'
         plt.savefig(filename, dpi=300)
         print(f"Total fitness graph saved as '{filename}'")
         plt.close()
@@ -186,7 +191,7 @@ class LLaMEAAnalyzer:
         plt.legend(fontsize=11, loc='upper right', frameon=True, facecolor='white', edgecolor='none')
         plt.tight_layout()
 
-        filename = f'llamea_graphs/{feature_name}_{save_suffix}.png'
+        filename = f'{self.save_folder_name}/{feature_name}_{save_suffix}.png'
         plt.savefig(filename, dpi=300)
         print(f"Feature graph saved as '{filename}'")
         plt.close()
@@ -263,33 +268,49 @@ class LLaMEAAnalyzer:
 
 
 if __name__ == "__main__":
-    same_scales = "new_class"
+    name1 = "exp-06-19_004627-LLaMEA-qwen3-coder_30b-ELA_for_MECHBENCH"
+    # name2 = "exp-06-04_122824_p2_budget800"
+    # name3 = "exp-06-05_110213_p3_budget800"
 
-    name1 = "exp-06-04_002048_p1_budget800"
-    name2 = "exp-06-04_122824_p2_budget800"
-    name3 = "exp-06-05_110213_p3_budget800"
+    analyzer = LLaMEAAnalyzer(save_folder_name='llamea_graphs/edition2', fitness_or_rawdist='raw_mean_distance')
 
-    analyzer = LLaMEAAnalyzer(missing_niche_radius=True)
+    log = analyzer.load_log(name1)
+    # analyzer.load_log(name2)
+    # analyzer.load_log(name3)
 
-    analyzer.load_log(name1)
-    analyzer.load_log(name2)
-    analyzer.load_log(name3)
+    # filtered_records = []
+    #
+    # for ind in log:
+    #     # Check if 'metadata' exists and has the target key
+    #     metadata = ind.get("metadata", {})
+    #     if "Penalized, niche distance" in metadata:
+    #         filtered_records.append({
+    #             "fitness": ind.get("fitness"),
+    #             "Penalized, niche distance": metadata["Penalized, niche distance"]
+    #         })
+    #
+    # # Create the filtered DataFrame
+    # filtered_df = pd.DataFrame(filtered_records)
+    #
+    # # View the result
+    # print(filtered_df)
 
-    problem_stats = analyzer.compare_experiments([name1, name2, name3])
+    # problem_stats = analyzer.compare_experiments([name1, name2, name3])
+    problem_stats = analyzer.compare_experiments([name1])
 
     # Plots
-    # analyzer.generate_plots(name1, problem_stats, save_suffix=f"p1_budget800_niche2{same_scales}", plot_type='total')
+    analyzer.generate_plots(name1, problem_stats, save_suffix=f"p1_budget800_niche2_{analyzer.fitness_or_rawdist}", plot_type='total')
     # analyzer.generate_plots(name2, problem_stats, save_suffix=f"p2_budget800_niche2{same_scales}", plot_type='total')
     # analyzer.generate_plots(name3, problem_stats, save_suffix=f"p3_budget800_niche2{same_scales}", plot_type='total')
 
-    # analyzer.generate_plots(name1, problem_stats, save_suffix=f"p1_budget800", plot_type='all_features')
+    analyzer.generate_plots(name1, problem_stats, save_suffix=f"p1_budget800_{analyzer.fitness_or_rawdist}", plot_type='all_features')
     # analyzer.generate_plots(name2, problem_stats, save_suffix=f"p2_budget800", plot_type='all_features')
     # analyzer.generate_plots(name3, problem_stats, save_suffix=f"p3_budget800", plot_type='all_features')
 
     experiment_mapping = {
         'p1': name1,
-        'p2': name2,
-        'p3': name3
+        # 'p2': name2,
+        # 'p3': name3
     }
 
     # Table and Latex

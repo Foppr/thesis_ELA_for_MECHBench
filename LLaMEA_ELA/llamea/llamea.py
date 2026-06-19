@@ -389,7 +389,16 @@ This changing rate {(prob*100):.1f}% is a mandatory requirement, you cannot chan
 """
             self.mutation_prompts = [new_mutation_prompt]
 
-        mutation_operator = random.choice(self.mutation_prompts)
+        # mutation_operator = random.choice(self.mutation_prompts)
+        # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
+        absolute_distances = individual.get_metadata('Absolute distances')
+        sorted_distances = sorted(absolute_distances.items(), key=lambda item: item[1], reverse=True)
+        worst_feature, worst_score = sorted_distances[0][0], sorted_distances[0][1]
+        mutation_operator = self.mutation_prompts[worst_feature]
+        individual.add_metadata('Mutation operator', worst_feature)
+
+        print(f"Mutating worst feature {worst_feature} with distance {worst_score}.")
+
         individual.set_operator(mutation_operator)
 
         task_prompt = (
@@ -408,6 +417,9 @@ With code:
 {feedback}
 
 {mutation_operator}
+Out of all features, this one has the worst score with an absolute distance of {worst_score}.
+Adjust the code to improve its score, while trying to keep all other features the same.
+
 {self.diff_output_format_prompt if self.diff_mode else self.output_format_prompt}
 """
         session_messages = [
@@ -456,6 +468,7 @@ With code:
         self.adapt_niche_radius(population)  # e.g. niche_radius=1.4 (avg. distance between vectors is 1.4)
 
         if self.niching == "sharing":
+            new_fitnesses = []
             for i, ind in enumerate(population):
                 niche_count = 1.0
                 for j, other in enumerate(population):
@@ -465,16 +478,20 @@ With code:
                     if d < self.niche_radius and self.niche_radius > 0:  # e.g. 0.7 < 1.4
                         niche_count += 1 - d / self.niche_radius
                 if self.minimization:
-                    ind.fitness *= niche_count
+                    new_fitness = ind.fitness * niche_count
                 else:
-                    ind.fitness /= niche_count
+                    new_fitness = ind.fitness / niche_count
+
+                new_fitnesses.append(new_fitness)
 
                 ind.add_metadata("Penalized, niche distance", ind.fitness)
-                if ind.get_metadata("Raw mean distance") is not None:
-                    print(f"{ind.name} "
-                          f"\nRaw dist: {ind.get_metadata('Raw mean distance')}"
-                          f"\n Penalized niche dist: {ind.get_metadata('Penalized, niche distance')}"
-                          f"\n Penalty multiplier: {ind.get_metadata('Penalized, niche distance') / ind.get_metadata('Raw mean distance')}")
+                ind.add_metadata("Niche radius", self.niche_radius)
+
+            # Log AFTER adding niche distance and niche radius to metadata
+            self.logger.log_population(population)
+            for i, ind in enumerate(population):
+                new_fitness = new_fitnesses[i]
+                ind.fitness = new_fitness  # But BEFORE updating the individual's fitness
 
         elif self.niching == "clearing":
             if self.clearing_interval and self.generation % self.clearing_interval != 0:
@@ -610,15 +627,13 @@ With code:
 
             self.generation += 1
 
-            if self.log:
-                self.logger.log_population(new_population)
+            # if self.log:
+            #     self.logger.log_population(new_population)
+            # # ↑ Log after niching, but before updating individual fitness
+            # # See order of selection > apply niching below
 
             # Update population and the best solution
             self.population = self.selection(self.population, new_population)
-
-            # !! Log after niching to add penalized distance
-            if self.log:
-                self.logger.log_population(self.population)
 
             # CHECK: Count how many individuals in the new parent population have a generation tag equal to current gen
             successful_offspring = sum(1 for p in self.population if p.generation == self.generation)
