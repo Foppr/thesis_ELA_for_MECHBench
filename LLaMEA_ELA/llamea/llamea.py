@@ -468,7 +468,6 @@ Adjust the code to improve its score, while trying to keep all other features th
         self.adapt_niche_radius(population)  # e.g. niche_radius=1.4 (avg. distance between vectors is 1.4)
 
         if self.niching == "sharing":
-            new_fitnesses = []
             for i, ind in enumerate(population):
                 niche_count = 1.0
                 for j, other in enumerate(population):
@@ -478,20 +477,12 @@ Adjust the code to improve its score, while trying to keep all other features th
                     if d < self.niche_radius and self.niche_radius > 0:  # e.g. 0.7 < 1.4
                         niche_count += 1 - d / self.niche_radius
                 if self.minimization:
-                    new_fitness = ind.fitness * niche_count
+                    ind.fitness *= niche_count
                 else:
-                    new_fitness = ind.fitness / niche_count
-
-                new_fitnesses.append(new_fitness)
+                    ind.fitness /= niche_count
 
                 ind.add_metadata("Penalized, niche distance", ind.fitness)
                 ind.add_metadata("Niche radius", self.niche_radius)
-
-            # Log AFTER adding niche distance and niche radius to metadata
-            self.logger.log_population(population)
-            for i, ind in enumerate(population):
-                new_fitness = new_fitnesses[i]
-                ind.fitness = new_fitness  # But BEFORE updating the individual's fitness
 
         elif self.niching == "clearing":
             if self.clearing_interval and self.generation % self.clearing_interval != 0:
@@ -534,19 +525,17 @@ Adjust the code to improve its score, while trying to keep all other features th
         return new_population
 
     def evolve_solution(self, individual):
-        """
-        Evolves a single solution by constructing a new prompt,
-        querying the LLM, and evaluating the fitness.
-        """
-        self.logevent(f"Evolving solution for {individual.name} with \nDESCRIPTION: {individual.description} and \nFEEDBACK: {individual.feedback}")
+        self.logevent(f"Evolving solution for {individual.name}")
         individual_copy = individual.copy()
-        self.logevent(f"COPY: {individual.name} with \n{individual.description} and \n{individual.feedback}")
-        if self.adaptive_prompt:  # STANDARD FALSE
-            individual_copy.task_prompt = self.optimize_task_prompt(individual_copy)
-        new_prompt = self.construct_prompt(individual_copy)
 
         evolved_individual = individual.empty_copy()
         try:
+            if self.adaptive_prompt:
+                individual_copy.task_prompt = self.optimize_task_prompt(individual_copy)
+
+            # Moved safely INSIDE the try block
+            new_prompt = self.construct_prompt(individual_copy)
+
             evolved_individual = self.llm.sample_solution(
                 new_prompt,
                 evolved_individual.parent_ids,
@@ -559,15 +548,14 @@ Adjust the code to improve its score, while trying to keep all other features th
             if not self.evaluate_population:
                 evolved_individual = self.evaluate_fitness(evolved_individual)
         except Exception as e:
-            error = repr(e)
+            error = repr(e) + "\n" + traceback.format_exc()
             evolved_individual.set_scores(
-                self.worst_value, f"An exception occurred: {error}.", error
+                self.worst_value, f"An exception occurred: {repr(e)}.", error
             )
             if hasattr(self.f, "log_individual"):
                 self.f.log_individual(evolved_individual)
-            self.logevent(f"An exception occured: {traceback.format_exc()}.")
+            self.logevent(f"An exception occurred during evolution: {error}")
 
-        # self.progress_bar.update(1)
         return evolved_individual
 
     def run(self):
@@ -627,8 +615,8 @@ Adjust the code to improve its score, while trying to keep all other features th
 
             self.generation += 1
 
-            # if self.log:
-            #     self.logger.log_population(new_population)
+            if self.log:
+                self.logger.log_population(new_population)
             # # ↑ Log after niching, but before updating individual fitness
             # # See order of selection > apply niching below
 
