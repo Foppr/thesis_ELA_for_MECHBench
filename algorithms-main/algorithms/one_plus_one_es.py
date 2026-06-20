@@ -19,17 +19,22 @@ class OnePlusOneES(Algorithm):
     sampler: Sampler = Normal()
     archive: deque = None
     c: float = 0.817
-    deck_id: int = 100
 
     def step(self, problem: ioh.ProblemType):
-        t = problem.state.evaluations
         a0 = self.a + (self.sigma * self.sampler(problem.meta_data.n_variables))
+        a0 = np.clip(a0, problem.bounds.lb, problem.bounds.ub)  # Fix: Clip when a0 goes out of bounds
         f0 = problem(a0)
+
+        t = problem.state.evaluations
+        print(f"Evaluation {t}: \nNew a0: {a0} \nNew objective value: {f0}")
+
         if f0 < self.f:
+            print(f"{f0} < {self.f}!")
             self.a = a0.copy()
             self.f = f0
             self.archive.append(1)
         else:
+            print(f"{f0} > {self.f}. Trying again.")
             self.archive.append(0)
         
         if t > 0 and t % problem.meta_data.n_variables == 0:
@@ -45,7 +50,7 @@ class OnePlusOneES(Algorithm):
         self.f = problem(self.a)
         # self.f = problem(self.a, self.deck_id)  # ADD: deck_id required by abstractPhysicalModel
 
-        self.evaluations += 1  # ADD: add after every evaluation
+        # self.evaluations += 1  # ADD: add after every evaluation
 
         self.sigma = self.sigma0 or np.linalg.norm(
             problem.bounds.lb - problem.bounds.ub

@@ -96,9 +96,19 @@ class ELAForMECHBench(ELAproblem):
         
 import numpy as np\n\nclass landscape:\n    \n    def __init__(self, dim=5):\n        self.dim = dim\n\n    def f(self, x):\n        # Normalize input to [-1, 1] for easier handling\n        x_norm = x / 5.0\n        \n        # Global quadratic basin - creates the smooth global structure\n        quadratic_term = np.sum(x_norm**2)\n        \n        # Radial basis function components to create multiple well-separated local minima\n        rb_term = 0.0\n        centers = np.linspace(-0.8, 0.8, 12)  # More centers for better clustering structure\n        for i in range(len(centers)):\n            for j in range(self.dim):\n                rb_term += 0.3 * np.exp(-15 * (x_norm[j] - centers[i%len(centers)])**2)\n        \n        # Harmonic perturbations to control skewness and dispersion\n        harmonic_term = 0.0\n        for i in range(self.dim):\n            harmonic_term += 0.6 * np.sin(3 * np.pi * x_norm[i]) * np.cos(2 * np.pi * x_norm[i])\n            harmonic_term += 0.4 * np.sin(5 * np.pi * x_norm[i]) * np.sin(3 * np.pi * x_norm[i])\n            harmonic_term += 0.3 * np.sin(7 * np.pi * x_norm[i]) * np.cos(4 * np.pi * x_norm[i])\n        \n        # Additional harmonic terms to control linear model coefficients and quadratic fit\n        additional_harmonic = 0.0\n        for i in range(self.dim):\n            additional_harmonic += 0.2 * np.sin(2 * np.pi * x_norm[i]) * np.cos(1.5 * np.pi * x_norm[i])\n            additional_harmonic += 0.15 * np.sin(4 * np.pi * x_norm[i]) * np.sin(2.5 * np.pi * x_norm[i])\n        \n        # Enhanced quadratic structure to improve quad_simple.adj_r2\n        # Add terms that specifically improve the ratio of max to min coefficients in quadratic models\n        quadratic_improvement = 0.0\n        for i in range(self.dim):\n            quadratic_improvement += 0.3 * x_norm[i]**2\n            quadratic_improvement += 0.08 * x_norm[i]**4  # Higher order term to influence quadratic fit\n            quadratic_improvement += 0.03 * x_norm[i]**6\n        \n        # Cross-dimensional interaction terms to improve model fit characteristics\n        cross_term = 0.0\n        for i in range(self.dim):\n            for j in range(i+1, min(i+4, self.dim)):  # More cross-terms for better interaction\n                cross_term += 0.15 * x_norm[i] * x_norm[j] * np.sin(np.pi * (x_norm[i] + x_norm[j]))\n        \n        # Skewness control term - increased cubic and higher order terms to achieve target skewness\n        skew_term = 0.0\n        for i in range(self.dim):\n            skew_term += 0.15 * x_norm[i]**3  # Increased cubic term for skewness\n            skew_term += 0.05 * x_norm[i]**5  # Fifth order term for additional skewness\n            skew_term += 0.02 * x_norm[i]**7  # Seventh order term for more pronounced skewness\n        \n        # Ruggedness enhancement to increase information content\n        ruggedness_term = 0.0\n        for i in range(self.dim):\n            ruggedness_term += 0.4 * np.sin(12 * np.pi * x_norm[i]) * np.cos(10 * np.pi * x_norm[i])\n            ruggedness_term += 0.25 * np.sin(18 * np.pi * x_norm[i]) * np.sin(15 * np.pi * x_norm[i])\n        \n        # Additional terms to specifically improve nearest better clustering properties\n        clustering_term = 0.0\n        # Add structure that creates more uniform distribution of better neighbors\n        for i in range(self.dim):\n            clustering_term += 0.1 * np.sin(6 * np.pi * x_norm[i]) * np.cos(4 * np.pi * x_norm[i])\n            clustering_term += 0.05 * np.sin(8 * np.pi * x_norm[i]) * np.sin(6 * np.pi * x_norm[i])\n            clustering_term += 0.08 * np.cos(5 * np.pi * x_norm[i]) * np.sin(3 * np.pi * x_norm[i])\n        \n        # Combine all terms with appropriate scaling\n        result = 0.7 * quadratic_term + 1.2 * rb_term + 0.6 * harmonic_term + 0.4 * additional_harmonic + 0.3 * cross_term + 0.5 * skew_term + 0.5 * ruggedness_term + 0.3 * quadratic_improvement + 0.2 * clustering_term\n        \n        # Add offset to control intercept\n        result += 0.744\n        \n        return result
 
-This proxy's scores are: "Proxy ELA values": [[0.3746903570635546], [0.12664595864944497], [0.30763990029081756], [0.5150401939950789], [0.1305591737586707], [0.29132498164442905], [0.923076923076923], [0.7857142857142858], [0.18070636555745712], [0.74225351205118], [0.11926923672333893]], "Original ELA values": [[0.31808415455122296], [0.12931885229404927], [0.22108122315925294], [0.7444454923627558], [1.0], [0.24255178097971536], [1.0], [1.0], [0.5102519892845082], [0.2957746230906558], [0.3331012892967914]], "Distance to disp.ratio_mean_02": 0.057, "Distance to ela_distr.skewness": -0.003, "Distance to ela_meta.lin_simple.adj_r2": 0.087, "Distance to ela_meta.lin_simple.intercept": -0.229, "Distance to ela_meta.lin_simple.coef.max": -0.869, "Distance to ela_meta.quad_simple.adj_r2": 0.049, "Distance to ic.eps_ratio": -0.077, "Distance to ic.eps_s": -0.214, "Distance to nbc.nb_fitness.cor": -0.33, "Distance to ela_level.mmce_qda_25": 0.446, "Distance to ela_level.lda_qda_25": -0.214, "Raw mean distance": 0.23404749591200355   
-The worst-performing feature is ela_meta.lin_simple.coef.max with a distance of -0.869 (Original: 1.0, Proxy: 0.131). 
-Please adjust the above code to improve the ela_meta.lin_simple.coef.max score, while trying to keep all other features the same.
+The proxy's results are:
+disp.ratio_mean_02: distance 0.057 (Original: 0.3181, Proxy: 0.3747)
+ela_distr.skewness: distance -0.003 (Original: 0.1293, Proxy: 0.1266)
+ela_meta.lin_simple.adj_r2: distance 0.087 (Original: 0.2211, Proxy: 0.3076)
+ela_meta.lin_simple.intercept: distance -0.229 (Original: 0.7444, Proxy: 0.515)
+ela_meta.lin_simple.coef.max: distance -0.869 (Original: 1.0, Proxy: 0.1306)
+ela_meta.quad_simple.adj_r2: distance 0.049 (Original: 0.2426, Proxy: 0.2913)
+ic.eps_ratio: distance -0.077 (Original: 1.0, Proxy: 0.9231)
+ic.eps_s: distance -0.214 (Original: 1.0, Proxy: 0.7857)
+nbc.nb_fitness.cor: distance -0.33 (Original: 0.5103, Proxy: 0.1807)
+ela_level.mmce_qda_25: distance 0.446 (Original: 0.2958, Proxy: 0.7423)
+ela_level.lda_qda_25: distance -0.214 (Original: 0.3331, Proxy: 0.1193)
+The worst-performing feature is ela_meta.lin_simple.coef.max. Please adjust the above code to improve the ela_meta.lin_simple.coef.max value (i.e. increase it), while trying to keep all other features the same.
         """
         self.example_proxy2 = f"""
         The previous loop resulted in the following code as the best proxy function, with fitness (i.e. distance to original ELA vector) of 0.242. Please use this code and adjust it to further improve the fitness score (0 is best):
@@ -203,6 +213,7 @@ import numpy as np\n\nclass landscape:\n    \n    def __init__(self, dim=5):\n  
         print(f"PROXY ELA: \n{ela_proxy.to_string()}")
 
         feedback = f"The optimization landscape '{proxy_name}' had the following distances to the original ELA values: "
+        distances = {}
         abs_distances = {}
         for i in range(len(ela_proxy)):
             # Grab the feature name from the index
@@ -216,9 +227,11 @@ import numpy as np\n\nclass landscape:\n    \n    def __init__(self, dim=5):\n  
             pairwise_distance = proxy_val - original_val
 
             # solution.add_metadata(f"Distance to {feature_name}", round(pairwise_distance, 3))
+            distances[feature_name] = pairwise_distance
             abs_distances[feature_name] = abs(pairwise_distance)
             feedback += f"{feature_name}: {pairwise_distance: .3f} (Original value: {original_val: .3f}, proxy value: {proxy_val: .3f}) \n"
 
+        solution.add_metadata('Distances', distances)
         solution.add_metadata('Absolute distances', abs_distances)
 
         # # OLD METHOD:
@@ -399,3 +412,15 @@ class SinusoidalHomogeneousLandscape:
         result = quadratic + 0.5 * sinusoidal + 0.1 * np.sum(np.sin(x_normalized) ** 2)
 
         return result
+
+
+# Edit log function:
+def edit_form(dic_):
+    s = ""
+    for i, feature in enumerate(features):
+        proxy_value = round(dic_['Proxy ELA values'][i][0], 4)
+        original_value = round(dic_['Original ELA values'][i][0], 4)
+        distance = dic_[f'Distance to {feature}']
+        s += f"{feature}: distance {distance} (Original: {original_value}, Proxy: {proxy_value})\n"
+
+    return s
