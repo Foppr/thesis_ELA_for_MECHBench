@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_bn_250D", 
+	"maximization": false, 
+	"algorithm": {"name": "turbo1_bn_p2_250D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_bn_250D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 52, "y": 3.4237208626350673, "x": [1.501574308901171, -3.6617857602530144, 0.6864749985520007, -2.4255473700922314, -0.44792067089607457]}}
+		]}
+	]
+}

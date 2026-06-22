@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_rsm_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "turbo1_rsm_p3_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_rsm_60D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 450, "best": {"evals": 362, "y": -0.9116167816451033, "x": [-4.996796527720017, 4.936094793678867, 0.49614619102552027, -4.931691221010141, -4.993703760269727, 4.209147916047657, 4.998394720101832, -4.99805432302283, 4.995844172156209, 4.99802624219609, -4.986715458685946, -4.899370305719038, -4.989988797903895, -4.794205838357384, -3.7047091963372436]}}
+		]}
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p1_rf_125D", 
+	"maximization": false, 
+	"algorithm": {"name": "cmaes_rf_p1_125D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p1_rf_125D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 153, "best": {"evals": 146, "y": -11207.19055423009, "x": [-3.7676495095123235, -4.639716765442566, 1.6949357237358909, -0.46395804367928506, 0.4920040548420321]}}
+		]}
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_gp_250D", 
+	"maximization": false, 
+	"algorithm": {"name": "de_gp_p2_250D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_gp_250D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 6906, "best": {"evals": 6415, "y": 2.5745861530303955, "x": [-4.990838831676397, -4.9830574912048355, -4.9815488529141945, -4.979990273766026, -4.967655847132101]}}
+		]}
+	]
+}

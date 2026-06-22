@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_gp_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "botorch_gp_p3_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_gp_60D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 450, "best": {"evals": 392, "y": 1.1286592483520508, "x": [-5, 5, 2.004605770111084, -5, -5, 5, 5, -5, -0.3052006661891937, 5, -3.107297897338867, -5, -5, -5, -5]}}
+		]}
+	]
+}

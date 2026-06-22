@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_xgb_250D", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_xgb_p3_250D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_xgb_250D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 450, "best": {"evals": 446, "y": 1.4015084505081177, "x": [-4.141731109342551, -4.093529765129325, 0.6094780506403819, 4.118235816505262, 2.5327772917077773, 3.996916572081197, 4.983052962215762, -3.6379268679954, 4.899510432521332, -4.957947254190482, 3.2198837437623524, 1.4436869820149543, -4.7481135523585, 1.094907030996569, 0.14098719035953078]}}
+		]}
+	]
+}

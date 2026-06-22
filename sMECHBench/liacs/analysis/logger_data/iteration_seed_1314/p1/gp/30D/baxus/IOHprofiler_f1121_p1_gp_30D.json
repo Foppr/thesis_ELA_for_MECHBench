@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p1_gp_30D", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_gp_p1_30D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p1_gp_30D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 125, "y": -10089.923828125, "x": [0, -2.771088574326323, 0.11084264018419532, 1.2560085420092921, 1.2676894539307195]}}
+		]}
+	]
+}

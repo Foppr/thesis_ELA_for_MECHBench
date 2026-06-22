@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p1_bn_125D", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_bn_p1_125D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p1_bn_125D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 133, "y": -10750.218259565863, "x": [-3.2481704920064662, -1.639165073633194, 0.3678173969965428, -0.6347172849345952, 1.0178657732903948]}}
+		]}
+	]
+}

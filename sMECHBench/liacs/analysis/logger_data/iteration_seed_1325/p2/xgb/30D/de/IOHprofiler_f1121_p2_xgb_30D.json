@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_xgb_30D", 
+	"maximization": false, 
+	"algorithm": {"name": "de_xgb_p2_30D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_xgb_30D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 1656, "best": {"evals": 1357, "y": 3.296156644821167, "x": [-3.4940024605140874, 1.6968562384256947, -1.0517770074138677, -2.131656047376481, -2.7495525717989904]}}
+		]}
+	]
+}

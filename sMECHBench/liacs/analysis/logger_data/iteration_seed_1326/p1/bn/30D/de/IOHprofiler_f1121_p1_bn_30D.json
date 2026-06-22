@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p1_bn_30D", 
+	"maximization": false, 
+	"algorithm": {"name": "de_bn_p1_30D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p1_bn_30D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 3930, "best": {"evals": 3925, "y": -13174.827332939869, "x": [-4.9851780553695795, -4.972962245215465, 4.962469608814919, 4.932942421519711, 0.4913618422276192]}}
+		]}
+	]
+}

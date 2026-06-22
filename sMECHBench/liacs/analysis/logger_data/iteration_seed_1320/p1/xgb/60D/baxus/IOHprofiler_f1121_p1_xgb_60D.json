@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p1_xgb_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_xgb_p1_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p1_xgb_60D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 141, "y": -10198.9384765625, "x": [0, -4.991434278774677, -0.09206385702446607, -3.726440668106079, 0.45665678086427874]}}
+		]}
+	]
+}

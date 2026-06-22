@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_rf_30D", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_rf_p2_30D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_rf_30D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 147, "y": 3.3844069382400073, "x": [3.0596324569210775, -3.2603350217675784, -1.738938926160833, -4.550589466825954, -3.5779873964592817]}}
+		]}
+	]
+}

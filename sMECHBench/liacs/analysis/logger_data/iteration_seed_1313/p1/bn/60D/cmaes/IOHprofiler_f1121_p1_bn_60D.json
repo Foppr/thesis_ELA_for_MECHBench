@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p1_bn_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "cmaes_bn_p1_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p1_bn_60D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 153, "best": {"evals": 140, "y": -8743.870496995894, "x": [2.4676834104270955, 0.6851805903715945, 4.522522951019731, -4.421069860814312, 0.6420108963324787]}}
+		]}
+	]
+}

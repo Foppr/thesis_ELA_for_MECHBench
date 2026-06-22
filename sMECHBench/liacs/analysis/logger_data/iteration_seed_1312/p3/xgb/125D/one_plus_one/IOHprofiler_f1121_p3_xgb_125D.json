@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_xgb_125D", 
+	"maximization": false, 
+	"algorithm": {"name": "one_plus_one_xgb_p3_125D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_xgb_125D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 451, "best": {"evals": 232, "y": 1.4756618738174438, "x": [-9.778472709103438, -3.712026222332092, -3.175040480724565, 14.581870874222139, 22.906105879903535, 20.57388445930848, -1.8992603122043443, 6.031518510604661, 17.179167125508364, 22.719272101355887, 22.945430251198157, 0.47496143169245997, 18.359537318361514, -12.869612980648935, -5.391338425492591]}}
+		]}
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_xgb_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "cmaes_xgb_p2_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_xgb_60D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 153, "best": {"evals": 84, "y": 3.398056745529175, "x": [-4.5069391135610175, -2.633907676176596, 4.2798859045850435, -4.422650276155567, -0.48712638193312485]}}
+		]}
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_rsm_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "one_plus_one_rsm_p2_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_rsm_60D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 151, "best": {"evals": 134, "y": 3.406893306847709, "x": [2.2371211330820127, -2.4621000208367523, 1.5518104720161916, -6.525108235905824, 0.46155095839577776]}}
+		]}
+	]
+}

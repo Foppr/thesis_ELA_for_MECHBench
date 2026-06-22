@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_rf_125D", 
+	"maximization": false, 
+	"algorithm": {"name": "botorch_rf_p3_125D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_rf_125D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 450, "best": {"evals": 445, "y": 1.5028241787435528, "x": [-4.199717998504639, -1.4065529108047485, 5, -4.753224849700928, -0.12793764472007751, 5, -5, 0.12879712879657745, 5, 5, 0.7718622088432312, -5, 5, 0.6558496952056885, 5]}}
+		]}
+	]
+}

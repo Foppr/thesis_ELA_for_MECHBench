@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_xgb_250D", 
+	"maximization": false, 
+	"algorithm": {"name": "cmaes_xgb_p2_250D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_xgb_250D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 153, "best": {"evals": 55, "y": 3.338411808013916, "x": [-1.5815512246134378, -2.9049052386029737, 0.5914509031916799, -2.1405197973029018, 0.7438699036876295]}}
+		]}
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_rsm_250D", 
+	"maximization": false, 
+	"algorithm": {"name": "botorch_rsm_p2_250D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_rsm_250D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 24, "y": 3.40616324216996, "x": [-5, -0.6374293565750122, 1.7486902475357056, -1.3763407468795776, 0.5114524364471436]}}
+		]}
+	]
+}

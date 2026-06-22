@@ -1,0 +1,17 @@
+.vscode/
+.idea/
+__pycache__/
+
+threepointbending_deck*/
+starbox_deck*/
+crashtube_deck*/
+
+Folder_Points/
+logs/
+test_dir/
+outcmaes/
+
+venv_mechbench*/
+tst/
+OpenRadioss*/
+.github/

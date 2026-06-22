@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_rsm_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_rsm_p2_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_rsm_60D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 112, "y": 3.409974351209082, "x": [-1.753340521554139, -4.979480304113387, -4.699314233411851, 2.4910109376583023, 4.275712535341455]}}
+		]}
+	]
+}

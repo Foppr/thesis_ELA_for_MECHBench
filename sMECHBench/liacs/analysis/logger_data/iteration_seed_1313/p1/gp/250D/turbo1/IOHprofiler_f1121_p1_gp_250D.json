@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p1_gp_250D", 
+	"maximization": false, 
+	"algorithm": {"name": "turbo1_gp_p1_250D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p1_gp_250D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 98, "y": -11361.1767578125, "x": [-4.505546486800053, -4.982720794971576, -1.8386830763877788, -1.226871664829361, 1.0764123022707075]}}
+		]}
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_xgb_250D", 
+	"maximization": false, 
+	"algorithm": {"name": "botorch_xgb_p3_250D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_xgb_250D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 450, "best": {"evals": 420, "y": 1.3931186199188232, "x": [-3.8454840183258057, -2.9163291454315186, 0.3812553882598877, -3.506140947341919, 1.3372337818145752, -0.2899293005466461, -5, 5, 5, -5, 4.434359550476074, 5, 4.779991149902344, -0.5056085586547852, -5]}}
+		]}
+	]
+}

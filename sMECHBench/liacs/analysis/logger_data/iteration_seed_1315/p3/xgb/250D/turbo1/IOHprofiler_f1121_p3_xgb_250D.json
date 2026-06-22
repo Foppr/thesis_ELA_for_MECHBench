@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_xgb_250D", 
+	"maximization": false, 
+	"algorithm": {"name": "turbo1_xgb_p3_250D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_xgb_250D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 485, "best": {"evals": 187, "y": 1.3890810012817383, "x": [-3.767877692317136, -3.5361726788249292, -1.68027097481483, -3.9206495781515986, 4.431287722446481, 4.927217358973383, -1.9207951222724367, 2.3814635767104715, 3.572342075295232, 3.13064169728629, 2.6543938778942158, 4.396840722570232, 3.227845951946799, 1.796958985237108, 4.118695809045148]}}
+		]}
+	]
+}

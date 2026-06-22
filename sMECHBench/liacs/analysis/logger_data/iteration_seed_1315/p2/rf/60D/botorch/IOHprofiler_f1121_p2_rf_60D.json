@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_rf_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "botorch_rf_p2_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_rf_60D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 146, "y": 3.3987254400000073, "x": [0.5551705360412598, -2.9944255352020264, -2.5077364444732666, 4.411290645599365, -4.250174522399902]}}
+		]}
+	]
+}

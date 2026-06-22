@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_gp_30D", 
+	"maximization": false, 
+	"algorithm": {"name": "one_plus_one_gp_p2_30D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_gp_30D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 151, "best": {"evals": 148, "y": 2.3560192584991455, "x": [-8.312752381222088, -7.415409181434452, -7.648283061034027, -7.982598984910722, -8.77183272659171]}}
+		]}
+	]
+}

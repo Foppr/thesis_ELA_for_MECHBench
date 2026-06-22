@@ -3,6 +3,9 @@ import sys
 import numpy as np
 import ioh
 from ioh import ProblemClass
+from datetime import datetime
+
+now = datetime.now().strftime('%Y_%m_%d_%H%M')
 
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 thesis_code_dir = os.path.abspath(os.path.join(current_script_dir, "..", ".."))
@@ -55,7 +58,7 @@ if __name__ == '__main__':
 
             f_wrapped = ioh.wrap_problem(
                 f,
-                name=f"mechbench_p{problem_id}_{alg_name}",
+                name=f"mechbench_p{problem_id}_{alg_name}_{now}",
                 optimization_type=ioh.OptimizationType.MIN,
                 lb=-5,
                 ub=5,
@@ -69,7 +72,7 @@ if __name__ == '__main__':
             logger = ioh.logger.Analyzer(
                 algorithm_name=alg_name,
                 root="data",
-                folder_name=alg_name,
+                folder_name=f"{alg_name}_{now}",
                 store_positions=True,
                 triggers=[ioh.logger.trigger.ALWAYS]  # Log at every step, not just improvements (there will be just 30D lines anyway)
             )

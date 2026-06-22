@@ -1,4 +1,6 @@
 import json
+import os
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -78,13 +80,13 @@ class LLaMEAAnalyzer:
             record = {
                 'generation': ind['generation'],
                 'fitness': ind['fitness'],
-                'raw_mean_distance': ind['metadata']['Raw mean distance']
+                # 'raw_mean_distance': ind['metadata']['Raw mean distance']
             }
-            proxy = ind['metadata']['Proxy ELA values']
-            original = ind['metadata']['Original ELA values']
+            proxy_dic = ind['metadata']["Proxy min-max ELA values"]
+            original_dic = ind['metadata']['Original min-max ELA values']
             for idx, feat_name in enumerate(self.features):
                 # Store error for each unique feature
-                record[feat_name] = abs(proxy[idx][0] - original[idx][0])
+                record[feat_name] = abs(proxy_dic[feat_name] - original_dic[feat_name])
             flat_records.append(record)
 
         return pd.DataFrame(flat_records)
@@ -116,7 +118,8 @@ class LLaMEAAnalyzer:
         df = self.experiments_data[exp_name]
         max_gen, ub_total, _ = global_stats
 
-        df_filtered = df[df['generation'] <= max_gen]
+        # df_filtered = df[df['generation'] <= max_gen]
+        df_filtered = df
         agg_df = df_filtered.groupby('generation')[self.fitness_or_rawdist].agg(['min', 'mean']).reset_index()
         agg_df = agg_df.sort_values('generation')
 
@@ -159,7 +162,8 @@ class LLaMEAAnalyzer:
         df = self.experiments_data[exp_name]
         max_gen, _, ub_features = global_stats  # Extract uniform features upper bound
 
-        df_filtered = df[df['generation'] <= max_gen]
+        # df_filtered = df[df['generation'] <= max_gen]
+        df_filtered = df
         agg_df = df_filtered.groupby('generation')[feature_name].agg(['min', 'mean']).reset_index()
         agg_df = agg_df.sort_values('generation')
 
@@ -268,50 +272,39 @@ class LLaMEAAnalyzer:
 
 
 if __name__ == "__main__":
-    name1 = "exp-06-19_004627-LLaMEA-qwen3-coder_30b-ELA_for_MECHBENCH"
-    # name2 = "exp-06-04_122824_p2_budget800"
-    # name3 = "exp-06-05_110213_p3_budget800"
+    base_dir = "06_22_niching_mut_exps"
+    analyzer = LLaMEAAnalyzer(save_folder_name='llamea_graphs/niching_mut', fitness_or_rawdist='fitness')
 
-    analyzer = LLaMEAAnalyzer(save_folder_name='llamea_graphs/edition2', fitness_or_rawdist='raw_mean_distance')
+    # Create the destination folder automatically if it doesn't exist
+    os.makedirs(analyzer.save_folder_name, exist_ok=True)
 
-    log = analyzer.load_log(name1)
-    # analyzer.load_log(name2)
-    # analyzer.load_log(name3)
+    exp_paths = []
 
-    # filtered_records = []
-    #
-    # for ind in log:
-    #     # Check if 'metadata' exists and has the target key
-    #     metadata = ind.get("metadata", {})
-    #     if "Penalized, niche distance" in metadata:
-    #         filtered_records.append({
-    #             "fitness": ind.get("fitness"),
-    #             "Penalized, niche distance": metadata["Penalized, niche distance"]
-    #         })
-    #
-    # # Create the filtered DataFrame
-    # filtered_df = pd.DataFrame(filtered_records)
-    #
-    # # View the result
-    # print(filtered_df)
+    # Step 1: Loop through the directory and load logs first
+    for directory in os.listdir(base_dir):
+        full_path = os.path.join(base_dir, directory)
 
-    # problem_stats = analyzer.compare_experiments([name1, name2, name3])
-    problem_stats = analyzer.compare_experiments([name1])
+        # Check that it's a directory and contains the expected log file
+        if os.path.isdir(full_path) and os.path.exists(os.path.join(full_path, "log.jsonl")):
+            analyzer.load_log(full_path)
+            exp_paths.append(full_path)
+            print(f"Successfully loaded log for: {directory}")
 
-    # Plots
-    analyzer.generate_plots(name1, problem_stats, save_suffix=f"p1_budget800_niche2_{analyzer.fitness_or_rawdist}", plot_type='total')
-    # analyzer.generate_plots(name2, problem_stats, save_suffix=f"p2_budget800_niche2{same_scales}", plot_type='total')
-    # analyzer.generate_plots(name3, problem_stats, save_suffix=f"p3_budget800_niche2{same_scales}", plot_type='total')
+    # Safety check to make sure we actually found files
+    if not exp_paths:
+        print(f"Error: No valid experiment directories containing 'log.jsonl' found in '{base_dir}'.")
+        sys.exit(1)
 
-    analyzer.generate_plots(name1, problem_stats, save_suffix=f"p1_budget800_{analyzer.fitness_or_rawdist}", plot_type='all_features')
-    # analyzer.generate_plots(name2, problem_stats, save_suffix=f"p2_budget800", plot_type='all_features')
-    # analyzer.generate_plots(name3, problem_stats, save_suffix=f"p3_budget800", plot_type='all_features')
+    print("\n--- Computing Global Stats Across Experiments ---")
+    # Step 2: Compare experiments AFTER all dataframes have been populated
+    problem_stats = analyzer.compare_experiments(exp_paths)
 
-    experiment_mapping = {
-        'p1': name1,
-        # 'p2': name2,
-        # 'p3': name3
-    }
+    print("\n--- Generating Plots ---")
+    # Step 3: Generate plots using the folder name as a clean suffix
+    for path in exp_paths:
+        folder_name = os.path.basename(path)
+        clean_suffix = f"budget800_{folder_name}_{analyzer.fitness_or_rawdist}"
 
-    # Table and Latex
-    difficulty_df = analyzer.save_feature_difficulty_ranking(experiment_mapping)
+        # Generate the total fitness and feature plots
+        analyzer.generate_plots(path, problem_stats, save_suffix=clean_suffix, plot_type='total')
+        analyzer.generate_plots(path, problem_stats, save_suffix=clean_suffix, plot_type='all_features')

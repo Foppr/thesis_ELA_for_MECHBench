@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p2_rf_60D", 
+	"maximization": false, 
+	"algorithm": {"name": "turbo1_rf_p2_60D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1121_p2_rf_60D/IOHprofiler_f1121_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 55, "y": 3.3754557945600085, "x": [0.07260872983321853, -1.4886797714259141, -2.7504114715626544, -2.5446942924583875, 0.7533879908705821]}}
+		]}
+	]
+}

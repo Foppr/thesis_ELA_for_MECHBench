@@ -391,13 +391,18 @@ This changing rate {(prob*100):.1f}% is a mandatory requirement, you cannot chan
 
         # mutation_operator = random.choice(self.mutation_prompts)
         # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
-        absolute_distances = individual.get_metadata('Absolute distances')
-        sorted_distances = sorted(absolute_distances.items(), key=lambda item: item[1], reverse=True)
-        worst_feature, worst_score = sorted_distances[0][0], sorted_distances[0][1]
-        mutation_operator = self.mutation_prompts[worst_feature]
-        individual.add_metadata('Mutation operator', worst_feature)
+        if isinstance(self.mutation_prompts, list):
+            mutation_operator = self.mutation_prompts[0]  # Just the length-1 list of a small mutation
 
-        print(f"Mutating worst feature {worst_feature} with distance {worst_score}.")
+        else:
+            absolute_distances_minmax = individual.get_metadata('Absolute min-max distances')
+            sorted_distances = sorted(absolute_distances_minmax.items(), key=lambda item: item[1], reverse=True)
+            worst_feature, worst_score = sorted_distances[0][0], sorted_distances[0][1]
+            mutation_operator = self.mutation_prompts[worst_feature]
+            mutation_operator += f"Out of all features, this one has the worst score with an absolute distance of {worst_score} (after min-max normalization). Adjust the code to improve its score, while trying to keep all other features the same."
+            individual.add_metadata('Mutation operator', worst_feature)
+
+            print(f"Mutating worst feature {worst_feature} with min-max distance {worst_score}.")
 
         individual.set_operator(mutation_operator)
 
@@ -417,8 +422,6 @@ With code:
 {feedback}
 
 {mutation_operator}
-Out of all features, this one has the worst score with an absolute distance of {worst_score}.
-Adjust the code to improve its score, while trying to keep all other features the same.
 
 {self.diff_output_format_prompt if self.diff_mode else self.output_format_prompt}
 """
@@ -462,6 +465,8 @@ Adjust the code to improve its score, while trying to keep all other features th
 
     def apply_niching(self, population):
         """Apply the configured niching strategy to ``population``."""
+        population = list(population)
+
         if self.niching not in {"sharing", "clearing"}:
             return population
 
@@ -477,12 +482,21 @@ Adjust the code to improve its score, while trying to keep all other features th
                     if d < self.niche_radius and self.niche_radius > 0:  # e.g. 0.7 < 1.4
                         niche_count += 1 - d / self.niche_radius
                 if self.minimization:
-                    ind.fitness *= niche_count
+                    new_fitness = ind.fitness * niche_count
                 else:
-                    ind.fitness /= niche_count
+                    new_fitness = ind.fitness / niche_count
 
-                ind.add_metadata("Penalized, niche distance", ind.fitness)
+                ind.add_metadata("Penalized, niche distance", new_fitness)
                 ind.add_metadata("Niche radius", self.niche_radius)
+
+            # Log population AFTER calculating penalized distance and niche radius:
+            if self.log:
+                self.logger.log_population(population)
+
+            # But BEFORE updating ind.fitness:
+            for i, ind in enumerate(population):
+                penalized_dist = ind.get_metadata("Penalized, niche distance")
+                ind.fitness = penalized_dist
 
         elif self.niching == "clearing":
             if self.clearing_interval and self.generation % self.clearing_interval != 0:
@@ -498,6 +512,7 @@ Adjust the code to improve its score, while trying to keep all other features th
                     niches.append(ind)
                 else:
                     ind.fitness = self.worst_value
+
         return population
 
     def selection(self, parents, offspring):
@@ -518,7 +533,7 @@ Adjust the code to improve its score, while trying to keep all other features th
             combined_population.sort(key=lambda x: x.fitness, reverse=reverse)
             new_population = combined_population[: self.n_parents]
         else:
-            offspring = self.apply_niching(list(offspring))
+            offspring = self.apply_niching(offspring)
             offspring.sort(key=lambda x: x.fitness, reverse=reverse)
             new_population = offspring[: self.n_parents]
 
@@ -615,10 +630,9 @@ Adjust the code to improve its score, while trying to keep all other features th
 
             self.generation += 1
 
-            if self.log:
-                self.logger.log_population(new_population)
-            # # ↑ Log after niching, but before updating individual fitness
-            # # See order of selection > apply niching below
+            # Log AFTER niching but BEFORE updating ind.fitness (see self.selection order)
+            # if self.log:
+            #     self.logger.log_population(new_population)
 
             # Update population and the best solution
             self.population = self.selection(self.population, new_population)

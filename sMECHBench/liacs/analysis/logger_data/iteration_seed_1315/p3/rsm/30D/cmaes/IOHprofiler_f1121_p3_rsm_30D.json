@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_rsm_30D", 
+	"maximization": false, 
+	"algorithm": {"name": "cmaes_rsm_p3_30D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_rsm_30D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 457, "best": {"evals": 457, "y": -2.058215435212638, "x": [4.980740260935372, 4.635946491315303, -1.3514600709532785, 4.790896305341461, -4.9557975796477995, -0.3893057241841831, 4.997949922465167, -4.994478590062581, 4.997028225806312, 3.4965930798804865, 4.839753393983182, 4.947079770609574, 4.976377557599893, -4.817715601405001, 4.850488869474581]}}
+		]}
+	]
+}

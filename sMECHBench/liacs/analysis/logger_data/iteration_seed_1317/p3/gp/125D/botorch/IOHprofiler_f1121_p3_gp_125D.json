@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_gp_125D", 
+	"maximization": false, 
+	"algorithm": {"name": "botorch_gp_p3_125D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_gp_125D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 450, "best": {"evals": 449, "y": 1.0161525011062622, "x": [-5, -0.6817181706428528, 1.2225656509399414, 5, 1.1360454559326172, -5, 5, 3.3892455101013184, 3.8721041679382324, 5, -0.8724156618118286, -1.888863444328308, -5, 0.24375630915164948, -2.173436403274536]}}
+		]}
+	]
+}

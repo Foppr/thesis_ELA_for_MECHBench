@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "p3_rsm_30D", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_rsm_p3_30D", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_p3_rsm_30D/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 450, "best": {"evals": 212, "y": -1.7447440922716164, "x": [4.999623221225368, 4.980099710737205, 4.967341543676087, 4.999623221225368, 4.980099710737205, 4.989835249601885, 4.995572516675455, -4.999021640986837, 4.967341543676087, -4.999814981046202, -4.999021640986837, -4.999814981046202, -4.988283989989267, -4.999918026417799, -4.989835249601885]}}
+		]}
+	]
+}
