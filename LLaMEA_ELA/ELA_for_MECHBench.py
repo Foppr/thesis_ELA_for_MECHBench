@@ -406,9 +406,9 @@ if __name__ == '__main__':
 
     mut_str = "FocusedMut" if mutation_prompts else "NoMut"
     nic_str = niching if niching else "noNiching"
-    experiment_name = f"ELA_for_MECHBENCH_{problem_type}_{nic_str}_{mut_str}"
 
-    for experiment_i in [1]:
+    for experiment_i in range(5):  # 5 runs
+        experiment_name = f"ELA_for_MECHBENCH_p{problem_type}_{nic_str}_{mut_str}_expNo{experiment_i}"
         es = LLaMEA(
             f=problem.evaluate_for_MECHBench,
             minimization=True,  # IMPORTANT: Distance should be minimized (0 is best)
@@ -420,10 +420,10 @@ if __name__ == '__main__':
             example_prompt=example_prompt,
             mutation_prompts=mutation_prompts,
             experiment_name=experiment_name,
-            elitism=False,
+            elitism=False,  # False=,   True=+
             HPO=False,
             max_workers=4,
-            budget=800,
+            budget=100,
             parallel_backend="loky",
             niching=niching,
             distance_metric=ela_distance,

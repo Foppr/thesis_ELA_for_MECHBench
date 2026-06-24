@@ -26,6 +26,8 @@ def main():
     problem=args.problem
     optimizer_name = args.optimizer
     seed = args.seed
+    print(f"---------------------------------")
+    print(f"RUNNING SEED {seed} OPTIMIZER {optimizer_name} ON PROBLEM {problem}")
 
     if problem == 1 or problem == 2:
         dim =5
