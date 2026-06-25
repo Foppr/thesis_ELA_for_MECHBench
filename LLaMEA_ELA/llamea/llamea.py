@@ -389,20 +389,20 @@ This changing rate {(prob*100):.1f}% is a mandatory requirement, you cannot chan
 """
             self.mutation_prompts = [new_mutation_prompt]
 
-        # mutation_operator = random.choice(self.mutation_prompts)
-        # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
-        if isinstance(self.mutation_prompts, list):
-            mutation_operator = self.mutation_prompts[0]  # Just the length-1 list of a small mutation
-
-        else:
-            absolute_distances_minmax = individual.get_metadata('Absolute min-max distances')
-            sorted_distances = sorted(absolute_distances_minmax.items(), key=lambda item: item[1], reverse=True)
-            worst_feature, worst_score = sorted_distances[0][0], sorted_distances[0][1]
-            mutation_operator = self.mutation_prompts[worst_feature]
-            mutation_operator += f"Out of all features, this one has the worst score with an absolute distance of {worst_score} (after min-max normalization). Adjust the code to improve its score, while trying to keep all other features the same."
-            individual.add_metadata('Mutation operator', worst_feature)
-
-            print(f"Mutating worst feature {worst_feature} with min-max distance {worst_score}.")
+        mutation_operator = random.choice(self.mutation_prompts)
+        # # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
+        # if isinstance(self.mutation_prompts, list):
+        #     mutation_operator = self.mutation_prompts[0]  # Just the length-1 list of a small mutation
+        #
+        # else:
+        #     absolute_distances_minmax = individual.get_metadata('Absolute min-max distances')
+        #     sorted_distances = sorted(absolute_distances_minmax.items(), key=lambda item: item[1], reverse=True)
+        #     worst_feature, worst_score = sorted_distances[0][0], sorted_distances[0][1]
+        #     mutation_operator = self.mutation_prompts[worst_feature]
+        #     mutation_operator += f"Out of all features, this one has the worst score with an absolute distance of {worst_score} (after min-max normalization). Adjust the code to improve its score, while trying to keep all other features the same."
+        #     individual.add_metadata('Mutation operator', worst_feature)
+        #
+        #     print(f"Mutating worst feature {worst_feature} with min-max distance {worst_score}.")
 
         individual.set_operator(mutation_operator)
 

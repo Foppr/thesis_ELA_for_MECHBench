@@ -80,19 +80,20 @@ class ELAForMECHBench(ELAproblem):
             'ela_level.lda_qda_25': f"should approach the value {self.original_ela_df.loc['ela_level.lda_qda_25', 'value']: .3f}. Explanation: From pflacco's calculate_ela_level['ela_level.lda_qda_25']: 'The initial data set D is split into two classes by a specific objective level which works as a threshold. One possibility is to use the median for this, which will result in equally sized classes. Other choices studied are the upper and lower quartiles of the distribution of y. Linear (LDA), quadratic (QDA) and mixture discriminant analysis (MDA) are used to predict whether the objective values Y fall below or exceed the calculated threshold. Multi-modal functions should result in several unconnected sublevel sets for the quantile of lower values, which can only be modeled by MDA, but not LDA or QDA. The extracted low-level features are based on the distribution of the resulting cross-validated mean misclassification errors of each classifier.' (Mersmann et al., 2011) 'ela_level.lda_qda_25': mean misclassification error of linear discriminant analysis (QDA) in the lower quartile (25)."
         }
 
-        self.mutations = {}
-        # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
-        for feature in self.features:
-            self.mutations[feature] = f"""
-            Create a new landscape class based on the selected code and improve the {feature} score, meaning: ELA feature {feature} {self.feature_descriptions[feature]}.
-            """
+        # self.mutations = {}
+        # # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
+        # for feature in self.features:
+        #     self.mutations[feature] = f"""
+        #     Create a new landscape class based on the selected code and improve the {feature} score, meaning: ELA feature {feature} {self.feature_descriptions[feature]}.
+        #     """
 
-        # # OLD: Random mutations
-        # for feature in features:
-        #     mutation_prompts.append(
-        #         f"Create a new landscape class based on the selected code and improve the {feature} score, meaning: ELA feature {feature} {problem.feature_descriptions[feature]}.")
-        # mutation_prompts.append(
-        #     "Create a new landscape class that is completely different from the selected solution but still adheres to the properties outlined in the task description.")
+        # OLD: Random mutations
+        self.mutation_prompts = []
+        for feature in features:
+            self.mutation_prompts.append(
+                f"Create a new landscape class based on the selected code and improve the {feature} score, meaning: ELA feature {feature} {problem.feature_descriptions[feature]}.")
+        self.mutation_prompts.append(
+            "Create a new landscape class that is completely different from the selected solution but still adheres to the properties outlined in the task description.")
 
         self.task_prompt = f"""
         Your task is to design novel mathematical functions (proxy functions) to be used as black-box optimization benchmark landscapes, with specific landscape properties.
@@ -379,14 +380,8 @@ if __name__ == '__main__':
                               size=500,  # <-- Optional edit: dataset size (30, 60, 125, 250 or 500)
                               features=features)
 
-    niching_env = os.environ.get("NICHING", "None")
-    mutation_env = os.environ.get("MUTATION", problem.mutations)
-
-    niching = None if niching_env == "None" else "sharing"
-    mutation_prompts = None if mutation_env == "None" else problem.mutations
-
-    print(f"--- Launching Experiment Configuration ---")
-    print(f"Problem {problem_type} - Niching {niching} - Focused mutations {'yes' if mutation_prompts else 'no'}")
+    print(f"--- Launching Experiment ---")
+    print(f"Problem {problem_type}")
     print(f"------------------------------------------")
 
     ai_model = "qwen3-coder:30b"
@@ -395,20 +390,18 @@ if __name__ == '__main__':
     # LLaMEA setup
     role_prompt = "You are a highly skilled computer scientist in the field optimization and benchmarking."
 
-    if problem_type == 1:
-        example_prompt = problem.example_proxy1
-    elif problem_type == 2:
-        example_prompt = problem.example_proxy2
-    elif problem_type == 3:
-        example_prompt = problem.example_proxy3  # Beware: p3 ran on 3750 so the ELA values will be slightly different
-    else:
-        example_prompt = None
-
-    mut_str = "FocusedMut" if mutation_prompts else "NoMut"
-    nic_str = niching if niching else "noNiching"
+    # if problem_type == 1:
+    #     example_prompt = problem.example_proxy1
+    # elif problem_type == 2:
+    #     example_prompt = problem.example_proxy2
+    # elif problem_type == 3:
+    #     example_prompt = problem.example_proxy3  # Beware: p3 ran on 3750 so the ELA values will be slightly different
+    # else:
+    #     example_prompt = None
 
     for experiment_i in range(5):  # 5 runs
-        experiment_name = f"ELA_for_MECHBENCH_p{problem_type}_{nic_str}_{mut_str}_expNo{experiment_i}"
+        experiment_name = f"ELA_for_MECHBENCH_p{problem_type}_expNo{experiment_i}"
+        print(f'Running experiment number {experiment_i}')
         es = LLaMEA(
             f=problem.evaluate_for_MECHBench,
             minimization=True,  # IMPORTANT: Distance should be minimized (0 is best)
@@ -417,15 +410,14 @@ if __name__ == '__main__':
             llm=llm,
             role_prompt=role_prompt,
             task_prompt=problem.task_prompt,
-            example_prompt=example_prompt,
-            mutation_prompts=mutation_prompts,
+            mutation_prompts=problem.mutation_prompts,
             experiment_name=experiment_name,
             elitism=False,  # False=,   True=+
             HPO=False,
             max_workers=4,
             budget=100,
             parallel_backend="loky",
-            niching=niching,
+            niching="sharing",
             distance_metric=ela_distance,
             niche_radius=2.0,
             adaptive_niche_radius=True,
