@@ -232,7 +232,8 @@ markdown code block labelled as diff:
 
         if self.log:
             modelname = self.model.replace(":", "_")
-            self.logger = ExperimentLogger(f"LLaMEA-{modelname}-{experiment_name}")
+            # self.logger = ExperimentLogger(f"LLaMEA-{modelname}-{experiment_name}")
+            self.logger = ExperimentLogger(f"{experiment_name}")
             self.llm.set_logger(self.logger)
         else:
             self.logger = None
@@ -637,9 +638,9 @@ With code:
             # Update population and the best solution
             self.population = self.selection(self.population, new_population)
 
-            # CHECK: Count how many individuals in the new parent population have a generation tag equal to current gen
-            successful_offspring = sum(1 for p in self.population if p.generation == self.generation)
-            print(f"Offspring Success Rate: {successful_offspring} / {self.n_offspring} entered the elite pool.")
+            # # CHECK: Count how many individuals in the new parent population have a generation tag equal to current gen
+            # successful_offspring = sum(1 for p in self.population if p.generation == self.generation)
+            # print(f"Offspring Success Rate: {successful_offspring} / {self.n_offspring} entered the elite pool.")
 
             self.update_best()
             self.logevent(

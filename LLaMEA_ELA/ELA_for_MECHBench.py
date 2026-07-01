@@ -65,20 +65,19 @@ class ELAForMECHBench(ELAproblem):
         self.ela_stats = pd.read_csv("../ela_feature_stats.csv")
 
         self.features = features
-        self.feature_descriptions = {
-            'disp.ratio_mean_02': f"should approach the value {self.original_ela_df.loc['disp.ratio_mean_02', 'value']: .3f}. Explanation: From pflacco's calculate_dispersion['disp.ratio_mean_02']: The dispersion features compare the dispersion, i.e. the (aggregated) pairwise distances, of all points in the initial design with the dispersion among the best points in the initial design. Per default, this set of “best points” is based on the 2%, 5% and 10% quantile of the objectives. Those dispersions are then compared based on the ratio as well as on the difference. [ratio, diff]_[mean, median]_[02, 05, 10, 25]: ratio and difference of the mean / median distances of the distances of the ‘best’ objectives vs. ‘all’ objectives. Taken from https://pflacco.readthedocs.io/en/latest/dispersion.html.",
-            'ela_distr.skewness': f"should approach the value {self.original_ela_df.loc['ela_distr.skewness', 'value']: .3f}. Explanation: From pflacco's calculate_ela_distribution['ela_distr.skewness']: skewness of the objective values.",
-            'ela_meta.lin_simple.adj_r2': f"should approach the value {self.original_ela_df.loc['ela_meta.lin_simple.adj_r2', 'value']: .3f}. Explanation: From pflacco's calculate_ela_meta['ela_meta.lin_simple.adj_r2']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) lin_simple.adj_r2: adjusted R^2 (i.e. model fit) of a simple linear model.",
-            'ela_meta.lin_simple.intercept': f"should approach the value {self.original_ela_df.loc['ela_meta.lin_simple.intercept', 'value']: .3f}. Explanation: From pflacco's calculate_ela_meta['ela_meta.lin_simple.intercept']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.lin_simple.intercept': intercept of a simple linear model.",
-            'ela_meta.lin_simple.coef.max': f"should approach the value {self.original_ela_df.loc['ela_meta.lin_simple.coef.max', 'value']: .3f}. Explanation: From pflacco's calculate_ela_meta['ela_meta.lin_simple.coef.max']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.lin_simple.coef.max': biggest (non-intercept) absolute coefficient of the simple linear model.",
-            'ela_meta.quad_simple.adj_r2': f"should approach the value {self.original_ela_df.loc['ela_meta.quad_simple.adj_r2', 'value']: .3f}. Explanation: From pflacco's calculate_ela_meta['ela_meta.quad_simple.adj_r2']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.quad_simple.adj_r2': adjusted R^2 (i.e. model fit) of a simple quadratic model (without interactions), i.e. the ratio of its (absolute) biggest and smallest coefficients.",
-            'ic.eps_ratio': f"should approach the value {self.original_ela_df.loc['ic.eps_ratio', 'value']: .3f}. Explanation: From pflacco's calculate_information_content['ic.eps_ratio']: Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach (Munoz et al., 2014). In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified. A neutral landscape has low IC, while a rugged landscape has high IC (Munoz et al., 2014). 'ic.eps_ratio': ratio of partial information sensitivity, cf. equation (8) in Munoz et al. (2014) where the ratio is 0.5.",
-            'ic.eps_s': f"should approach the value {self.original_ela_df.loc['ic.eps_s', 'value']: .3f}. Explanation: From pflacco's calculate_information_content['ic.eps_s']: Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach (Munoz et al., 2014). In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified. A neutral landscape has low IC, while a rugged landscape has high IC (Munoz et al., 2014). 'ic.eps_s': settling sensitivity, indicating the epsilon for which the sequence nearly consists of zeros only, cf. equation (6) in Munoz et al. (2014).",
-            'nbc.nb_fitness.cor': f"should approach the value {self.original_ela_df.loc['nbc.nb_fitness.cor', 'value']: .3f}. Explanation: From pflacco's calculate_nbc['nbc.nb_fitness.cor']: Nearest Better Clustering features. Computes features based on the comparison of nearest neighbour and nearest better neighbour, i.e., the nearest neighbor with a better performance / objective value value. nb_fitness.cor: correlation between fitness value and count of observations to whom the current observation is the nearest better neighbour (the so-called 'indegree').",
-            # 'pca.expl_var_PC1.cov_init': f"should approach the value {self.original_ela_df.loc['pca.expl_var_PC1.cov_init', 'value']: .3f}. Explanation: From pflacco's calculate_pca['pca.expl_var_PC1.cov_init']: Principal component (analysis) features. expl_var_PC1.cov_init: proportion of variance, which is explained by the first principal component when applying PCA to the covariance matrix of the entire initial design.",
-            'ela_level.mmce_qda_25': f"should approach the value {self.original_ela_df.loc['ela_level.mmce_qda_25', 'value']: .3f}. Explanation: From pflacco's calculate_ela_level['ela_level.mmce_qda_25']: 'The initial data set D is split into two classes by a specific objective level which works as a threshold. One possibility is to use the median for this, which will result in equally sized classes. Other choices studied are the upper and lower quartiles of the distribution of y. Linear (LDA), quadratic (QDA) and mixture discriminant analysis (MDA) are used to predict whether the objective values Y fall below or exceed the calculated threshold. Multi-modal functions should result in several unconnected sublevel sets for the quantile of lower values, which can only be modeled by MDA, but not LDA or QDA. The extracted low-level features are based on the distribution of the resulting cross-validated mean misclassification errors of each classifier.' (Mersmann et al., 2011) 'ela_level.mmce_qda_25': mean misclassification error of quadratic discriminant analysis (QDA) in the lower quartile (25).",
-            'ela_level.lda_qda_25': f"should approach the value {self.original_ela_df.loc['ela_level.lda_qda_25', 'value']: .3f}. Explanation: From pflacco's calculate_ela_level['ela_level.lda_qda_25']: 'The initial data set D is split into two classes by a specific objective level which works as a threshold. One possibility is to use the median for this, which will result in equally sized classes. Other choices studied are the upper and lower quartiles of the distribution of y. Linear (LDA), quadratic (QDA) and mixture discriminant analysis (MDA) are used to predict whether the objective values Y fall below or exceed the calculated threshold. Multi-modal functions should result in several unconnected sublevel sets for the quantile of lower values, which can only be modeled by MDA, but not LDA or QDA. The extracted low-level features are based on the distribution of the resulting cross-validated mean misclassification errors of each classifier.' (Mersmann et al., 2011) 'ela_level.lda_qda_25': mean misclassification error of linear discriminant analysis (QDA) in the lower quartile (25)."
-        }
+        # self.feature_descriptions = {
+        #     'disp.ratio_mean_02': f"should approach the value {self.original_ela_df.loc['disp.ratio_mean_02', 'value']: .3f}. Explanation: From pflacco's calculate_dispersion['disp.ratio_mean_02']: The dispersion features compare the dispersion, i.e. the (aggregated) pairwise distances, of all points in the initial design with the dispersion among the best points in the initial design. Per default, this set of “best points” is based on the 2%, 5% and 10% quantile of the objectives. Those dispersions are then compared based on the ratio as well as on the difference. [ratio, diff]_[mean, median]_[02, 05, 10, 25]: ratio and difference of the mean / median distances of the distances of the ‘best’ objectives vs. ‘all’ objectives. Taken from https://pflacco.readthedocs.io/en/latest/dispersion.html.",
+        #     'ela_distr.skewness': f"should approach the value {self.original_ela_df.loc['ela_distr.skewness', 'value']: .3f}. Explanation: From pflacco's calculate_ela_distribution['ela_distr.skewness']: skewness of the objective values.",
+        #     'ela_meta.lin_simple.adj_r2': f"should approach the value {self.original_ela_df.loc['ela_meta.lin_simple.adj_r2', 'value']: .3f}. Explanation: From pflacco's calculate_ela_meta['ela_meta.lin_simple.adj_r2']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) lin_simple.adj_r2: adjusted R^2 (i.e. model fit) of a simple linear model.",
+        #     'ela_meta.lin_simple.intercept': f"should approach the value {self.original_ela_df.loc['ela_meta.lin_simple.intercept', 'value']: .3f}. Explanation: From pflacco's calculate_ela_meta['ela_meta.lin_simple.intercept']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.lin_simple.intercept': intercept of a simple linear model.",
+        #     'ela_meta.lin_simple.coef.max': f"should approach the value {self.original_ela_df.loc['ela_meta.lin_simple.coef.max', 'value']: .3f}. Explanation: From pflacco's calculate_ela_meta['ela_meta.lin_simple.coef.max']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.lin_simple.coef.max': biggest (non-intercept) absolute coefficient of the simple linear model.",
+        #     'ela_meta.quad_simple.adj_r2': f"should approach the value {self.original_ela_df.loc['ela_meta.quad_simple.adj_r2', 'value']: .3f}. Explanation: From pflacco's calculate_ela_meta['ela_meta.quad_simple.adj_r2']: 'Meta-Model: Linear and quadratic regression models with or without interactions are fitted to the initial data D. The adjusted coefficient of determination R2 is returned in each case as an indicator for model accuracy. Functions with variable scaling will not allow a good fit of regression models without interaction effects, and simple unimodal functions might be approximated by using a quadratic model. In addition, features are extracted which reflect the size relations of the model coefficients.' (Mersmann et al., 2011) 'ela_meta.quad_simple.adj_r2': adjusted R^2 (i.e. model fit) of a simple quadratic model (without interactions), i.e. the ratio of its (absolute) biggest and smallest coefficients.",
+        #     'ic.eps_ratio': f"should approach the value {self.original_ela_df.loc['ic.eps_ratio', 'value']: .3f}. Explanation: From pflacco's calculate_information_content['ic.eps_ratio']: Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach (Munoz et al., 2014). In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified. A neutral landscape has low IC, while a rugged landscape has high IC (Munoz et al., 2014). 'ic.eps_ratio': ratio of partial information sensitivity, cf. equation (8) in Munoz et al. (2014) where the ratio is 0.5.",
+        #     'ic.eps_s': f"should approach the value {self.original_ela_df.loc['ic.eps_s', 'value']: .3f}. Explanation: From pflacco's calculate_information_content['ic.eps_s']: Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach (Munoz et al., 2014). In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified. A neutral landscape has low IC, while a rugged landscape has high IC (Munoz et al., 2014). 'ic.eps_s': settling sensitivity, indicating the epsilon for which the sequence nearly consists of zeros only, cf. equation (6) in Munoz et al. (2014).",
+        #     'nbc.nb_fitness.cor': f"should approach the value {self.original_ela_df.loc['nbc.nb_fitness.cor', 'value']: .3f}. Explanation: From pflacco's calculate_nbc['nbc.nb_fitness.cor']: Nearest Better Clustering features. Computes features based on the comparison of nearest neighbour and nearest better neighbour, i.e., the nearest neighbor with a better performance / objective value value. nb_fitness.cor: correlation between fitness value and count of observations to whom the current observation is the nearest better neighbour (the so-called 'indegree').",
+        #     'ela_level.mmce_qda_25': f"should approach the value {self.original_ela_df.loc['ela_level.mmce_qda_25', 'value']: .3f}. Explanation: From pflacco's calculate_ela_level['ela_level.mmce_qda_25']: 'The initial data set D is split into two classes by a specific objective level which works as a threshold. One possibility is to use the median for this, which will result in equally sized classes. Other choices studied are the upper and lower quartiles of the distribution of y. Linear (LDA), quadratic (QDA) and mixture discriminant analysis (MDA) are used to predict whether the objective values Y fall below or exceed the calculated threshold. Multi-modal functions should result in several unconnected sublevel sets for the quantile of lower values, which can only be modeled by MDA, but not LDA or QDA. The extracted low-level features are based on the distribution of the resulting cross-validated mean misclassification errors of each classifier.' (Mersmann et al., 2011) 'ela_level.mmce_qda_25': mean misclassification error of quadratic discriminant analysis (QDA) in the lower quartile (25).",
+        #     'ela_level.lda_qda_25': f"should approach the value {self.original_ela_df.loc['ela_level.lda_qda_25', 'value']: .3f}. Explanation: From pflacco's calculate_ela_level['ela_level.lda_qda_25']: 'The initial data set D is split into two classes by a specific objective level which works as a threshold. One possibility is to use the median for this, which will result in equally sized classes. Other choices studied are the upper and lower quartiles of the distribution of y. Linear (LDA), quadratic (QDA) and mixture discriminant analysis (MDA) are used to predict whether the objective values Y fall below or exceed the calculated threshold. Multi-modal functions should result in several unconnected sublevel sets for the quantile of lower values, which can only be modeled by MDA, but not LDA or QDA. The extracted low-level features are based on the distribution of the resulting cross-validated mean misclassification errors of each classifier.' (Mersmann et al., 2011) 'ela_level.lda_qda_25': mean misclassification error of linear discriminant analysis (QDA) in the lower quartile (25)."
+        # }
 
         # self.mutations = {}
         # # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
@@ -88,24 +87,31 @@ class ELAForMECHBench(ELAproblem):
         #     """
 
         # OLD: Random mutations
-        self.mutation_prompts = []
-        for feature in features:
-            self.mutation_prompts.append(
-                f"Create a new landscape class based on the selected code and improve the {feature} score, meaning: ELA feature {feature} {problem.feature_descriptions[feature]}.")
-        self.mutation_prompts.append(
-            "Create a new landscape class that is completely different from the selected solution but still adheres to the properties outlined in the task description.")
+        self.mutation_prompts = [
+            "Create a new landscape class by mutating the selected code. Keep the same interface, but modify the mathematical structure of f(x). Try to improve the fitness score based on the feedback.",
+            "Create a new landscape class by making a small mutation to the selected code, such as changing coefficients, frequencies, nonlinear terms, interactions, or shifts.",
+            "Create a new landscape class by making a larger mutation to the selected code while preserving the same interface.",
+            "Create a new landscape class that is substantially different from the selected solution but still follows the task description."
+        ]
+        self.task_prompt = """
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
 
-        self.task_prompt = f"""
-        Your task is to design novel mathematical functions (proxy functions) to be used as black-box optimization benchmark landscapes, with specific landscape properties.
-        The code you need to write is a class with a function `f` with one parameter `x` which is a realvalued sample (numpy array).
-        The proxy function's landscape will be quantified using Exploratory Landscape Analysis (ELA) features, using the pflacco Python library. The proxy's landscape should approach that of the original, expensive BBO problem as much as possible, meaning its ELA feature values should be as close as possible to those of the original problem.
-        The optimization function should have the following properties: \n- it will be used as minimization problem (so the global optimum should be the minimum value of the function)."""
-        for feature in self.features:
-            self.task_prompt += f"ELA feature {feature} {self.feature_descriptions[feature]}"
-        self.task_prompt += """
-        The class should also have a __init__(dim) function, that received the number of dimensions for the function.
-        The function will be evaluated between per dimension lower bound of -5.0 and upper bound of 5.0.
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
         """
+
+        # for feature in self.features:
+        #     self.task_prompt += f"ELA feature {feature} {self.feature_descriptions[feature]}"
+        # self.task_prompt += """
+        # The class should also have a __init__(dim) function, that received the number of dimensions for the function.
+        # The function will be evaluated between per dimension lower bound of -5.0 and upper bound of 5.0.
+        # """
 
         self.example_proxy1 = f"""
         The previous loop resulted in the following code as the best proxy function, with fitness (i.e. distance to original ELA vector) of 0.234:
@@ -255,7 +261,6 @@ Please adjust the above code to improve the ic.eps_s value (i.e. approach -0.175
         print(f"ORIGINAL ELA MIN-MAX: \n{self.min_max_ela_df.to_string()}")
         print(f"PROXY ELA MIN-MAX: \n{ela_proxy_minmax.to_string()}")
 
-        feedback = f"The optimization landscape '{proxy_name}' had the following distances to the original ELA values: "
         distances = {}
         abs_distances = {}
         distances_minmax = {}
@@ -281,7 +286,7 @@ Please adjust the above code to improve the ic.eps_s value (i.e. approach -0.175
             abs_distances[feature_name] = abs(pairwise_distance)
             distances_minmax[feature_name] = pairwise_distance_minmax
             abs_distances_minmax[feature_name] = abs(pairwise_distance_minmax)
-            feedback += f"{feature_name}: {pairwise_distance: .3f} (Original value: {original_val: .3f}, proxy value: {proxy_val: .3f}) \n"
+            # feedback += f"{feature_name}: {pairwise_distance: .3f} (Original value: {original_val: .3f}, proxy value: {proxy_val: .3f}) \n"
 
         print(f"\nabs_distances_minmax: {abs_distances_minmax}\n")
         solution.add_metadata('Distances', distances)
@@ -334,19 +339,24 @@ Please adjust the above code to improve the ic.eps_s value (i.e. approach -0.175
         # print(f"Z MEAN MECHBENCH (WITH SD): \n{z_mean_mechbench}")
         # print(f"Z MEAN PROXY (WITH SD): \n{z_mean_proxy}")
 
-        distance_series = (self.original_ela_df - ela_proxy).abs()
-        print(f"DISTANCE SERIES: \n{distance_series}")
-        distance_series.name = "feature_distance"
+        # distance_series = (self.original_ela_df - ela_proxy).abs()
+        # print(f"DISTANCE SERIES: \n{distance_series}")
+        # distance_series.name = "feature_distance"
 
         # solution.add_metadata("MECHBench_mean_z", z_mean_mechbench.to_numpy())
         # solution.add_metadata("proxy_mean_z", z_mean_proxy.to_numpy())
         # solution.add_metadata("proxy_mean_z", distance_series.to_numpy())
 
-        distance_series_minmax = (self.min_max_ela_df - ela_proxy_minmax).abs()
+        distance_series_minmax = (ela_proxy_minmax - self.min_max_ela_df)
         print(f"DISTANCE SERIES MIN-MAX: \n{distance_series_minmax}")
 
-        final_score = distance_series_minmax['value'].mean()
+        final_score = distance_series_minmax['value'].abs().mean()
         solution.add_metadata("Raw mean distance (min-max normalized)", final_score)
+
+        feedback = f"The landscape '{proxy_name}' had total fitness distance {final_score:.3f}. Lower is better.\n"
+        feature_distances = distance_series_minmax.to_dict()['value']
+        for feature_name, distance in feature_distances.items():
+            feedback += f"{feature_name}: error {distance:.3f}\n"
 
         print(f"MEAN DISTANCE (min-max): \n{final_score}")
         solution.set_scores(
@@ -376,12 +386,17 @@ if __name__ == '__main__':
 
     # Read variables dynamically from slurm:
     problem_type = int(os.environ.get("PROBLEM_TYPE", 1))
+    ES_config = (os.environ.get("ES_CONFIG", "1e1"))
+    print(ES_config)
+    n_parents = int(ES_config[0])
+    elitism = bool(1 if ES_config[1] == "E" else 0)
+    n_offspring = int(ES_config[2])
     problem = ELAForMECHBench(problem_type=problem_type,
                               size=500,  # <-- Optional edit: dataset size (30, 60, 125, 250 or 500)
                               features=features)
 
     print(f"--- Launching Experiment ---")
-    print(f"Problem {problem_type}")
+    print(f"Problem {problem_type} ({ES_config})")
     print(f"------------------------------------------")
 
     ai_model = "qwen3-coder:30b"
@@ -400,19 +415,20 @@ if __name__ == '__main__':
     #     example_prompt = None
 
     for experiment_i in range(5):  # 5 runs
-        experiment_name = f"ELA_for_MECHBENCH_p{problem_type}_expNo{experiment_i}"
+    # for experiment_i in range(1):  # 1 run
+        experiment_name = f"p{problem_type}_({ES_config})_run{experiment_i}"
         print(f'Running experiment number {experiment_i}')
         es = LLaMEA(
             f=problem.evaluate_for_MECHBench,
             minimization=True,  # IMPORTANT: Distance should be minimized (0 is best)
-            n_parents=8,
-            n_offspring=16,
+            n_parents=n_parents,
+            n_offspring=n_offspring,
             llm=llm,
             role_prompt=role_prompt,
             task_prompt=problem.task_prompt,
             mutation_prompts=problem.mutation_prompts,
             experiment_name=experiment_name,
-            elitism=False,  # False=,   True=+
+            elitism=elitism,  # False=,   True=+
             HPO=False,
             max_workers=4,
             budget=100,
