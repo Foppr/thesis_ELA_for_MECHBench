@@ -46,7 +46,8 @@ class ExperimentLogger:
         model_name = name.split("/")[-1]
         today = datetime.today().strftime("%m-%d_%H%M%S")
         # dirname = f"exp-{today}-{name}"
-        dirname = f"logs/exp-{today}-{name}"  # Add logs subdirectory
+
+        dirname = f"exps_0702/exp-{today}-{name}"  # Add logs subdirectory (NEEDS TO BE MADE FIRST)
         os.mkdir(dirname)
         os.mkdir(f"{dirname}/configspace")
         os.mkdir(f"{dirname}/code")

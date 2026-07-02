@@ -66,53 +66,6 @@ def main():
     optimizer.run()
     logger.close()
 
-    # n_total = len(problems)*len(seeds)*6
-    # with tqdm(total=n_total) as pbar:
-    #     for seed in seeds:
-    #         for problem in problems:
-    #             if problem == 1 or problem == 2:
-    #                 dim=5
-    #             elif problem == 3:
-    #                 dim=15
-            
-    #             f_no_deck_id = get_objective_function(problem)
-
-    #             f = lambda x: f_no_deck_id(x, deck_id=1)
-                
-    #             optimizers_dict = {
-    #                 "cmaes" : None,
-    #                 "turbo1": None,
-    #                 "botorch": None,
-    #                 "baxus": None,
-    #                 "de": None,
-    #                 "one_plus_one": None
-    #             }
-
-    #             for optimizer_name, _ in optimizers_dict.items():
-    #                 f_wrapped = ioh.wrap_problem(
-    #                     f,
-    #                     name=f"mechbench_p{problem}",
-    #                     optimization_type=ioh.OptimizationType.MIN,
-    #                     lb=-5,
-    #                     ub=5,
-    #                     dimension=dim
-    #                 )
-
-    #                 logger = ioh.logger.Analyzer(
-    #                     root=f'analysis/logger_data/mechbench/seed{seed}/p{problem}',
-    #                     folder_name=f"{optimizer_name}",
-    #                     algorithm_name=f"{optimizer_name}_mechbench",
-    #                     store_positions=True,
-    #                     triggers=[ioh.logger.trigger.ALWAYS]
-    #                 )
-
-    #                 f_wrapped.attach_logger(logger)
-
-    #                 tqdm.write(f"\nProblem: {problem }\nOptimizer:{optimizer_name}\n")
-    #                 optimizer = instantiate_optimizer(f_wrapped, dim, optimizer_name, seed)
-    #                 optimizer.run()
-    #                 logger.close()
-    #                 pbar.update(1)
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
