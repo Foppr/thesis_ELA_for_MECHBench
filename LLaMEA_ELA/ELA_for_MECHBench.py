@@ -43,26 +43,38 @@ def ela_distance(s1, s2):
 
 class ELAForMECHBench(ELAproblem):
     def __init__(self, problem_type, size, features):
+        """
+        :param: problem_type (int): problem ID (1, 2, 3)
+        :param: size (int): size of the problem (30, 60, 125, 250, 500) * D
+        :param: features (list): list of features
+        """
         super().__init__()
         data_path = "../Folder_Points/500D"
         if problem_type == 1:
             abs_path = os.path.abspath(data_path + "/data_p1")
             dim = 5
+            self.dim_stats = dim
         elif problem_type == 2:
             abs_path = os.path.abspath(data_path + "/data_p2")
             dim = 5
+            self.dim_stats = dim
         elif problem_type == 3:
             abs_path = os.path.abspath(data_path + "/data_p3")
             dim = 15
+            self.dim_stats = 20  # For p3, use dim=20 from the stats, because dim=15 is absent
         else:
             print('Please enter a valid problem type (1, 2 or 3)')
             sys.exit(1)
 
         points_df = pd.read_csv(f"{abs_path}/points/{size}d{dim}_p{problem_type}_seed1312.csv", index_col='id')
+        min_max_points_df = pd.read_csv(f"{abs_path}/points_min_max/min_max_{size}d{dim}_p{problem_type}_seed1312.csv", index_col='id')
         self.X = points_df.iloc[:, :dim]  # x0-x4 for p1-2, x0-x14 for p3
-        self.original_ela_df = pd.read_csv(f"{abs_path}/ELA/{size}d{dim}_p{problem_type}_seed1312_ela.csv", index_col='feature')
-        self.min_max_ela_df = pd.read_csv(f"{abs_path}/ELA_min_max/{size}d{dim}_p{problem_type}_seed1312_ela.csv", index_col='feature')
-        self.ela_stats = pd.read_csv("../ela_feature_stats.csv")
+        self.X_scaled = min_max_points_df.iloc[:, :dim]
+        self.original_ela_df = pd.read_csv(f"{abs_path}/ELA/ela_{size}d{dim}_p{problem_type}_seed1312.csv", index_col='feature')
+        self.min_max_ela_df = pd.read_csv(f"{abs_path}/ELA_min_max/minmax_ela_{size}d{dim}_p{problem_type}_seed1312.csv", index_col='feature')
+
+        # New updated ela stats per size:
+        self.ela_stats = pd.read_csv(f"../Folder_Points/500D/by_size/{size}d_updated_ELA_stats.csv")
 
         self.features = features
         # self.feature_descriptions = {
@@ -213,31 +225,27 @@ Please adjust the above code to improve the ic.eps_s value (i.e. approach -0.175
                 y[i] = 0
             y_scaled = y
         else:
-            # Scale y (X should already be scaled before!)
+            # Scale y
             y_scaled = (y - y.min()) / (y.max() - y.min())
 
-        ela_proxy = self.compute_ela(self.X, y_scaled)
+        ela_proxy = self.compute_ela(self.X_scaled, y_scaled)
         ela_proxy = pd.Series(ela_proxy)
         ela_proxy = ela_proxy.reset_index()
         ela_proxy.columns = ['feature', 'value']
-
-        # ela_per_seed = preprocces_data(ela_per_seed)
         ela_proxy.index.name = 'feature'
         ela_proxy.name = 'value'
         ela_proxy.set_index('feature', inplace=True)
 
         original_ela_dic = self.original_ela_df.round(4).to_dict()['value']
         proxy_ela_dic = ela_proxy.round(4).to_dict()['value']
-
         solution.add_metadata("Original ELA values (no min-max)", original_ela_dic)
         solution.add_metadata("Proxy ELA values (no min-max)", proxy_ela_dic)
-
         print(f"ORIGINAL ELA: \n{self.original_ela_df.to_string()}")
         print(f"PROXY ELA: \n{ela_proxy.to_string()}")
 
-        # Min-max normalization on ELA values:
+        # Min-max normalization on proxy ELA values:
         stats_filtered = self.ela_stats[
-            (self.ela_stats['dimension'] == 5) & (self.ela_stats['dataset'] == 'BBOB_SM_all')]
+            (self.ela_stats['dimension'] == self.dim_stats) & (self.ela_stats['dataset'] == 'BBOB_SM_all')]
 
         # Explicitly join using left_index=True because 'feature' was set as the index
         merged_df = pd.merge(ela_proxy, stats_filtered[['feature', 'min', 'max']],
@@ -249,15 +257,13 @@ Please adjust the above code to improve the ic.eps_s value (i.e. approach -0.175
         merged_df['normalized_value'] = merged_df['normalized_value'].fillna(0.0)
         ela_proxy_minmax = merged_df[['feature', 'normalized_value']].rename(columns={'normalized_value': 'value'})
 
-        # Re-index ela_proxy_minmax so it matches the structure expected by downstream absolute difference checks
+        # Re-index ela_proxy_minmax
         ela_proxy_minmax.set_index('feature', inplace=True)
 
         original_ela_minmax_dic = self.min_max_ela_df.round(4).to_dict()['value']
         proxy_ela_minmax_dic = ela_proxy_minmax.round(4).to_dict()['value']
-
         solution.add_metadata("Original min-max ELA values", original_ela_minmax_dic)
         solution.add_metadata("Proxy min-max ELA values", proxy_ela_minmax_dic)
-
         print(f"ORIGINAL ELA MIN-MAX: \n{self.min_max_ela_df.to_string()}")
         print(f"PROXY ELA MIN-MAX: \n{ela_proxy_minmax.to_string()}")
 
@@ -350,15 +356,16 @@ Please adjust the above code to improve the ic.eps_s value (i.e. approach -0.175
         distance_series_minmax = (ela_proxy_minmax - self.min_max_ela_df)
         print(f"DISTANCE SERIES MIN-MAX: \n{distance_series_minmax}")
 
-        final_score = distance_series_minmax['value'].abs().mean()
-        solution.add_metadata("Raw mean distance (min-max normalized)", final_score)
+        # final_score = distance_series_minmax['value'].abs().mean()
+        final_score = distance_series_minmax['value'].abs().sum()  # Manhattan distance
+        solution.add_metadata("Raw manhattan distance (min-max normalized)", final_score)
 
-        feedback = f"The landscape '{proxy_name}' had total fitness distance {final_score:.3f}. Lower is better.\n"
+        feedback = f"The landscape '{proxy_name}' had manhattan distance (fitness) {final_score:.3f}. Lower is better.\n"
         feature_distances = distance_series_minmax.to_dict()['value']
         for feature_name, distance in feature_distances.items():
             feedback += f"{feature_name}: error {distance:.3f}\n"
 
-        print(f"MEAN DISTANCE (min-max): \n{final_score}")
+        print(f"MANHATTAN DISTANCE (min-max): \n{final_score}")
         solution.set_scores(
             final_score,  # Fitness
             feedback=f"{feedback}",
