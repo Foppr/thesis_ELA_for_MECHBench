@@ -49,6 +49,7 @@ class LLaMEAAnalyzer:
     def run(self,
             progress_plots=True,
             pca_plots=True,
+            diversity_plots=True,
             get_proxy_standings=True,
             compute_aocc=True,
             compare_aocc=True,
@@ -73,12 +74,36 @@ class LLaMEAAnalyzer:
 
         if pca_plots:
             print(f'\n --- Making PCA plots ---')
+
             for p in self.log:
+                all_problem_data = []
                 for config in self.log[p]:
                     if 'total' not in config:
                         for inds in self.log[p][config]:
                             if 'total' in inds:
-                                self.pca(self.log[p][config][inds], name_=f'{p}_{config}')
+                                for individual in self.log[p][config][inds]:
+                                    proxy_dic = individual['metadata']["Proxy min-max ELA values"]
+                                    all_problem_data.append(list(proxy_dic.values()))
+
+                # Shared PCA model per problem
+                if all_problem_data:
+                    shared_df = pd.DataFrame(all_problem_data, columns=self.features)
+                    shared_pca = PCA(n_components=2)
+                    shared_pca.fit(shared_df)
+
+                    for config in self.log[p]:
+                        if 'total' not in config:
+                            for inds in self.log[p][config]:
+                                if 'total' in inds:
+                                    self.pca(
+                                        self.log[p][config][inds],
+                                        shared_pca,
+                                        save_folder='pca_plots',
+                                        name_=f'{p}_{config}'
+                                    )
+
+        if diversity_plots:
+            self.plot_initial_diversity()
 
         if get_proxy_standings:
             print(f'\n --- Getting podium, median and worst proxy per problem ---')
@@ -91,9 +116,17 @@ class LLaMEAAnalyzer:
             self.standings1 = self.get_podium_median_worst(p1_total)
             self.standings2 = self.get_podium_median_worst(p2_total)
             self.standings3 = self.get_podium_median_worst(p3_total)
-            self.standings_total['p1'] = self.standings1
-            self.standings_total['p2'] = self.standings2
-            self.standings_total['p3'] = self.standings3
+            self.standings1.to_csv(f'{self.save_folder_name}/standings1.csv')
+            self.standings2.to_csv(f'{self.save_folder_name}/standings2.csv')
+            self.standings3.to_csv(f'{self.save_folder_name}/standings3.csv')
+        else:
+            self.standings1 = pd.read_csv(f'{self.save_folder_name}/standings1.csv')
+            self.standings2 = pd.read_csv(f'{self.save_folder_name}/standings2.csv')
+            self.standings3 = pd.read_csv(f'{self.save_folder_name}/standings3.csv')
+
+        self.standings_total['p1'] = self.standings1
+        self.standings_total['p2'] = self.standings2
+        self.standings_total['p3'] = self.standings3
 
         # RUN ALGORITHMS
 
@@ -106,32 +139,14 @@ class LLaMEAAnalyzer:
         if compare_aocc:
             print(f'\n --- Computing Kendall\'s tau ---')
             kendall_savename = 'kendall_results'
+            aocc_savename = 'aocc_results.csv'
             self.compare_AOCCs(aocc_savename, kendall_savename)
 
         if kendall_fitness_scatter:
             print(f'\n --- Producing Kendall vs. Fitness scatterplot ---')
             scatter_savename = 'kendall_fitness_scatterplot'
-            self.scatter_fitness_kendall(scatter_savename)
-
-    def load_log(self, dir, problem_, es_config_, run_):
-        """
-        Loads the JSONL log file, cleans out invalid entries,
-        """
-        raw_log = []
-        with open(f"{dir}/log.jsonl", 'r', encoding='utf-8') as f:
-            for line in f:
-                if line.strip():
-                    individual = json.loads(line)
-                    if individual.get('fitness') != float('inf') and individual.get('fitness') != np.inf:
-                        raw_log.append(individual)
-
-        if self.missing_niche_radius:
-            raw_log = self._compute_niche_radius(raw_log)
-
-        self.log[problem_][es_config_][run_] = raw_log
-
-        self.experiments_data[problem_][es_config_][run_] = self._process_to_dataframe(raw_log)
-        return raw_log
+            path_kendall_results = 'kendall_results'
+            self.scatter_fitness_kendall(path_kendall_results, scatter_savename)
 
     def load_logs(self):
         for problem_ in os.listdir(self.log_dir):
@@ -168,54 +183,6 @@ class LLaMEAAnalyzer:
             self.experiments_data[problem_][f'{problem_}_total'] = self._process_to_dataframe(problem_log)
             # 3 problem_logs
 
-    def compute_total_logs(self, problem_):
-        problem_total_log = []
-        for es_config_, es_dic in self.log[problem_].items():
-            if 'total' in es_config_:
-                continue
-
-            config_total = []
-            for run_, run_log in es_dic.items():
-                for ind in run_log:
-                    problem_total_log.append(ind)
-                    config_total.append(ind)
-
-            self.log[problem_][es_config_][f'{es_config_}_total'] = config_total
-            self.experiments_data[problem_][es_config_][f'{es_config_}_total'] = self._process_to_dataframe(config_total)
-
-        self.log[problem_][f'{problem_}_total'] = problem_total_log
-        self.experiments_data[problem_][f'{problem_}_total'] = self._process_to_dataframe(problem_total_log)
-
-    @staticmethod
-    def _compute_niche_radius(log):
-        """Computes the niche radius per generation"""
-        if not log:
-            return log
-
-        unique_gens = sorted(list(set(ind['generation'] for ind in log)))
-
-        for gen in unique_gens:
-            individuals_genX = [ind for ind in log if ind['generation'] == gen]
-            dists = []
-
-            for i in range(len(individuals_genX)):
-                for j in range(i + 1, len(individuals_genX)):
-                    ind1 = individuals_genX[i]
-                    ind2 = individuals_genX[j]
-                    try:
-                        proxy_ela1 = ind1['metadata']['Proxy ELA values']
-                        proxy_ela2 = ind2['metadata']['Proxy ELA values']
-                        dist = np.sum(np.abs(np.asarray(proxy_ela1) - np.asarray(proxy_ela2)))
-                        dists.append(dist)
-                    except KeyError:
-                        pass
-
-            niche_radius = float(np.mean(dists)) if dists else 0.0
-            for ind in individuals_genX:
-                if 'metadata' in ind:
-                    ind['metadata']['niche_radius'] = niche_radius
-        return log
-
     def _process_to_dataframe(self, log):
         flat_records = []
         for ind in log:
@@ -234,7 +201,7 @@ class LLaMEAAnalyzer:
 
         return pd.DataFrame(flat_records)
 
-    def pca(self, individuals, name_):
+    def pca(self, individuals, pre_fitted_pca, save_folder, name_):
         pca_dic = {}
         proxy_data = pd.DataFrame(columns=self.features)
         generations = []
@@ -246,9 +213,8 @@ class LLaMEAAnalyzer:
 
         generations = pd.Series(generations)
 
-        pca = PCA(n_components=2)
-        proxies_reduced = pca.fit_transform(proxy_data)
-        expl_var = pca.explained_variance_ratio_
+        proxies_reduced = pre_fitted_pca.transform(proxy_data)
+        expl_var = pre_fitted_pca.explained_variance_ratio_
 
         fig, ax = plt.subplots(figsize=(9, 6))
 
@@ -279,7 +245,8 @@ class LLaMEAAnalyzer:
         cbar.set_label("Evolutionary Generation", rotation=270, labelpad=15)
 
         plt.tight_layout()
-        plt.savefig(f"PCA_results_{name_}.png", dpi=900)
+        filename = f"{self.save_folder_name}/{save_folder}/PCA_results_{name_}.png"
+        plt.savefig(filename, dpi=900)
         plt.close()
 
         return pca_dic
@@ -385,7 +352,7 @@ class LLaMEAAnalyzer:
                 markerfacecolor="gray",
                 markersize=6,
                 alpha=0.6,
-                label="Parent Proxies",
+                label="Initial Proxies",
             ),
             Line2D(
                 [0],
@@ -395,7 +362,7 @@ class LLaMEAAnalyzer:
                 markerfacecolor="black",
                 markeredgecolor="black",
                 markersize=12,
-                label="Target Problem 1",
+                label="MB1",
             ),
             Line2D(
                 [0],
@@ -405,7 +372,7 @@ class LLaMEAAnalyzer:
                 markerfacecolor="black",
                 markeredgecolor="black",
                 markersize=10,
-                label="Target Problem 2",
+                label="MB2",
             ),
             Line2D(
                 [0],
@@ -415,43 +382,16 @@ class LLaMEAAnalyzer:
                 markerfacecolor="black",
                 markeredgecolor="black",
                 markersize=9,
-                label="Target Problem 3",
+                label="MB3",
             ),
         ]
         plt.legend(handles=legend_elements, loc="upper right", frameon=True, fontsize=11)
 
         plt.tight_layout()
-        plt.savefig(f'{self.save_folder_name}/parent_ela_diversity.png', dpi=900)
+        filename = f'{self.save_folder_name}/parent_ela_diversity.png'
+        plt.savefig(filename, dpi=900)
 
         return all_initial_elas
-
-    def _is_proxy_valid(self, code, name):
-        """
-        Validates a proxy by running it against a sample space spanning
-        both negative and positive bounds to catch domain/runtime exceptions.
-        """
-        try:
-            # Create an isolated environment to execute the proxy string
-            local_env = {}
-            exec(code, globals(), local_env)
-            if name not in local_env:
-                return False
-
-            proxy_class = local_env[name]
-            proxy_instance = proxy_class(dim=5)
-            problem = proxy_instance.f
-
-            # Generate a 100x5 test matrix covering [-5.0, 5.0]
-            # This explicitly introduces negative numbers to catch fractional exponent bugs
-            test_points = np.random.uniform(-5.0, 5.0, (100, 5))
-
-            for pt in test_points:
-                val = problem(pt)
-                if np.isnan(val) or np.isinf(val):
-                    return False
-            return True
-        except Exception:
-            return False
 
     def get_podium_median_worst(self, individuals):
         """
@@ -531,76 +471,32 @@ class LLaMEAAnalyzer:
 
         return df_standings
 
-    def get_podium_median_worst_OLD(self, individuals, filter_threshold=0.2):
+    def _is_proxy_valid(self, code, name):
         """
-        Given a list of individuals, get the best 3 (podium), median and worst performing proxies from the log.
-        :param: individuals (list): contains the individuals to filter
-        :param: filter_threshold (float): threshold to filter proxies deemed to similar (standard: 0.2 * SD)
-
-        :return: list containing the data of the podium, median and worst proxies (including generation, fitness and code)
+        Validates a proxy by testing negative and positive inputs
         """
-        df_sorted = pd.DataFrame(individuals).sort_values(by='fitness')
+        try:
+            # Create an isolated environment to execute the proxy string
+            local_env = {}
+            exec(code, globals(), local_env)
+            if name not in local_env:
+                return False
 
-        # for individual in df_sorted.iterrows():
-        #     name_ = individual[1]['name']
-        #     code_ = individual[1]['code']
-        #     problem_ = individual[1]['problem']
-        #     if problem_ == 'p1' or problem_ == 'p2':
-        #         dim = 5
-        #     else:
-        #         dim = 15
-        #     exec(code_, globals())
-        #
-        #     proxy_class = globals()[name_]
-        #     proxy_instance = proxy_class(dim=dim)
-        #     f = proxy_instance.f
+            proxy_class = local_env[name]
+            proxy_instance = proxy_class(dim=5)
+            problem = proxy_instance.f
 
-        # Filter df to drop proxies deemed too similar (based on the fitness score)
-        fitnesses = df_sorted['fitness'].values
-        keep_indices = [0]  # Always keep first proxy
-        last_kept_val = fitnesses[0]
-        threshold = df_sorted['fitness'].std() * filter_threshold
-        for idx in range(1, len(fitnesses)):
-            if abs(fitnesses[idx] - last_kept_val) >= threshold:
-                keep_indices.append(idx)
-                last_kept_val = fitnesses[idx]
+            test_points = np.random.uniform(-5.0, 5.0, (100, 5))
 
-        df_filtered = df_sorted.iloc[keep_indices]
+            for pt in test_points:
+                val = problem(pt)
+                if np.isnan(val) or np.isinf(val):
+                    return False
+            return True
+        except Exception:
+            return False
 
-        median_index = len(df_filtered) // 2
-
-        podium_proxies = df_filtered.iloc[:3]
-        median_proxies = df_filtered.iloc[median_index-1:median_index+2]
-        worst_proxies = df_filtered.iloc[-3:]
-
-        podium_proxies['standing'] = ['pod1', 'pod2', 'pod3']
-        median_proxies['standing'] = ['med1', 'med2', 'med3']
-        worst_proxies['standing'] = ['worst1', 'worst2', 'worst3']
-
-        return podium_proxies, median_proxies, worst_proxies
-
-    def compare_experiments(self, problem_, exp_names):
-        max_gens = []
-        ubs_total = []
-        ubs_features = []
-
-        for name in exp_names:
-            df = self.experiments_data[problem_][name]
-
-            # Total fitness
-            agg_total = df.groupby('generation')['fitness'].agg(['min', 'mean']).reset_index()
-            # This will either use 'fitness' or 'Raw mean distance' if the fitness is accidentally incorrect
-            max_gens.append(agg_total['generation'].max())
-            ubs_total.append(max(agg_total['mean'].max(), agg_total['min'].max()))
-
-            # Fitness for all 11 features
-            for feat in self.features:
-                if feat in df.columns:
-                    agg_feat = df.groupby('generation')[feat].agg(['min', 'mean'])
-                    ubs_features.append(max(agg_feat['mean'].max(), agg_feat['min'].max()))
-
-        return min(max_gens), max(ubs_total), max(ubs_features)
-
+    # region PROGRESSION PLOTS
     def save_individual_legend(self, save_folder):
         """
         Generates a separate, standalone horizontal (3x1 layout) legend
@@ -659,6 +555,9 @@ class LLaMEAAnalyzer:
         """
         Generates 9 graphs tracking raw fitness vs. best-so-far convergence.
         """
+        full_path = f'{self.save_folder_name}/{save_folder}'
+        if not os.path.exists(full_path):
+            os.mkdir(full_path)
         max_ind_bound, max_fit_bound = global_stats
 
         for problem_ in self.log.keys():
@@ -744,7 +643,7 @@ class LLaMEAAnalyzer:
 
                 plt.tight_layout()
                 suffix = "_clean" if clean_layout else ""
-                filename = f'{self.save_folder_name}/{save_folder}/progression_{problem_}_{config_}{suffix}.png'
+                filename = f'{full_path}/progression_{problem_}_{config_}{suffix}.png'
                 plt.savefig(filename, dpi=300, bbox_inches='tight')
                 plt.close()
                 print(f"Generated progression graph: {filename}")
@@ -753,6 +652,10 @@ class LLaMEAAnalyzer:
         """
         Generates 9 graphs tracking the mean best-so-far convergence curve for features.
         """
+        full_path = f'{self.save_folder_name}/{save_folder}'
+        if not os.path.exists(full_path):
+            os.mkdir(full_path)
+
         for problem_ in self.log.keys():
             if 'total' in problem_:
                 continue
@@ -814,7 +717,7 @@ class LLaMEAAnalyzer:
 
                 plt.tight_layout()
                 suffix = "_clean" if clean_layout else ""
-                filename = f'{self.save_folder_name}/{save_folder}/features_{problem_}_{config_}{suffix}.png'
+                filename = f'{full_path}/features_{problem_}_{config_}{suffix}.png'
                 plt.savefig(filename, dpi=300, bbox_inches='tight')
                 plt.close()
                 print(f"Generated feature progression graph: {filename}")
@@ -841,7 +744,6 @@ class LLaMEAAnalyzer:
 
                 # Align to the shortest run in this configuration block
                 min_len = min(len(runs_dict[rk]) for rk in run_keys)
-                print(f'MIN LEN: {min_len} for {run_keys}')
                 # max_individuals = max(max_individuals, min_len)
                 max_individuals = min(max_individuals, min_len)
 
@@ -856,7 +758,7 @@ class LLaMEAAnalyzer:
 
         return max_individuals, global_max_mean_fitness
 
-    def compare_features_by_individual(self, max_ind_bound=129):
+    def compare_features_by_individual(self, max_ind_bound):
         """
         Computes the global maximum fitness across all 11 features, problems,
         and configurations to establish a uniform Y-axis bound.
@@ -864,24 +766,19 @@ class LLaMEAAnalyzer:
         global_max_feature_fitness = 0.0
 
         for problem_ in self.log.keys():
-            print(problem_)
             if 'total' in problem_:
                 continue
             for config_ in self.log[problem_].keys():
-                print(config_)
                 if 'total' in config_:
                     continue
 
                 runs_dict = self.log[problem_][config_]
                 run_keys = [k for k in runs_dict.keys() if 'total' not in k]
-                print(run_keys)
                 if not run_keys:
                     continue
 
                 min_len = min(len(runs_dict[rk]) for rk in run_keys)
-                print(min_len)
                 length = min(min_len, max_ind_bound)
-                print(length)
 
                 # Track best-so-far profiles per feature to find the highest mean point
                 for feat in self.features:
@@ -890,7 +787,6 @@ class LLaMEAAnalyzer:
                         run_log = runs_dict[rk][:length]
                         # Extract the explicit absolute min-maxed distance metric
                         feat_seq = [ind["metadata"]["Absolute min-max distances"][feat] for ind in run_log]
-                        print(feat_seq)
 
                         best_seq = []
                         current_best = float('inf')
@@ -900,117 +796,13 @@ class LLaMEAAnalyzer:
                             best_seq.append(current_best)
                         config_feat_matrix.append(best_seq)
 
-                    print(config_feat_matrix)
                     if config_feat_matrix:
                         mean_profile = np.mean(config_feat_matrix, axis=0)
-                        print(mean_profile)
                         global_max_feature_fitness = max(global_max_feature_fitness, np.max(mean_profile))
 
         return global_max_feature_fitness
 
-    def plot_total_fitness(self, exp_name, global_stats, save_suffix):
-        """Plots the global best and average raw fitness across generations"""
-        df = self.experiments_data[exp_name]
-        max_gen, ub_total, _ = global_stats
-
-        # df_filtered = df[df['generation'] <= max_gen]
-        df_filtered = df
-        agg_df = df_filtered.groupby('generation')[self.fitness_or_rawdist].agg(['min', 'mean']).reset_index()
-        agg_df = agg_df.sort_values('generation')
-
-        generations = agg_df['generation']
-        avg_distances = agg_df['mean']
-        best_distances = agg_df['min']
-
-        min_val = best_distances.min()
-        best_gen = agg_df.loc[agg_df['min'] == min_val, 'generation'].iloc[0]
-
-        plt.figure(figsize=(10, 6))
-        plt.style.use('seaborn-v0_8-whitegrid')
-
-        plt.plot(generations, best_distances, label='Best Raw Distance (Min)', color='#1f77b4', linewidth=2.5,
-                 marker='o', markersize=4)
-        plt.plot(generations, avg_distances, label='Avg Raw Distance', color='#ff7f0e', linewidth=2, linestyle='--')
-        plt.scatter(best_gen, min_val, color='#2ca02c', s=100, zorder=5, label='Global Best')
-
-        plt.text(best_gen, min_val - (ub_total * 0.02), f'{min_val:.3f}', color='#006400', fontweight='bold',
-                 ha='center', va='top', fontsize=14)
-        plt.ylim(0, ub_total)
-
-        plt.title(f'LLaMEA Evolutionary Progress (Problem {save_suffix})', fontsize=14, fontweight='bold', pad=15)
-        plt.xlabel('Generation', fontsize=12, labelpad=10)
-        plt.ylabel('Raw Distance (Fitness)', fontsize=12, labelpad=10)
-        plt.xticks(generations)
-        plt.legend(fontsize=11, loc='upper right', frameon=True, facecolor='white', edgecolor='none')
-        plt.tight_layout()
-
-        filename = f'{self.save_folder_name}/{save_suffix}.png'
-        plt.savefig(filename, dpi=300)
-        # print(f"Total fitness graph saved as '{filename}'")
-        plt.close()
-
-    def plot_feature_fitness(self, exp_name, feature_name, global_stats, save_suffix):
-        """Plot fitness evolution for individual features"""
-        if feature_name not in self.features:
-            raise ValueError(f"Feature '{feature_name}' not found in the defined features list.")
-
-        df = self.experiments_data[exp_name]
-        max_gen, _, ub_features = global_stats  # Extract uniform features upper bound
-
-        # df_filtered = df[df['generation'] <= max_gen]
-        df_filtered = df
-        agg_df = df_filtered.groupby('generation')[feature_name].agg(['min', 'mean']).reset_index()
-        agg_df = agg_df.sort_values('generation')
-
-        generations = agg_df['generation']
-        avg_errors = agg_df['mean']
-        best_errors = agg_df['min']
-
-        min_val = best_errors.min()
-        best_gen = agg_df.loc[agg_df['min'] == min_val, 'generation'].iloc[0]
-
-        plt.figure(figsize=(10, 6))
-        plt.style.use('seaborn-v0_8-whitegrid')
-
-        plt.plot(generations, best_errors, label='Best Feature Error (Min)', color='#1f77b4', linewidth=2.5, marker='o',
-                 markersize=4)
-        plt.plot(generations, avg_errors, label='Avg Feature Error', color='#ff7f0e', linewidth=2, linestyle='--')
-
-        plt.scatter(best_gen, min_val, color='#2ca02c', s=100, zorder=5, label='Global Best Error')
-        plt.text(best_gen, min_val - (ub_features * 0.02), f'{min_val:.3f}', color='#006400', fontweight='bold',
-                 ha='center', va='top', fontsize=14)
-
-        plt.ylim(0, ub_features)
-
-        plt.title(f'ELA Feature Progress: {feature_name}\n(Problem {save_suffix})', fontsize=13, fontweight='bold',
-                  pad=12)
-        plt.xlabel('Generation', fontsize=12, labelpad=10)
-        plt.ylabel('Absolute Error (|Proxy - Original|)', fontsize=11, labelpad=10)
-        plt.xticks(generations)
-        plt.legend(fontsize=11, loc='upper right', frameon=True, facecolor='white', edgecolor='none')
-        plt.tight_layout()
-
-        filename = f'{self.save_folder_name}/{feature_name}_{save_suffix}.png'
-        plt.savefig(filename, dpi=300)
-        # print(f"Feature graph saved as '{filename}'")
-        plt.close()
-
-    def generate_plots(self, exp_name, global_stats, save_suffix, plot_type='total', feature_name=None):
-        """
-        Plot total or per-feature (one specific or all of them)
-        plot_type: 'total', 'feature', 'all_features'
-        """
-        if plot_type == 'total':
-            self.plot_total_fitness(exp_name, global_stats, save_suffix)
-        elif plot_type == 'feature':
-            if not feature_name:
-                raise ValueError("A specific 'feature_name' must be provided if plot_type='feature'.")
-            self.plot_feature_fitness(exp_name, feature_name, global_stats, save_suffix)
-        elif plot_type == 'all_features':
-            for feat in self.features:
-                self.plot_feature_fitness(exp_name, feat, global_stats, save_suffix)
-        else:
-            raise ValueError("Invalid plot_type. Use 'total', 'feature', or 'all_features'.")
+    # endregion PROGRESSION PLOTS
 
     def save_feature_difficulty_ranking(self, exp_mapping, output_filename='llamea_tables/feature_difficulty_ranking.csv'):
         """
@@ -1114,10 +906,8 @@ class LLaMEAAnalyzer:
                                         evaluations.max() - evaluations.min()
                                 )
 
-                                auc = np.trapezoid(norm_bsf, norm_evals)
+                                auc = np.trapz(norm_bsf, norm_evals)
                                 aocc = 1 - auc
-
-                                print(f'{standing}_{algo} AOCC --- {aocc}\n')
 
                                 aocc_records.append({
                                     'problem': p,
@@ -1143,7 +933,8 @@ class LLaMEAAnalyzer:
         return df_wide
 
     def compare_AOCCs(self, path_aocc_results, save_path):
-        aocc_results = pd.read_csv(path_aocc_results)
+        full_path = f'{self.save_folder_name}/{path_aocc_results}'
+        aocc_results = pd.read_csv(full_path)
         for p in [1, 2]:
             optimizers = {'botorch': {}, 'cmaes': {}, 'de': {}, 'one_plus_one': {}, 'turbo1': {}, 'baxus': {}}
             aocc_p = aocc_results.loc[(aocc_results['problem'] == f'p{p}')]
@@ -1171,27 +962,67 @@ class LLaMEAAnalyzer:
                 taus[f'MB{p}_{standing}']['fitness'] = fitness
 
             df_taus = pd.DataFrame(taus).T
-            filename = f'{self.save_folder_name}/{save_path}_{p}.csv'
+            filename = f'{self.save_folder_name}/{save_path}_p{p}.csv'
             df_taus.to_csv(filename)
 
-    def scatter_fitness_kendall(self, path_kendall_results, save_path=None):
+    def scatter_fitness_kendall(self, path_kendall_results, save_path):
         for p in [1, 2]:
-            df_taus = pd.read_csv(f'{path_kendall_results}_p{p}')
+            filename = f'{self.save_folder_name}/{path_kendall_results}'
+            df_taus = pd.read_csv(f'{filename}_p{p}.csv', index_col=0)
             tau = df_taus['tau'].to_numpy()
             fitness = df_taus['fitness'].to_numpy()
             standings = df_taus.index.to_numpy()
+            ranks = pd.Series([i for i, s in enumerate(standings)])
+            norm_ranks = (ranks - ranks.min()) / (ranks.max() - ranks.min())
 
             fig, ax = plt.subplots(figsize=(9, 6))
+            cmap = plt.get_cmap("viridis")
 
-            # Scatterplot
-            scatter = ax.scatter(
-                tau,
-                fitness,
-                c=standings,
-                cmap="viridis",
-                s=40,
-                alpha=0.8,
-                edgecolors="none"
+            jitter_amplitude_x = 0.015
+            jitter_amplitude_y = (fitness.max() - fitness.min()) * 0.015
+
+            rng = np.random.default_rng(seed=42)
+
+            for i in range(len(tau)):
+                # Generate a tiny offset for overlapping proxies
+                jx = rng.uniform(-jitter_amplitude_x, jitter_amplitude_x)
+                jy = rng.uniform(-jitter_amplitude_y, jitter_amplitude_y)
+                plot_x = tau[i] + jx
+                plot_y = fitness[i] + jy
+
+                ax.scatter(
+                    plot_x,
+                    plot_y,
+                    color=cmap(norm_ranks[i]),
+                    s=350,
+                    alpha=0.8,
+                    edgecolors="black",
+                    linewidths=0.5
+                )
+
+                ax.text(
+                    plot_x,
+                    plot_y,
+                    str(ranks[i]+1),
+                    color="white",
+                    fontsize=9,
+                    fontweight="bold",
+                    va="center",
+                    ha="center"
+                )
+
+            # Trend line
+            m, b = np.polyfit(tau, fitness, 1)
+            x_line = np.linspace(tau.min(), tau.max(), 100)
+            y_line = m * x_line + b
+            ax.line = ax.plot(
+                x_line,
+                y_line,
+                color="red",
+                linestyle="--",
+                linewidth=2,
+                alpha=0.7,
+                label=f"Trend (slope: {m:.2f})"
             )
 
             # PC values
@@ -1201,13 +1032,8 @@ class LLaMEAAnalyzer:
                 ylabel=f"Fitness",
             )
 
-            # Axes
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
-            ax.legend()
-
             plt.tight_layout()
-            plt.savefig(f"{self.save_folder_name}/{path_kendall_results}_{p}.png", dpi=900)
+            plt.savefig(f"{self.save_folder_name}/{save_path}_p{p}.png", dpi=900)
             plt.close()
 
 
@@ -1221,7 +1047,19 @@ if __name__ == "__main__":
         aocc_path=aocc_path
     )
 
-    analyzer.run()
+    analyzer.load_logs()
+    log = analyzer.log
+    df = analyzer.experiments_data
+
+    analyzer.run(
+        progress_plots=False,
+        pca_plots=True,
+        diversity_plots=False,
+        get_proxy_standings=False,
+        compute_aocc=False,
+        compare_aocc=False,
+        kendall_fitness_scatter=False
+    )
 
     sys.exit(0)
 
