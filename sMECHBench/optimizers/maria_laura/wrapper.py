@@ -858,8 +858,15 @@ import torch
 import os
 import sys
 from botorch.models import SingleTaskGP
-from botorch.fit import fit_gpytorch_mll
-from botorch.acquisition import LogExpectedImprovement
+try:
+    from botorch.fit import fit_gpytorch_mll
+except ImportError:
+    from botorch.fit import fit_gpytorch_model as fit_gpytorch_mll  # mll does not exist in my botorch version!
+try:
+    from botorch.acquisition.analytic import LogExpectedImprovement
+except ImportError:
+    # Fallback to the standard Expected Improvement if Log version is missing
+    from botorch.acquisition.analytic import ExpectedImprovement as LogExpectedImprovement
 from botorch.optim.optimize import optimize_acqf
 from botorch.sampling import SobolQMCNormalSampler
 from gpytorch.mlls import ExactMarginalLogLikelihood
@@ -947,9 +954,16 @@ class BAxUS_botorchWrapper:
         from gpytorch.mlls import ExactMarginalLogLikelihood
         from torch.quasirandom import SobolEngine
 
-        from botorch.acquisition.analytic import LogExpectedImprovement
-        from botorch.exceptions import ModelFittingError
-        from botorch.fit import fit_gpytorch_mll
+        try:
+            from botorch.acquisition.analytic import LogExpectedImprovement
+        except ImportError:
+            # Fallback to the standard Expected Improvement if Log version is missing
+            from botorch.acquisition.analytic import ExpectedImprovement as LogExpectedImprovement
+        # from botorch.exceptions import ModelFittingError
+        try:
+            from botorch.fit import fit_gpytorch_mll
+        except ImportError:
+            from botorch.fit import fit_gpytorch_model as fit_gpytorch_mll  # mll does not exist in my botorch version!
         from botorch.generation import MaxPosteriorSampling
         from botorch.models import SingleTaskGP
         from botorch.optim import optimize_acqf

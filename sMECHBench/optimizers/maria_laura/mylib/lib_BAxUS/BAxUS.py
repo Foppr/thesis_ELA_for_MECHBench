@@ -13,9 +13,16 @@ from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from torch.quasirandom import SobolEngine
 
-from botorch.acquisition.analytic import LogExpectedImprovement
-from botorch.exceptions import ModelFittingError
-from botorch.fit import fit_gpytorch_mll
+try:
+    from botorch.acquisition.analytic import LogExpectedImprovement
+except ImportError:
+    # Fallback to the standard Expected Improvement if Log version is missing
+    from botorch.acquisition.analytic import ExpectedImprovement as LogExpectedImprovement
+try:
+    from botorch.fit import fit_gpytorch_mll
+except ImportError:
+    from botorch.fit import \
+        fit_gpytorch_model as fit_gpytorch_mll  # mll does not exist in my botorch version!
 from botorch.generation import MaxPosteriorSampling
 from botorch.models import SingleTaskGP
 from botorch.optim import optimize_acqf
@@ -211,7 +218,12 @@ def create_candidate(
 
     # Scale the TR to be proportional to the lengthscales
     x_center = X[Y.argmax(), :].clone()
-    weights = model.covar_module.lengthscale.detach().view(-1)
+
+    # Safe fallback wrapper handling both older and newer BoTorch kernel architectures
+    if hasattr(model.covar_module, "base_kernel") and model.covar_module.base_kernel is not None:
+        weights = model.covar_module.base_kernel.lengthscale.detach().view(-1)
+    else:
+        weights = model.covar_module.lengthscale.detach().view(-1)
     weights = weights / weights.mean()
     weights = weights / torch.prod(weights.pow(1.0 / len(weights)))
     tr_lb = torch.clamp(x_center - weights * state.length, -1.0, 1.0)

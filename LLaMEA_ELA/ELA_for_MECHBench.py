@@ -66,6 +66,8 @@ class ELAForMECHBench(ELAproblem):
             print('Please enter a valid problem type (1, 2 or 3)')
             sys.exit(1)
 
+        self.dim = dim
+
         points_df = pd.read_csv(f"{abs_path}/points/{size}d{dim}_p{problem_type}_seed1312.csv", index_col='id')
         min_max_points_df = pd.read_csv(f"{abs_path}/points_min_max/min_max_{size}d{dim}_p{problem_type}_seed1312.csv", index_col='id')
         self.X = points_df.iloc[:, :dim]  # x0-x4 for p1-2, x0-x14 for p3
@@ -74,7 +76,7 @@ class ELAForMECHBench(ELAproblem):
         self.min_max_ela_df = pd.read_csv(f"{abs_path}/ELA_min_max/minmax_ela_{size}d{dim}_p{problem_type}_seed1312.csv", index_col='feature')
 
         # New updated ela stats per size:
-        self.ela_stats = pd.read_csv(f"../Folder_Points/500D/by_size/{size}d_updated_ELA_stats.csv")
+        self.ela_stats = pd.read_csv(f"../Folder_Points/500D/by_size/{size}d/{size}d_updated_ELA_stats.csv")
 
         self.features = features
         # self.feature_descriptions = {
@@ -209,7 +211,7 @@ Please adjust the above code to improve the ic.eps_s value (i.e. approach -0.175
         exec(code, globals())
 
         proxy_class = globals()[proxy_name]
-        proxy_instance = proxy_class(dim=5)
+        proxy_instance = proxy_class(dim=self.dim)
         problem = proxy_instance.f
         objective_values = {}
         ela_per_seed = {}
@@ -393,7 +395,7 @@ if __name__ == '__main__':
 
     # Read variables dynamically from slurm:
     problem_type = int(os.environ.get("PROBLEM_TYPE", 1))
-    ES_config = (os.environ.get("ES_CONFIG", "1e1"))
+    ES_config = (os.environ.get("ES_CONFIG", "1E1"))
     print(ES_config)
     n_parents = int(ES_config[0])
     elitism = bool(1 if ES_config[1] == "E" else 0)
