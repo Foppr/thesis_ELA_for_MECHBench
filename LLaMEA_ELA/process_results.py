@@ -46,6 +46,11 @@ class LLaMEAAnalyzer:
         self.log = {}
         self.experiments_data = {}
 
+        self.min_tau = 0
+        self.max_tau = 0
+        self.min_fit = 0
+        self.max_fit = 0
+
     def run(self,
             progress_plots=True,
             pca_plots=True,
@@ -75,8 +80,8 @@ class LLaMEAAnalyzer:
         if pca_plots:
             print(f'\n --- Making PCA plots ---')
 
+            all_problem_data = []
             for p in self.log:
-                all_problem_data = []
                 for config in self.log[p]:
                     if 'total' not in config:
                         for inds in self.log[p][config]:
@@ -85,12 +90,34 @@ class LLaMEAAnalyzer:
                                     proxy_dic = individual['metadata']["Proxy min-max ELA values"]
                                     all_problem_data.append(list(proxy_dic.values()))
 
-                # Shared PCA model per problem
-                if all_problem_data:
-                    shared_df = pd.DataFrame(all_problem_data, columns=self.features)
-                    shared_pca = PCA(n_components=2)
-                    shared_pca.fit(shared_df)
+            # Shared, global PCA model
+            if all_problem_data:
+                shared_df = pd.DataFrame(all_problem_data, columns=self.features)
+                shared_pca = PCA(n_components=2)
 
+                # Find global PCA bounds
+                all_reduced = shared_pca.fit_transform(shared_df)
+                mb_data = [
+                    list(self.original_minmaxEla_p1.values()),
+                    list(self.original_minmaxEla_p2.values()),
+                    list(self.original_minmaxEla_p3.values())
+                ]
+                mb_df = pd.DataFrame(mb_data, columns=self.features)
+                all_mb_reduced = shared_pca.transform(mb_df)
+
+                pc1_min = min(all_reduced[:, 0].min(), all_mb_reduced[:, 0].min())
+                pc1_max = max(all_reduced[:, 0].max(), all_mb_reduced[:, 0].max())
+                pc2_min = min(all_reduced[:, 1].min(), all_mb_reduced[:, 1].min())
+                pc2_max = max(all_reduced[:, 1].max(), all_mb_reduced[:, 1].max())
+
+                # Padding
+                pc1_padding = (pc1_max - pc1_min) * 0.05
+                pc2_padding = (pc2_max - pc2_min) * 0.05
+
+                global_xlim = (pc1_min - pc1_padding, pc1_max + pc1_padding)
+                global_ylim = (pc2_min - pc2_padding, pc2_max + pc2_padding)
+
+                for p in self.log:
                     for config in self.log[p]:
                         if 'total' not in config:
                             for inds in self.log[p][config]:
@@ -98,8 +125,11 @@ class LLaMEAAnalyzer:
                                     self.pca(
                                         self.log[p][config][inds],
                                         shared_pca,
+                                        problem_type=p,
                                         save_folder='pca_plots',
-                                        name_=f'{p}_{config}'
+                                        name_=f'{p}_{config}',
+                                        xlim=global_xlim,
+                                        ylim=global_ylim
                                     )
 
         if diversity_plots:
@@ -201,10 +231,18 @@ class LLaMEAAnalyzer:
 
         return pd.DataFrame(flat_records)
 
-    def pca(self, individuals, pre_fitted_pca, save_folder, name_):
+    def pca(self, individuals, pre_fitted_pca, problem_type, save_folder, name_, xlim, ylim):
         pca_dic = {}
         proxy_data = pd.DataFrame(columns=self.features)
+        mb_vector = pd.DataFrame(columns=self.features)
+
         generations = []
+        if problem_type == 'p1':
+            mb_vector.loc[0] = self.original_minmaxEla_p1.values()
+        elif problem_type == 'p2':
+            mb_vector.loc[0] = self.original_minmaxEla_p2.values()
+        elif problem_type == 'p3':
+            mb_vector.loc[0] = self.original_minmaxEla_p3.values()
 
         for i, individual in enumerate(individuals):
             proxy_dic = individual['metadata']["Proxy min-max ELA values"]
@@ -214,12 +252,13 @@ class LLaMEAAnalyzer:
         generations = pd.Series(generations)
 
         proxies_reduced = pre_fitted_pca.transform(proxy_data)
+        mb_reduced = pre_fitted_pca.transform(mb_vector)
         expl_var = pre_fitted_pca.explained_variance_ratio_
 
         fig, ax = plt.subplots(figsize=(9, 6))
 
         # Scatterplot
-        scatter = ax.scatter(
+        proxies_s = ax.scatter(
             proxies_reduced[:, 0],
             proxies_reduced[:, 1],
             c=generations,
@@ -229,19 +268,35 @@ class LLaMEAAnalyzer:
             edgecolors="none"
         )
 
-        # PC values
+        # Original MB point
+        mb_s = ax.scatter(
+            mb_reduced[:, 0],
+            mb_reduced[:, 1],
+            marker='*',
+            s=300,
+            color="red",
+            alpha=0.6,
+            edgecolors="black",
+            linewidths=0.75,
+            label=f"MB{problem_type[1]}"
+        )
+
         ax.set(
             title=f"PCA by Generations ({name_})",
             xlabel=f"1st Principal Component ({expl_var[0] * 100:.1f}%)",
             ylabel=f"2nd Principal Component ({expl_var[1] * 100:.1f}%)",
+            xlim=xlim,  # Global bounds
+            ylim=ylim
         )
 
         # Axes
         ax.set_xticklabels([])
         ax.set_yticklabels([])
 
+        ax.legend(loc="upper right", frameon=True)
+
         # Colorbar
-        cbar = fig.colorbar(scatter, ax=ax)
+        cbar = fig.colorbar(proxies_s, ax=ax)
         cbar.set_label("Evolutionary Generation", rotation=270, labelpad=15)
 
         plt.tight_layout()
@@ -416,9 +471,12 @@ class LLaMEAAnalyzer:
         # Worst
         for id, row in df_sorted[::-1].iterrows():  # Reverse traversal
             if self._is_proxy_valid(row['code'], row['name']):
-                worst_proxies.append(row)  # Goes 1) worst, 2) second-worst, 3) third-worst
+                worst_proxies.append(row)
             if len(worst_proxies) == 3:
                 break
+
+        # Fix: worst1 should be the 'best' and worst3 the absolute worst
+        worst_proxies = worst_proxies[::-1]
 
         mid_start = len(df_sorted) // 2
 
@@ -935,6 +993,7 @@ class LLaMEAAnalyzer:
     def compare_AOCCs(self, path_aocc_results, save_path):
         full_path = f'{self.save_folder_name}/{path_aocc_results}'
         aocc_results = pd.read_csv(full_path)
+
         for p in [1, 2]:
             optimizers = {'botorch': {}, 'cmaes': {}, 'de': {}, 'one_plus_one': {}, 'turbo1': {}, 'baxus': {}}
             aocc_p = aocc_results.loc[(aocc_results['problem'] == f'p{p}')]
@@ -962,6 +1021,10 @@ class LLaMEAAnalyzer:
                 taus[f'MB{p}_{standing}']['fitness'] = fitness
 
             df_taus = pd.DataFrame(taus).T
+            self.min_tau = min(df_taus['tau'].min(), self.min_tau)
+            self.max_tau = max(df_taus['tau'].max(), self.max_tau)
+            self.min_fit = min(df_taus['fitness'].min(), self.min_fit)
+            self.max_fit = max(df_taus['fitness'].max(), self.max_fit)
             filename = f'{self.save_folder_name}/{save_path}_p{p}.csv'
             df_taus.to_csv(filename)
 
@@ -1025,11 +1088,19 @@ class LLaMEAAnalyzer:
                 label=f"Trend (slope: {m:.2f})"
             )
 
+            x_padding = (self.max_tau - self.min_tau) * 0.05
+            y_padding = (self.max_fit - self.min_fit) * 0.05
+
+            global_xlim = (self.min_tau - x_padding, self.max_tau + x_padding)
+            global_ylim = (self.min_fit - y_padding, self.max_fit + y_padding)
+
             # PC values
             ax.set(
                 title=f"Kendall's tau vs. fitness (p{p})",
                 xlabel=f"Kendall's tau",
                 ylabel=f"Fitness",
+                xlim=global_xlim,
+                ylim=global_ylim
             )
 
             plt.tight_layout()
@@ -1053,163 +1124,10 @@ if __name__ == "__main__":
 
     analyzer.run(
         progress_plots=False,
-        pca_plots=True,
+        pca_plots=False,
         diversity_plots=False,
         get_proxy_standings=False,
         compute_aocc=False,
-        compare_aocc=False,
-        kendall_fitness_scatter=False
+        compare_aocc=True,
+        kendall_fitness_scatter=True
     )
-
-    sys.exit(0)
-
-    # analyzer.run(
-    #     progress_plots=False,
-    #     get_proxy_standings=True,
-    #     compute_aocc=False,
-    #     compare_aocc=True
-    # )
-
-    analyzer.load_logs()
-    for p in analyzer.log:
-        for config in analyzer.log[p]:
-            if 'total' not in config:
-                for inds in analyzer.log[p][config]:
-                    if 'total' in inds:
-                        analyzer.pca(analyzer.log[p][config][inds], name_=f'{p}_{config}')
-
-    sys.exit(0)
-
-    base_dir = "../ELA_for_MECHBench/LLaMEA_ELA/exps_0704"
-    analyzer = LLaMEAAnalyzer(save_folder_name='')
-    analyzer.load_logs(base_dir)
-
-    aocc_path = '../ELA_for_MECHBench/LLaMEA_ELA/proxies'
-    # aoccs = analyzer.compute_AOCC(aocc_path)
-    # analyzer.compare_AOCCs('aocc_results_2.csv')
-
-    log = analyzer.log
-    exp_data = analyzer.experiments_data
-
-    p1_total = log['p1']['p1_total']
-    p2_total = log['p2']['p2_total']
-    p3_total = log['p3']['p3_total']
-
-    pod1, med1, wrs1 = analyzer.get_podium_median_worst(p1_total)
-    print(pod1['id'])
-    pod2, med2, wrs2 = analyzer.get_podium_median_worst(p2_total)
-    print(pod2['id'])
-    pod3, med3, wrs3 = analyzer.get_podium_median_worst(p3_total)
-    print(pod3['id'])
-
-    sys.exit(0)
-
-    initial_elas = analyzer.plot_initial_diversity()
-
-    print("\n--- Computing Uniform Bounds Across All Experiments ---")
-    max_ind, max_fit = analyzer.compare_experiments_by_individual()
-    print(f'MAX INDIVIDUAL BOUND {max_ind}')
-    max_feat_fit = analyzer.compare_features_by_individual(max_ind_bound=max_ind)
-
-    # 1. Process Core Progression Figures & Legend
-    print("\n--- Generating Consolidated Progression Plots & Legend ---")
-    analyzer.plot_individual_progression((max_ind, max_fit), clean_layout=True)
-    analyzer.save_individual_legend()
-
-    # 2. Process Feature Progression Figures & Legend
-    print("\n--- Generating Per-Feature Convergence Plots & Legend ---")
-    analyzer.plot_feature_progression(global_max_fit=max_feat_fit, max_ind_bound=max_ind, clean_layout=True)
-    analyzer.save_feature_legend()
-
-    print("\nProcessing completely successful!")
-    sys.exit(0)
-
-    def threshold_experiment(individuals):
-        filter_thresholds = [0.0, 0.1, 0.3, 0.5, 0.7, 0.9]
-
-        for thr in filter_thresholds:
-            podium, median, worst, filtered_df = analyzer.get_podium_median_worst(individuals, filter_threshold=thr)
-            print(f'--- THRESHOLD {thr} * SD ---\n')
-            print(f'Podium fitnesses:\n {podium["fitness"]} \nSD {float(podium["fitness"].std().round(3))}')
-            print(f'Median fitnesses:\n {median["fitness"]} \nSD {float(median["fitness"].std().round(3))}')
-            print(f'Worst fitnesses:\n {worst["fitness"]} \nSD {float(worst["fitness"].std().round(3))}')
-            print(f'Len Filtered df: {len(filtered_df)} (how many total proxies there were to choose from)')
-            print(f'\n\n')
-
-    for problem in ['p1', 'p2', 'p3']:
-        problem_total = log[problem][f'{problem}_total']
-        print(f'\n +++ CHECKING {problem} TOTAL (len {len(problem_total)}) +++ \n ')
-        threshold_experiment(problem_total)
-        for config_name, config_log in log[problem].items():
-            if 'total' not in config_name:
-                config_total = config_log[f'{config_name}_total']
-                print(f'\n +++ CHECKING {config_name} TOTAL (len {len(config_total)}) +++ \n ')
-                threshold_experiment(config_total)
-
-    sys.exit(0)
-
-    # region 0630
-    base_dir = "../exps_06_30"
-    analyzer = LLaMEAAnalyzer(save_folder_name='llamea_graphs/exps_06_30_new')
-    os.makedirs(analyzer.save_folder_name, exist_ok=True)
-
-    analyzer.load_logs(base_dir)
-
-    print("\n--- Computing Uniform Bounds Across All Experiments ---")
-    max_ind, max_fit = analyzer.compare_experiments_by_individual()
-    print(f'MAX INDIVIDUAL BOUND {max_ind}')
-    max_feat_fit = analyzer.compare_features_by_individual(max_ind_bound=max_ind)
-
-    # 1. Process Core Progression Figures & Legend
-    print("\n--- Generating Consolidated Progression Plots & Legend ---")
-    analyzer.plot_individual_progression((max_ind, max_fit), clean_layout=True)
-    analyzer.save_individual_legend()
-
-    # 2. Process Feature Progression Figures & Legend
-    print("\n--- Generating Per-Feature Convergence Plots & Legend ---")
-    analyzer.plot_feature_progression(global_max_fit=max_feat_fit, max_ind_bound=max_ind, clean_layout=True)
-    analyzer.save_feature_legend()
-
-    print("\nProcessing completely successful!")
-    sys.exit(0)
-
-    # endregion 0630
-
-    # region 0701
-    base_dir = "../exps_0701"
-    analyzer = LLaMEAAnalyzer(save_folder_name='llamea_graphs/exps_07_01')
-    os.makedirs(analyzer.save_folder_name, exist_ok=True)
-
-    analyzer.load_logs(base_dir)
-
-    print("\n--- Computing Uniform Bounds Across All Experiments ---")
-    _, max_fit = analyzer.compare_experiments_by_individual()
-    max_ind = 129  # Variance exception anchor
-    max_feat_fit = analyzer.compare_features_by_individual(max_ind_bound=max_ind)
-
-    # 1. Process Core Progression Figures & Legend
-    print("\n--- Generating Consolidated Progression Plots & Legend ---")
-    analyzer.plot_individual_progression((max_ind, max_fit), clean_layout=True)
-    analyzer.save_individual_legend()
-
-    # 2. Process Feature Progression Figures & Legend
-    print("\n--- Generating Per-Feature Convergence Plots & Legend ---")
-    analyzer.plot_feature_progression(global_max_fit=max_feat_fit, max_ind_bound=max_ind, clean_layout=True)
-    analyzer.save_feature_legend()
-
-    print("\nProcessing completely successful!")
-    sys.exit(0)
-
-    # endregion 0701
-
-    print("\n--- Computing Global Stats Across Experiments ---")
-    problem_stats = analyzer.compare_experiments(exp_names)
-
-    print("\n--- Generating Plots ---")
-    for name in exp_names:
-        folder_name = os.path.basename(name)
-        clean_suffix = f"{folder_name}"
-
-        # Generate the total fitness and feature plots
-        analyzer.generate_plots(name, problem_stats, save_suffix=clean_suffix, plot_type='total')
-        analyzer.generate_plots(name, problem_stats, save_suffix=clean_suffix, plot_type='all_features')

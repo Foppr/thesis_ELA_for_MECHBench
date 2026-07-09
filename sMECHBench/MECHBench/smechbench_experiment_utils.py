@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
   
 
-runnerOptions = {"np":9, # Number of processes to run the simulation
+runnerOptions = {"np":8, # Number of processes to run the simulation
                  "nt":1,
                  "h_level":1,
                  "gmsh_verbosity":0,

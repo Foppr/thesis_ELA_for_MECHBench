@@ -17,11 +17,11 @@ def ela_distance(s1, s2):
     """
     Calculate the ELA distance between two solutions based on their metadata.
     """
-    if "Proxy ELA values" not in s1.metadata or "Proxy ELA values" not in s2.metadata:
-        return 0.0  # No features to compare
+    if "Proxy min-max ELA values" not in s1.metadata or "Proxy min-max ELA values" not in s2.metadata:
+        return 0.0
 
-    features1 = s1.metadata["Proxy ELA values"]
-    features2 = s2.metadata["Proxy ELA values"]
+    features1 = s1.metadata["Proxy min-max ELA values"]
+    features2 = s2.metadata["Proxy min-max ELA values"]
 
     # Replace NaN values with zeros
     features1 = np.nan_to_num(features1, nan=0.0)
