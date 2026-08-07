@@ -10,8 +10,6 @@ runnerOptions = {"np":8, # Number of processes to run the simulation
                  "write_vtk":False,
 }
 
-
-
 def get_objective_function(problem):
     # dim = 15#vector = [np.zeros((20,)).tolist()] # Vector where the objective function is evaluated, it has as many components as the second input argument in get_problem below
     if problem == 1 or problem == 2:
