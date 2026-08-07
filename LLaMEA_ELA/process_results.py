@@ -9,16 +9,24 @@ from sklearn.decomposition import PCA
 import seaborn as sns
 from matplotlib.lines import Line2D
 from scipy.stats import kendalltau
+import pflacco.classical_ela_features as ela
 
 
 class LLaMEAAnalyzer:
-    def __init__(self, log_dir, save_folder_name, aocc_path):
+    def __init__(self, log_dir,
+                 save_folder_name,
+                 aocc_path,
+                 updated_stats_path='../Folder_Points/500D/by_size/500D/500d_updated_ELA_stats.csv',
+                 original_stats_path='ela_feature_stats.csv'
+                 ):
         self.log_dir = log_dir
         self.save_folder_name = save_folder_name
         if not os.path.exists(save_folder_name):
             os.mkdir(save_folder_name)
 
         self.aocc_path = aocc_path
+        self.updated_stats_path = updated_stats_path
+        self.original_stats_path = original_stats_path
 
         self.features = [
             'disp.ratio_mean_02',
@@ -33,6 +41,10 @@ class LLaMEAAnalyzer:
             'ela_level.mmce_qda_25',
             'ela_level.lda_qda_25'
         ]
+
+        # self.MB1_ela_500d = pd.read_csv('../Folder_Points/500D/data_p1/ELA/ela_500d5_p1_seed1312.csv')
+        # self.MB2_ela_500d = pd.read_csv('../Folder_Points/500D/data_p2/ELA/ela_500d5_p2_seed1312.csv')
+        # self.MB3_ela_500d = pd.read_csv('../Folder_Points/500D/data_p3/ELA/ela_500d15_p3_seed1312.csv')
 
         self.original_minmaxEla_p1 = {'disp.ratio_mean_02': 0.3180841545512229, 'ela_distr.skewness': 0.1293188522940492, 'ela_meta.lin_simple.adj_r2': 0.2210812231592529, 'ela_meta.lin_simple.intercept': 0.7444454923627558, 'ela_meta.lin_simple.coef.max': 1.0, 'ela_meta.quad_simple.adj_r2': 0.2425517809797153, 'ic.eps_ratio': 1.0, 'ic.eps_s': 1.0, 'nbc.nb_fitness.cor': 0.5102519892845082, 'ela_level.mmce_qda_25': 0.2957746230906558, 'ela_level.lda_qda_25': 0.3331012892967914}
         self.original_minmaxEla_p2 = {'disp.ratio_mean_02': 0.613775757719448, 'ela_distr.skewness': 0.1919105264092217, 'ela_meta.lin_simple.adj_r2': 0.2228005657527632, 'ela_meta.lin_simple.intercept': 0.4325753309513677, 'ela_meta.lin_simple.coef.max': 0.3115486529327629, 'ela_meta.quad_simple.adj_r2': 0.2579866624338019, 'ic.eps_ratio': 0.864406779661017, 'ic.eps_s': 0.7478260869565218, 'nbc.nb_fitness.cor': 0.6089279644868683, 'ela_level.mmce_qda_25': 0.225352085399721, 'ela_level.lda_qda_25': 0.4880185824214766}
@@ -178,6 +190,132 @@ class LLaMEAAnalyzer:
             path_kendall_results = 'kendall_results'
             self.scatter_fitness_kendall(path_kendall_results, scatter_savename)
 
+    @staticmethod
+    def compute_ela(X, y):
+        ela_distr = ela.calculate_ela_distribution(X, y)
+        ela_meta = ela.calculate_ela_meta(X, y)
+        ela_disp = ela.calculate_dispersion(X, y)
+        ela_ic = ela.calculate_information_content(X, y)
+        ela_nbc = ela.calculate_nbc(X, y)
+        ela_level = ela.calculate_ela_level(X, y)
+
+        ela_1 = ela_disp['disp.ratio_mean_02']  # 1) disp.ratio_mean_02
+        ela_2 = ela_distr['ela_distr.skewness']  # 2) ela_distr.skewness
+        ela_3 = ela_meta['ela_meta.lin_simple.adj_r2']  # 3) ela_meta.lin_simple.adj_r2
+        ela_4 = ela_meta['ela_meta.lin_simple.intercept']  # 4) ela_meta.lin_simple.intercept
+        ela_5 = ela_meta['ela_meta.lin_simple.coef.max']  # 5) ela_meta.lin_simple.coef.max
+        ela_6 = ela_meta['ela_meta.quad_simple.adj_r2']  # 6) ela_meta.quad_simple.adj_r2
+        ela_7 = ela_ic['ic.eps_ratio']  # 7) ic.eps_ratio
+        ela_8 = ela_ic['ic.eps_s']  # 8) ic.eps_s
+        ela_9 = ela_nbc['nbc.nb_fitness.cor']  # 9) nbc.nb_fitness.cor
+        ela_11 = ela_level['ela_level.mmce_qda_25']  # 11
+        ela_12 = ela_level['ela_level.lda_qda_25']  # 12
+
+        ela_values = {
+            'disp.ratio_mean_02': ela_1,
+            'ela_distr.skewness': ela_2,
+            'ela_meta.lin_simple.adj_r2': ela_3,
+            'ela_meta.lin_simple.intercept': ela_4,
+            'ela_meta.lin_simple.coef.max': ela_5,
+            'ela_meta.quad_simple.adj_r2': ela_6,
+            'ic.eps_ratio': ela_7,
+            'ic.eps_s': ela_8,
+            'nbc.nb_fitness.cor': ela_9,
+            'ela_level.mmce_qda_25': ela_11,
+            'ela_level.lda_qda_25': ela_12
+        }
+
+        return pd.Series(ela_values)
+
+    def update_ela_stats(self):
+        ela_stats = pd.read_csv(self.original_stats_path)
+
+        all_ela_values = {}
+        path_by_size = "../Folder_Points/500D/by_size"
+        for size in os.listdir(path_by_size):
+            all_ela_values[size] = {}
+            new_ela_stats = ela_stats.copy()  # The copy stats that will be updated and output
+            size_path = f'../Folder_Points/500D/by_size/{size}'
+            if not size_path[-3:] == 'csv':
+                print(f'\n\n ++++ #### SIZE {size} #### ++++ \n\n')
+
+                os.listdir(f'{size_path}/ELA')
+                for problem_path in os.listdir(f'{size_path}/ELA'):
+                    if 'p1' in problem_path:
+                        problem = 'p1'
+                        dim = 5
+                    elif 'p2' in problem_path:
+                        problem = 'p2'
+                        dim = 5
+                    elif 'p3' in problem_path:
+                        problem = 'p3'
+                        dim = 20  # 20 because 15 is missing in ela_stats
+
+                    print(f'---- PROBLEM {problem} ----')
+
+                    full_path = f'{path_by_size}/{size}/ELA/{problem_path}'
+                    raw_ela_values = pd.read_csv(full_path, index_col='feature')  # MB ELA values
+                    all_ela_values[size][problem] = raw_ela_values
+
+                    for feature in self.features:
+                        # Get the row corresponding to the feature and dimensionality
+                        condition = (new_ela_stats['dimension'] == dim) & (new_ela_stats['feature'] == feature)
+                        feat_dim_row = new_ela_stats.loc[condition]
+                        min_ = feat_dim_row['min'].iloc[0]
+                        max_ = feat_dim_row['max'].iloc[0]
+                        feat_value = raw_ela_values.loc[feature].iloc[0]
+
+                        if feat_value < min_:
+                            print(f'{feat_value: 3f} < {min_: 3f}. Updating!')
+                            new_ela_stats.loc[condition, 'min'] = float(feat_value)
+                            print(f'New row: {new_ela_stats.loc[condition].to_string()}\n')
+                        elif feat_value > max_:
+                            print(f'{feat_value: 3f} > {max_: 3f}. Updating!')
+                            new_ela_stats.loc[condition, 'max'] = float(feat_value)
+                            print(f'New row: {new_ela_stats.loc[condition].to_string()}\n')
+
+                    new_ela_stats.to_csv(f'{size_path}/{size}_updated_ELA_stats.csv', index=False)
+
+    def min_max_ela(self):
+        path = '../Folder_Points/500D/by_size'
+        for size in os.listdir(path):
+            stats_csv = f'{path}/{size}/{size}_updated_ELA_stats.csv'
+            stats_df = pd.read_csv(stats_csv)
+            ela_path = f'{path}/{size}/ELA'
+            for p_ela_csv in os.listdir(ela_path):
+                if 'p1' in p_ela_csv:
+                    problem = 'p1'
+                    dim = 5
+                elif 'p2' in p_ela_csv:
+                    problem = 'p2'
+                    dim = 5
+                elif 'p3' in p_ela_csv:
+                    problem = 'p3'
+                    dim = 20  # 20 because 15 is missing in ela_stats
+
+                full_ela_path = f'{ela_path}/{p_ela_csv}'
+                ela_series = pd.read_csv(full_ela_path, index_col='feature')
+
+                # Min-max normalization on ELA values:
+                stats_filtered = stats_df[
+                    (stats_df['dimension'] == dim) & (stats_df['dataset'] == 'BBOB_SM_all')]
+
+                # Explicitly join using left_index=True because 'feature' was set as the index
+                merged_df = pd.merge(ela_series, stats_filtered[['feature', 'min', 'max']],
+                                     left_index=True, right_on='feature', how='left')
+
+                denominator = merged_df['max'] - merged_df['min']
+                denominator = denominator.replace(0, np.nan)
+                merged_df['normalized_value'] = (merged_df['value'] - merged_df['min']) / denominator
+                merged_df['normalized_value'] = merged_df['normalized_value'].fillna(0.0)
+                ela_minmax = merged_df[['feature', 'normalized_value']].rename(
+                    columns={'normalized_value': 'value'})
+
+                ela_minmax = ela_minmax.set_index('feature')
+                print(ela_minmax.to_string())
+                save_name = f'../Folder_Points/500D/data_{problem}/ELA_min_max/minmax_{p_ela_csv}'
+                ela_minmax.to_csv(save_name)
+
     def load_logs(self):
         for problem_ in os.listdir(self.log_dir):
             problem_log = []  # Contains all individuals of this problem, across all configs and runs
@@ -230,6 +368,22 @@ class LLaMEAAnalyzer:
             flat_records.append(record)
 
         return pd.DataFrame(flat_records)
+
+    def feature_stats_plot(self):
+        updated_stats = pd.read_csv(self.updated_stats_path)
+        original_stats = pd.read_csv(self.original_stats_path)
+
+        updated_12 = updated_stats.loc[(updated_stats['dimension'] == 5) & (updated_stats['feature'].isin(self.features))]
+        original_12 = original_stats.loc[(original_stats['dimension'] == 5) & (original_stats['feature'].isin(self.features))]
+        updated_3 = updated_stats.loc[(updated_stats['dimension'] == 20) & (updated_stats['feature'].isin(self.features))]
+        original_3 = original_stats.loc[(original_stats['dimension'] == 20) & (original_stats['feature'].isin(self.features))]
+
+        for dim, p in [(5, '1, 2'), (20, '3')]:
+            updated = updated_stats.loc[(updated_stats['dimension'] == dim) & (updated_stats['feature'].isin(self.features))]
+            original = original_stats.loc[(original_stats['dimension'] == dim) & (original_stats['feature'].isin(self.features))]
+
+            original_min, original_max = original['min'], original['max']
+            updated_min, updated_max = updated['min'], updated['max']
 
     def pca(self, individuals, pre_fitted_pca, problem_type, save_folder, name_, xlim, ylim):
         pca_dic = {}
@@ -926,8 +1080,7 @@ class LLaMEAAnalyzer:
                 if p == 'p1' or p == 'p2':
                     max_evals = 150
                 else:
-                    continue  # missing for now
-                    # max_evals = 450
+                    max_evals = 450
 
                 for standing in os.listdir(f'{analysis_path}/{seed}/{p}'):
                     for algo in os.listdir(f'{analysis_path}/{seed}/{p}/{standing}'):
@@ -994,7 +1147,7 @@ class LLaMEAAnalyzer:
         full_path = f'{self.save_folder_name}/{path_aocc_results}'
         aocc_results = pd.read_csv(full_path)
 
-        for p in [1, 2]:
+        for p in [1, 2, 3]:
             optimizers = {'botorch': {}, 'cmaes': {}, 'de': {}, 'one_plus_one': {}, 'turbo1': {}, 'baxus': {}}
             aocc_p = aocc_results.loc[(aocc_results['problem'] == f'p{p}')]
             for standing in [f'MB{p}', 'pod1', 'pod2', 'pod3', 'med1', 'med2', 'med3', 'worst1', 'worst2', 'worst3']:
@@ -1029,7 +1182,7 @@ class LLaMEAAnalyzer:
             df_taus.to_csv(filename)
 
     def scatter_fitness_kendall(self, path_kendall_results, save_path):
-        for p in [1, 2]:
+        for p in [1, 2, 3]:
             filename = f'{self.save_folder_name}/{path_kendall_results}'
             df_taus = pd.read_csv(f'{filename}_p{p}.csv', index_col=0)
             tau = df_taus['tau'].to_numpy()
@@ -1111,7 +1264,7 @@ class LLaMEAAnalyzer:
 if __name__ == "__main__":
     log_dir = "../ELA_for_MECHBench/LLaMEA_ELA/exps_0704"
     save_folder_name = 'results'
-    aocc_path = '../ELA_for_MECHBench/LLaMEA_ELA/proxies'
+    aocc_path = '../ELA_for_MECHBench/LLaMEA_ELA/algo_results'
     analyzer = LLaMEAAnalyzer(
         log_dir=log_dir,
         save_folder_name=save_folder_name,
@@ -1122,12 +1275,4 @@ if __name__ == "__main__":
     log = analyzer.log
     df = analyzer.experiments_data
 
-    analyzer.run(
-        progress_plots=False,
-        pca_plots=False,
-        diversity_plots=False,
-        get_proxy_standings=False,
-        compute_aocc=False,
-        compare_aocc=True,
-        kendall_fitness_scatter=True
-    )
+    analyzer.run()
