@@ -4,7 +4,7 @@
 
 &#x20;   <source media="(prefers-color-scheme: light)" srcset="pipeline.svg">
 
-&#x20;   <img alt="Shows the thesis pipeline." src="pipeline.svg" width="200px">
+&#x20;   <img alt="Shows the thesis pipeline." src="pipeline.svg" width="700px">
 
 &#x20; </picture>
 
