@@ -1,0 +1,71 @@
+import numpy as np
+
+class MultimodalSinusoidalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        self.bounds = type('Bounds', (), {'lb': -5.0, 'ub': 5.0})()
+        
+    def f(self, x):
+        if len(x) != self.dim:
+            raise ValueError("Input dimension mismatch")
+        
+        # Base quadratic term with strong conditioning
+        f = np.sum(x**2) * 0.8
+        
+        # Add chaotic sinusoidal grid pattern with high-frequency interactions
+        for i in range(self.dim):
+            f += 0.3 * np.sin(11 * x[i]) * np.cos(9 * x[i]) * np.sin(5 * x[i])
+            
+        # Add nested multi-scale interactions with exponential coupling
+        for i in range(self.dim):
+            for j in range(i+1, min(i+5, self.dim)):  # Extended range for complexity
+                f += 0.15 * np.sin(4 * x[i] + 3 * x[j]) * np.cos(7 * x[i] - 2 * x[j]) * np.sin(2 * x[i] + x[j])
+                
+        # Add fractal-like self-similar structure with recursive pattern
+        for i in range(self.dim):
+            f += 0.08 * np.sin(15 * np.sin(4 * x[i])) * np.cos(10 * np.cos(3 * x[i])) * np.sin(6 * np.sin(2 * x[i]))
+            
+        # Add higher-order polynomial interactions with non-linear coupling
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                for k in range(j+1, min(j+4, self.dim)):
+                    f += 0.03 * x[i]**3 * np.sin(x[j] + x[k]) * np.cos(x[i] * x[j])
+                    
+        # Add multiple global minima at non-origin locations with varying scales
+        global_minima = np.array([[-3.0, 3.0], [3.0, -3.0], [-3.0, -3.0], [3.0, 3.0], 
+                                 [-1.5, 1.5], [1.5, -1.5], [-1.5, -1.5], [1.5, 1.5]])
+        if self.dim >= 2:
+            minima_term = 0
+            for min_point in global_minima:
+                if self.dim >= len(min_point):
+                    diff = x[:len(min_point)] - min_point
+                    minima_term += np.exp(-0.3 * np.sum(diff**2))
+            f += 0.4 * minima_term
+            
+        # Add noise component with non-uniform distribution for additional challenge
+        f += 0.02 * np.sum(np.sin(15 * x)**2 + np.cos(8 * x)**2)
+        
+        # Add dimensional coupling with cross-terms that increase complexity exponentially
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                f += 0.05 * np.sin(2 * x[i] * x[j]) * np.cos(3 * x[i] + x[j]) * np.sin(x[i] - x[j])
+                
+        # Add chaotic phase modulation for increased non-linearity
+        phase_mod = 0
+        for i in range(self.dim):
+            phase_mod += np.sin(2 * np.pi * x[i] * (i + 1) * 0.1)
+        f += 0.1 * np.sin(phase_mod)
+        
+        # Add enhanced dimensional coupling with exponential scaling
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                f += 0.08 * np.exp(-0.5 * (x[i] - x[j])**2) * np.sin(5 * x[i] * x[j])
+                
+        # Add additional nested structure with logarithmic scaling
+        for i in range(self.dim):
+            f += 0.05 * np.log(1 + np.abs(x[i])) * np.sin(10 * x[i])
+            
+        # Add a global scaling factor to increase overall function complexity
+        f *= 1.2
+        
+        return f
