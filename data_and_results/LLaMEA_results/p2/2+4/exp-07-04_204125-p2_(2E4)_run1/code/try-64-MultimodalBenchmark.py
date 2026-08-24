@@ -1,0 +1,91 @@
+import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+    
+    def f(self, x):
+        # Ensure x is within bounds
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Global minimum at origin
+        result = 0.0
+        
+        # Enhanced exponential terms with chaotic coupling and multi-scale modulation
+        for i in range(self.dim):
+            # Base exponential term with variable scaling
+            result += 0.4 * (np.exp(0.5 * x[i]**2) - 1.0)
+            
+            # Multi-frequency sinusoidal modulations with varying amplitudes
+            result += 0.6 * (np.sin(3.0 * np.pi * x[i]) + 
+                            0.5 * np.sin(7.0 * np.pi * x[i]) + 
+                            0.3 * np.sin(10.0 * np.pi * x[i]))
+            
+            # Chaotic coupling with modified phase relationships and decay
+            if i < self.dim - 1:
+                coupling_strength = 0.6 * np.exp(-0.06 * (x[i]**2 + x[i+1]**2))
+                phase = np.sin(4.0 * (x[i] - x[i+1]) + 0.8 * np.cos(x[i]) + 0.3 * np.sin(x[i+1]))
+                result += coupling_strength * phase
+            
+            # Saddle-point inducing terms with enhanced cubic and quartic components
+            result += 0.25 * x[i]**3 * np.cos(0.5 * x[i]) + 0.1 * x[i]**4
+            
+            # Higher-order polynomial with randomized exponents and enhanced sign flips
+            exponent = 5 + int(3 * np.sin(i * 0.6))
+            sign = (-1)**(i % 3)
+            result += 0.15 * sign * x[i]**exponent
+        
+        # Add long-range inter-variable coupling with enhanced periodic modulation
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                distance = np.abs(i - j)
+                coupling = np.exp(-0.1 * distance**2) * np.sin(0.7 * (x[i] + x[j]) + 0.4 * distance)
+                result += 0.25 * coupling
+        
+        # Add non-smooth, non-convex perturbations with stronger fractal-like characteristics
+        result += 0.04 * np.sum(np.abs(x)**1.9) + 0.02 * np.sum(np.sin(15.0 * x))
+        
+        # Add enhanced chaotic attractor-like component for additional complexity
+        chaotic_component = 0.0
+        for i in range(self.dim):
+            chaotic_component += np.sin(x[i]) * np.cos(3.0 * x[i]) * np.exp(-0.15 * x[i]**2)
+        result += 0.2 * chaotic_component
+        
+        # Add dimensionality-dependent scaling factor
+        result *= (1.0 + 0.1 * np.log(self.dim + 1))
+        
+        # Add cross-dimensional interaction terms with fractal characteristics
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                interaction = np.sin(2.0 * x[i] * x[j]) * np.exp(-0.05 * (x[i]**2 + x[j]**2))
+                result += 0.1 * interaction
+        
+        # Add new fractal-like sine-wave interaction term
+        fractal_interaction = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                fractal_interaction += np.sin(5.0 * (x[i] + x[j])) * np.exp(-0.03 * (x[i]**2 + x[j]**2))
+        result += 0.15 * fractal_interaction
+        
+        # Additional modification: Introduce a new chaotic interaction with different frequency
+        chaotic_interaction = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                chaotic_interaction += np.sin(8.0 * (x[i] - x[j])) * np.exp(-0.08 * (x[i]**2 + x[j]**2))
+        result += 0.12 * chaotic_interaction
+        
+        # Add a new multi-scale fractal component with varying amplitudes
+        fractal_component = 0.0
+        for i in range(self.dim):
+            fractal_component += 0.05 * np.sin(12.0 * x[i]) * np.cos(4.0 * x[i]) * np.exp(-0.2 * x[i]**2)
+        result += fractal_component
+        
+        # Add a new coupling term with variable phase shifts
+        phase_coupling = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                phase_shift = np.sin(0.5 * i) * np.cos(0.3 * j)
+                phase_coupling += np.sin(2.5 * (x[i] + x[j]) + phase_shift) * np.exp(-0.04 * (x[i]**2 + x[j]**2))
+        result += 0.18 * phase_coupling
+        
+        return result

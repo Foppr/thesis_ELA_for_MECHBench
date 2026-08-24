@@ -1,0 +1,63 @@
+import numpy as np
+
+class StructuredMultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        np.random.seed(42)
+        self.rbf_centers = np.random.uniform(-5.0, 5.0, (15, dim))
+        self.rbf_weights = np.random.uniform(0.3, 2.5, 15)
+        self.conditioning_factors = np.random.uniform(0.05, 3.0, dim)
+        self.frequency_modulators = np.random.uniform(1.0, 8.0, dim)
+        self.cross_dim_coupling = np.random.uniform(-0.5, 0.5, (dim, dim))
+    
+    def f(self, x):
+        x = np.clip(x, -5.0, 5.0)
+        result = 0.0
+        
+        # Enhanced Radial Basis Function components with varying scales
+        for i in range(15):
+            diff = x - self.rbf_centers[i]
+            rbf_value = np.exp(-np.sum(diff**2) / (2 * (0.3 + 0.2 * i)**2))
+            result += self.rbf_weights[i] * rbf_value
+        
+        # Chaotic sinusoidal modulation with frequency modulation and cross-dimension coupling
+        for i in range(self.dim):
+            freq = self.frequency_modulators[i] * (1.0 + 0.3 * np.sin(0.7 * x[i]))
+            result += 8 * np.sin(freq * x[i]) * self.conditioning_factors[i]
+            # Add cross-dimension interactions
+            for j in range(self.dim):
+                if i != j:
+                    result += 2 * np.sin(0.5 * x[i]) * np.cos(0.3 * x[j]) * self.cross_dim_coupling[i, j]
+        
+        # Enhanced boundary penalty with exponential decay and dynamic scaling
+        boundary_penalty = 0.0
+        for i in range(self.dim):
+            dist_from_boundary = 5.0 - np.abs(x[i])
+            if dist_from_boundary > 0:
+                boundary_penalty += 20 * dist_from_boundary**2 * np.exp(-0.3 * dist_from_boundary**2)
+        result += boundary_penalty
+        
+        # Dynamic conditioning based on norm and dimensionality with enhanced periodicity
+        norm = np.linalg.norm(x)
+        dynamic_factor = 1.0 + 1.0 * np.sin(norm / 3.0) * np.cos(norm / 5.0) * np.sin(norm / 7.0)
+        result *= dynamic_factor
+        
+        # Structured noise with chaotic periodicity and dimensionally dependent scaling
+        noise = 0.0
+        for i in range(self.dim):
+            noise += 4 * np.sin(0.8 * x[i]) * np.cos(0.4 * x[i]) * np.exp(-0.1 * x[i]**2) * (1.0 + 0.2 * np.sin(1.5 * x[i]))
+        result += noise
+        
+        # Add a more complex chaotic perturbation term with higher frequency components
+        chaotic_term = 0.0
+        for i in range(self.dim):
+            chaotic_term += 3 * np.sin(12 * x[i] + np.sin(8 * x[i]) + np.cos(6 * x[i])) * np.cos(5 * x[i])
+        result += chaotic_term
+        
+        # Add a multi-scale harmonic component to increase complexity
+        harmonic_component = 0.0
+        for i in range(self.dim):
+            harmonic_component += 2.5 * np.sin(2 * x[i]) * np.cos(3 * x[i]) * np.sin(4 * x[i])
+        result += harmonic_component
+        
+        return result

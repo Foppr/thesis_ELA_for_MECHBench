@@ -1,0 +1,131 @@
+import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+    
+    def f(self, x):
+        # Normalize input to [-1, 1] for stability
+        x_norm = x / 5.0
+        
+        # Sum of squares term
+        f1 = np.sum(x_norm**2)
+        
+        # Multimodal term with increased frequency and amplitude
+        f2 = 3.0 * np.sum(np.cos(50 * np.pi * x_norm))
+        
+        # Additional quartic term with modified coefficient
+        f3 = 0.4 * np.sum(x_norm**4)
+        
+        # Cross-term interaction to increase conditioning
+        f4 = 0.8 * np.sum(x_norm[:-1] * x_norm[1:])
+        
+        # Additional quadratic interaction term
+        f5 = 0.5 * np.sum((x_norm[:-1] - x_norm[1:])**2)
+        
+        # Fifth power term for added complexity
+        f6 = 0.2 * np.sum(np.abs(x_norm)**5)
+        
+        # Additional sine term for increased multimodality
+        f7 = 0.9 * np.sum(np.sin(40 * np.pi * x_norm))
+        
+        # Sixth power term for enhanced curvature
+        f8 = 0.15 * np.sum(x_norm**6)
+        
+        # Additional cosine term with different frequency for more structure
+        f9 = 0.4 * np.sum(np.cos(30 * np.pi * x_norm))
+        
+        # Modified quadratic interaction with higher weight
+        f10 = 0.5 * np.sum((x_norm[:-2] - x_norm[2:])**2)
+        
+        # Additional higher-order interaction term
+        f11 = 0.25 * np.sum((x_norm[:-3] - x_norm[3:])**2)
+        
+        # Increased penalty for large values
+        f12 = 0.2 * np.sum(np.abs(x_norm)**7)
+        
+        # New Gaussian-like penalty term with modified decay rate and amplitude
+        f13 = 0.25 * np.sum(np.exp(-4.0 * x_norm**2))
+        
+        # Chaotic interaction term using sine and cosine combinations
+        f14 = 0.35 * np.sum(np.sin(50 * np.pi * x_norm) * np.cos(30 * np.pi * x_norm))
+        
+        # High-frequency oscillation component
+        f15 = 0.25 * np.sum(np.sin(100 * x_norm))
+        
+        # Exponential decay with modified base
+        f16 = 0.2 * np.sum(np.exp(-6.0 * np.abs(x_norm)))
+        
+        # Cubic interaction term
+        f17 = 0.2 * np.sum(x_norm**3)
+        
+        # Mixed power and trigonometric term
+        f18 = 0.15 * np.sum(np.sin(25 * x_norm**2))
+        
+        # Additional chaotic sine-cosine interaction
+        f19 = 0.25 * np.sum(np.sin(35 * np.pi * x_norm) * np.cos(45 * np.pi * x_norm))
+        
+        # Additional exponential term with negative base
+        f20 = 0.15 * np.sum(np.exp(-2.5 * x_norm**2))
+        
+        # Increased penalty for extreme values
+        f21 = 0.15 * np.sum(np.abs(x_norm)**8)
+        
+        # Enhanced cubic term with different coefficient
+        f22 = 0.2 * np.sum(x_norm**5)
+        
+        # Additional high-frequency cosine term
+        f23 = 0.3 * np.sum(np.cos(60 * np.pi * x_norm))
+        
+        # Complex interaction with 4-dimensional jumps
+        f24 = 0.2 * np.sum((x_norm[:-4] - x_norm[4:])**2)
+        
+        # Additional chaotic sine-cosine interaction with different frequencies
+        f25 = 0.2 * np.sum(np.sin(40 * np.pi * x_norm) * np.cos(50 * np.pi * x_norm))
+        
+        # Additional exponential term with modified base
+        f26 = 0.1 * np.sum(np.exp(-1.5 * x_norm**2))
+        
+        # Increased penalty for very large values
+        f27 = 0.08 * np.sum(np.abs(x_norm)**9)
+        
+        # Additional high-order power term
+        f28 = 0.08 * np.sum(x_norm**8)
+        
+        # Additional chaotic sine term with different frequency
+        f29 = 0.15 * np.sum(np.sin(60 * x_norm))
+        
+        # Additional interaction term with 5-dimensional jumps
+        f30 = 0.15 * np.sum((x_norm[:-5] - x_norm[5:])**2)
+        
+        # Additional chaotic sine-cosine interaction with even higher frequencies
+        f31 = 0.2 * np.sum(np.sin(60 * np.pi * x_norm) * np.cos(70 * np.pi * x_norm))
+        
+        # Additional exponential term with even higher decay rate
+        f32 = 0.12 * np.sum(np.exp(-7.0 * x_norm**2))
+        
+        # Additional high-frequency sine term
+        f33 = 0.18 * np.sum(np.sin(70 * x_norm))
+        
+        # Additional power term with higher order
+        f34 = 0.05 * np.sum(x_norm**9)
+        
+        # Additional interaction with 6-dimensional jumps
+        f35 = 0.1 * np.sum((x_norm[:-6] - x_norm[6:])**2)
+        
+        # Additional chaotic interaction with 3-dimensional jumps
+        f36 = 0.12 * np.sum((x_norm[:-3] - x_norm[3:])**2)
+        
+        # Additional exponential term with very high decay rate
+        f37 = 0.08 * np.sum(np.exp(-8.0 * x_norm**2))
+        
+        # Additional sine term with very high frequency
+        f38 = 0.1 * np.sum(np.sin(80 * x_norm))
+        
+        # Additional cosine term with very high frequency
+        f39 = 0.15 * np.sum(np.cos(80 * np.pi * x_norm))
+        
+        # Additional power term with even higher order
+        f40 = 0.03 * np.sum(x_norm**10)
+        
+        return f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 + f19 + f20 + f21 + f22 + f23 + f24 + f25 + f26 + f27 + f28 + f29 + f30 + f31 + f32 + f33 + f34 + f35 + f36 + f37 + f38 + f39 + f40
