@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "mechbench_p3", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_mechbench", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_mechbench_p3/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 450, "best": {"evals": 432, "y": 1.3103047112699355, "x": [4.401234607079726, -4.096181788277201, 3.1501429261455307, -4.993734475318073, -4.888567581046215, 4.6981158135478704, 3.8448056230925776, 4.823243642654942, 4.4278894354715455, -4.209613463316319, 4.926087599794409, 2.4940409073552754, -4.576219813706541, -4.344550841806097, 4.3520216698073515]}}
+		]}
+	]
+}

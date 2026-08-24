@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1144, 
+	"function_name": "p1_seed1324_med3_optone_plus_one", 
+	"maximization": false, 
+	"algorithm": {"name": "one_plus_one_mechbench", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1144_p1_seed1324_med3_optone_plus_one/IOHprofiler_f1144_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 151, "best": {"evals": 147, "y": -5.672555428485901, "x": [-3.9841338681617255, -4.949170428660096, 2.310231688706688, -1.9500459465713067, 3.873086477632625]}}
+		]}
+	]
+}

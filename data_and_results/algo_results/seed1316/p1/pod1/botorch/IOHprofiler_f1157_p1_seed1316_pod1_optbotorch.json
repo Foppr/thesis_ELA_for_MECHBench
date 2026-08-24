@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1157, 
+	"function_name": "p1_seed1316_pod1_optbotorch", 
+	"maximization": false, 
+	"algorithm": {"name": "botorch_mechbench", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1157_p1_seed1316_pod1_optbotorch/IOHprofiler_f1157_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 70, "y": -30.51975783544131, "x": [2.8550031185150146, 5, -2.0579605102539062, -5, 5]}}
+		]}
+	]
+}

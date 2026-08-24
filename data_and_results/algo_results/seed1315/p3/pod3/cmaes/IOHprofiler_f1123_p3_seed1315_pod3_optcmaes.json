@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1123, 
+	"function_name": "p3_seed1315_pod3_optcmaes", 
+	"maximization": false, 
+	"algorithm": {"name": "cmaes_mechbench", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1123_p3_seed1315_pod3_optcmaes/IOHprofiler_f1123_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 457, "best": {"evals": 441, "y": -1.7556232842836947, "x": [-2.5707437116258065, -3.604021700330186, 4.346132778494921, -3.9182711565465205, -3.391348813582595, -3.5016878232629676, -2.3555392105623465, -4.8115190167214985, 4.86082399957579, 4.121606211114524, -1.4102076030341233, -3.0535070838975225, 3.7717749948364383, -4.034972307208289, 4.964301304366043]}}
+		]}
+	]
+}
