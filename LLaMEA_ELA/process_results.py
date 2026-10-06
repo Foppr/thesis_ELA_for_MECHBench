@@ -2,6 +2,7 @@ import json
 import os
 import numpy as np
 import pandas as pd
+import itertools
 import matplotlib.pyplot as plt
 import sys
 from sklearn import metrics
@@ -50,9 +51,6 @@ class LLaMEAAnalyzer:
         self.original_minmaxEla_p2 = {'disp.ratio_mean_02': 0.613775757719448, 'ela_distr.skewness': 0.1919105264092217, 'ela_meta.lin_simple.adj_r2': 0.2228005657527632, 'ela_meta.lin_simple.intercept': 0.4325753309513677, 'ela_meta.lin_simple.coef.max': 0.3115486529327629, 'ela_meta.quad_simple.adj_r2': 0.2579866624338019, 'ic.eps_ratio': 0.864406779661017, 'ic.eps_s': 0.7478260869565218, 'nbc.nb_fitness.cor': 0.6089279644868683, 'ela_level.mmce_qda_25': 0.225352085399721, 'ela_level.lda_qda_25': 0.4880185824214766}
         self.original_minmaxEla_p3 = {'disp.ratio_mean_02': 0.8785028761364115, 'ela_distr.skewness': 0.1827705273439356, 'ela_meta.lin_simple.adj_r2': 0.0168121027022387, 'ela_meta.lin_simple.intercept': 0.2178719275405489, 'ela_meta.lin_simple.coef.max': 0.595020107122112, 'ela_meta.quad_simple.adj_r2': 0.4266757168517114, 'ic.eps_ratio': 1.0, 'ic.eps_s': 1.0, 'nbc.nb_fitness.cor': 0.3924693159004784, 'ela_level.mmce_qda_25': 0.7743123688965757, 'ela_level.lda_qda_25': 0.1753467427267984}
 
-        self.standings1 = None
-        self.standings2 = None
-        self.standings3 = None
         self.standings_total = {}
 
         self.log = {}
@@ -63,14 +61,23 @@ class LLaMEAAnalyzer:
         self.min_fit = 0
         self.max_fit = 0
 
+        self.standings1 = pd.read_csv(f'{self.save_folder_name}/standings1.csv')
+        self.standings2 = pd.read_csv(f'{self.save_folder_name}/standings2.csv')
+        self.standings3 = pd.read_csv(f'{self.save_folder_name}/standings3.csv')
+
+        self.standings_total['p1'] = self.standings1
+        self.standings_total['p2'] = self.standings2
+        self.standings_total['p3'] = self.standings3
+
     def run(self,
             progress_plots=True,
             pca_plots=True,
             diversity_plots=True,
             get_proxy_standings=True,
             compute_aocc=True,
+            plot_aocc=True,
             compare_aocc=True,
-            kendall_fitness_scatter=True
+            kendall_fitness_scatter=True,
             ):
         # After LLaMEA loop
         self.load_logs()
@@ -177,6 +184,11 @@ class LLaMEAAnalyzer:
             print(f'\n --- Computing AOCC for all proxies ---')
             aocc_savename = 'aocc_results.csv'
             self.compute_AOCC(self.aocc_path, aocc_savename)
+
+        if plot_aocc:
+            print(f'\n --- Plotting AOCC points ---')
+            df = pd.read_csv('results/aocc_results.csv')
+            self.plot_aocc_per_problem(df)
 
         if compare_aocc:
             print(f'\n --- Computing Kendall\'s tau ---')
@@ -1138,10 +1150,227 @@ class LLaMEAAnalyzer:
 
         seed_cols = [c for c in df_wide.columns if c not in ['problem', 'standing', 'algo']]
         df_wide['mean'] = df_wide[seed_cols].mean(axis=1)
+        df_wide['SE'] = df_wide[seed_cols].std(axis=1)
         filename = f'{self.save_folder_name}/{save_path}'
         df_wide.to_csv(filename)
 
         return df_wide
+
+    def compute_A12(self, path_convergence_data, save_path):
+        """
+        Computes A12 effect size RMSE and proxy fitness, saving 3 CSV files (one per problem).
+        Includes Min-Max normalization within each problem.
+        """
+        analysis_path = path_convergence_data
+        bsf_data = {}
+
+        # 1. PARSE DATA (Unchanged)
+        for seed in os.listdir(analysis_path):
+            seed_path = os.path.join(analysis_path, seed)
+            if not os.path.isdir(seed_path): continue
+            for p in os.listdir(seed_path):
+                p_path = os.path.join(seed_path, p)
+                if not os.path.isdir(p_path): continue
+                if p not in bsf_data: bsf_data[p] = {}
+                max_evals = 150 if p in ['p1', 'p2'] else 450
+
+                for standing in os.listdir(p_path):
+                    standing_path = os.path.join(p_path, standing)
+                    if not os.path.isdir(standing_path): continue
+                    if standing not in bsf_data[p]: bsf_data[p][standing] = {}
+
+                    for algo in os.listdir(standing_path):
+                        algo_path = os.path.join(standing_path, algo)
+                        if not os.path.isdir(algo_path): continue
+                        if algo not in bsf_data[p][standing]: bsf_data[p][standing][algo] = {}
+
+                        for f in os.listdir(algo_path):
+                            if f[:3] == 'IOH': continue
+                            data_dir = os.path.join(algo_path, f)
+                            if not os.path.isdir(data_dir): continue
+
+                            for dat in os.listdir(data_dir):
+                                if not dat.endswith('.dat'): continue
+                                dat_path = os.path.join(data_dir, dat)
+
+                                df = pd.read_csv(dat_path, sep=" ")
+                                df = df[:max_evals]
+                                raw_y = df["raw_y"].to_numpy()
+
+                                best_so_far = []
+                                current_bsf = float('inf')
+                                for y_ in raw_y:
+                                    if y_ < current_bsf:
+                                        current_bsf = y_
+                                    best_so_far.append(current_bsf)
+                                while len(best_so_far) < max_evals:
+                                    best_so_far.append(current_bsf)
+                                bsf_data[p][standing][algo][seed] = best_so_far
+
+        # 2. COMPUTE A12 & EXTRACT FITNESS
+        proxy_standings = ['pod1', 'pod2', 'pod3', 'med1', 'med2', 'med3', 'worst1', 'worst2', 'worst3']
+
+        for p in ['p1', 'p2', 'p3']:
+            if p not in bsf_data: continue
+            standings = bsf_data[p].keys()
+            mb_standing = next((s for s in standings if 'MB' in s), None)
+            if not mb_standing: continue
+
+            algos = sorted(list(bsf_data[p][mb_standing].keys()))
+            pairs = list(itertools.combinations(algos, 2))
+            cuts = [25, 50, 75, 100, 125, 150] if p in ['p1', 'p2'] else [75, 150, 225, 300, 375, 450]
+
+            def get_90_A12(standing_name):
+                a12_values = []
+                for (algo1, algo2) in pairs:
+                    for cut in cuts:
+                        cut_idx = cut - 1
+                        algo1_vals, algo2_vals = [], []
+                        seeds1 = set(bsf_data[p][standing_name].get(algo1, {}).keys())
+                        seeds2 = set(bsf_data[p][standing_name].get(algo2, {}).keys())
+                        common_seeds = seeds1.intersection(seeds2)
+
+                        for s in common_seeds:
+                            algo1_vals.append(bsf_data[p][standing_name][algo1][s][cut_idx])
+                            algo2_vals.append(bsf_data[p][standing_name][algo2][s][cut_idx])
+
+                        algo1_vals, algo2_vals = np.array(algo1_vals), np.array(algo2_vals)
+                        wins = np.sum(algo1_vals < algo2_vals)
+                        ties = np.sum(algo1_vals == algo2_vals)
+                        n_seeds = len(common_seeds)
+
+                        a12 = (wins + 0.5 * ties) / n_seeds if n_seeds > 0 else 0.5
+                        a12_values.append(a12)
+                return np.array(a12_values)
+
+            mb_a12 = get_90_A12(mb_standing)
+            standings_p = self.standings_total[p]
+
+            p_results = []
+            for proxy in proxy_standings:
+                if proxy in bsf_data[p]:
+                    proxy_a12 = get_90_A12(proxy)
+                    rmse = np.sqrt(np.mean((mb_a12 - proxy_a12) ** 2))
+                    try:
+                        fitness = standings_p.loc[standings_p['standing'] == proxy]['fitness'].values[0]
+                    except IndexError:
+                        fitness = np.nan
+
+                    p_results.append({
+                        'standing': proxy,
+                        'A12_RMSE': rmse,
+                        'fitness': fitness
+                    })
+
+            # 3. NORMALIZE & SAVE PROBLEM-SPECIFIC CSV
+            df_p = pd.DataFrame(p_results)
+
+            if len(df_p) > 1:
+                rmse_min, rmse_max = df_p['A12_RMSE'].min(), df_p['A12_RMSE'].max()
+                fit_min, fit_max = df_p['fitness'].min(), df_p['fitness'].max()
+
+                # Prevent division by zero if values are identical
+                df_p['norm_A12_RMSE'] = (df_p['A12_RMSE'] - rmse_min) / (
+                            rmse_max - rmse_min) if rmse_max > rmse_min else 0
+                df_p['norm_fitness'] = (df_p['fitness'] - fit_min) / (fit_max - fit_min) if fit_max > fit_min else 0
+            else:
+                df_p['norm_A12_RMSE'] = 0.0
+                df_p['norm_fitness'] = 0.0
+
+            df_p.set_index('standing', inplace=True)
+
+            p_num = p.replace('p', '')
+            filename = f"{self.save_folder_name}/{save_path}_p{p_num}.csv"
+            os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+            df_p.to_csv(filename)
+            print(f"Saved {filename}")
+
+    def plot_aocc_per_problem(self, df_wide):
+        """Generates grouped error-bar plots of AOCC values (mean ± SE) per problem.
+
+        Parameters:
+        df_wide : pd.DataFrame
+            Output DataFrame from compute_AOCC containing 'problem', 'standing',
+            'algo', 'mean', and 'SE'.
+        save_folder : str
+            Directory where the output plot images will be saved.
+        """
+        save_folder = f"{self.save_folder_name}/aocc_point_plots"
+        os.makedirs(save_folder, exist_ok=True)
+        sns.set_theme(style="whitegrid", palette="Set2")
+
+        unique_problems = df_wide["problem"].unique()
+
+        for problem in unique_problems:
+            # print(problem)
+            sub_df = df_wide[df_wide["problem"] == problem].copy()
+
+            # Place Real-World target (e.g. MB1/MB2) first on the x-axis if present
+            standings = list(sub_df["standing"].unique())
+            mb_standings = [s for s in standings if "MB" in s]
+            other_standings = [s for s in standings if "MB" not in s]
+            # standing_order = mb_standings + sorted(other_standings)
+            standing_order = [f'MB{problem[1]}', 'pod1', 'pod2', 'pod3', 'med1', 'med2', 'med3', 'worst1', 'worst2', 'worst3']
+            # print(standing_order)
+
+            unique_algos = sorted(sub_df["algo"].unique())
+            num_algos = len(unique_algos)
+
+            # Offset width to jitter points horizontally across standings
+            width = 0.12
+            standing_x_map = {s: i for i, s in enumerate(standing_order)}
+
+            fig, ax = plt.subplots(figsize=(10, 6), dpi=300)
+
+            for idx, algo in enumerate(unique_algos):
+                algo_df = sub_df[sub_df["algo"] == algo].copy()
+
+                # Map x-coordinates with categorical jitter offset
+                x_coords = [
+                    standing_x_map[s] + (idx - num_algos / 2) * width + width / 2
+                    for s in algo_df["standing"]
+                ]
+
+                ax.errorbar(
+                    x_coords,
+                    algo_df["mean"],
+                    yerr=algo_df["SE"],
+                    fmt="o-",
+                    label=algo,
+                    capsize=4,
+                    capthick=1.5,
+                    elinewidth=1.5,
+                    markersize=6,
+                    alpha=0.85,
+                )
+
+            ax.set_xticks(range(len(standing_order)))
+            ax.set_xticklabels(standing_order, fontsize=11, fontweight="bold")
+            ax.set_xlabel(
+                "Standing / Problem Target", fontsize=12, fontweight="bold"
+            )
+            ax.set_ylabel("Mean AOCC (± SE)", fontsize=12, fontweight="bold")
+            ax.set_title(
+                f"Algorithm Performance Comparison Across Standings — {problem.upper()}",
+                fontsize=13,
+                fontweight="bold",
+                pad=15,
+            )
+
+            ax.set_ylim(0, 1.05)
+            ax.grid(True, linestyle="--", alpha=0.5)
+            ax.legend(
+                title="Algorithm",
+                bbox_to_anchor=(1.02, 1),
+                loc="upper left",
+                frameon=True,
+            )
+
+            plt.tight_layout()
+            save_path = os.path.join(save_folder, f"aocc_comparison_{problem}.png")
+            plt.savefig(save_path, bbox_inches="tight")
+            plt.close()
+            print(f"Saved plot: {save_path}")
 
     def compare_AOCCs(self, path_aocc_results, save_path):
         full_path = f'{self.save_folder_name}/{path_aocc_results}'
@@ -1181,90 +1410,99 @@ class LLaMEAAnalyzer:
             filename = f'{self.save_folder_name}/{save_path}_p{p}.csv'
             df_taus.to_csv(filename)
 
-    def scatter_fitness_kendall(self, path_kendall_results, save_path):
+    def scatter_fitness_metric(self, path_results, save_path, metric='tau', use_normalized=True):
+        """
+        Scatter plot comparing fitness against a performance metric.
+        :param metric: Base metric name (e.g., 'tau' or 'A12_RMSE').
+        :param use_normalized: If True, uses the [0, 1] normalized versions of the columns.
+        """
         for p in [1, 2, 3]:
-            filename = f'{self.save_folder_name}/{path_kendall_results}'
-            df_taus = pd.read_csv(f'{filename}_p{p}.csv', index_col=0)
-            tau = df_taus['tau'].to_numpy()
-            fitness = df_taus['fitness'].to_numpy()
-            standings = df_taus.index.to_numpy()
+            filename = f'{self.save_folder_name}/{path_results}'
+            df_metric = pd.read_csv(f'{filename}_p{p}.csv', index_col=0)
+
+            # Dynamically select columns based on normalization flag
+            if use_normalized and metric != 'tau':
+                x_col = f'norm_{metric}'
+                y_col = 'norm_fitness'
+            else:
+                x_col = metric
+                y_col = 'fitness'
+
+            metric_vals = df_metric[x_col].to_numpy()
+            fitness = df_metric[y_col].to_numpy()
+            standings = df_metric.index.to_numpy()
+
             ranks = pd.Series([i for i, s in enumerate(standings)])
             norm_ranks = (ranks - ranks.min()) / (ranks.max() - ranks.min())
 
             fig, ax = plt.subplots(figsize=(9, 6))
             cmap = plt.get_cmap("viridis")
 
-            jitter_amplitude_x = 0.015
-            jitter_amplitude_y = (fitness.max() - fitness.min()) * 0.015
+            # Jitter relative to the local data bounds
+            x_range = metric_vals.max() - metric_vals.min()
+            y_range = fitness.max() - fitness.min()
+            jitter_amplitude_x = (x_range * 0.015) if x_range > 0 else 0.015
+            jitter_amplitude_y = (y_range * 0.015) if y_range > 0 else 0.015
 
             rng = np.random.default_rng(seed=42)
 
-            for i in range(len(tau)):
-                # Generate a tiny offset for overlapping proxies
+            for i in range(len(metric_vals)):
                 jx = rng.uniform(-jitter_amplitude_x, jitter_amplitude_x)
                 jy = rng.uniform(-jitter_amplitude_y, jitter_amplitude_y)
-                plot_x = tau[i] + jx
+                plot_x = metric_vals[i] + jx
                 plot_y = fitness[i] + jy
 
                 ax.scatter(
-                    plot_x,
-                    plot_y,
-                    color=cmap(norm_ranks[i]),
-                    s=350,
-                    alpha=0.8,
-                    edgecolors="black",
-                    linewidths=0.5
+                    plot_x, plot_y, color=cmap(norm_ranks[i]),
+                    s=350, alpha=0.8, edgecolors="black", linewidths=0.5
                 )
 
                 ax.text(
-                    plot_x,
-                    plot_y,
-                    str(ranks[i]+1),
-                    color="white",
-                    fontsize=9,
-                    fontweight="bold",
-                    va="center",
-                    ha="center"
+                    plot_x, plot_y, str(ranks[i] + 1), color="white",
+                    fontsize=9, fontweight="bold", va="center", ha="center"
                 )
 
             # Trend line
-            m, b = np.polyfit(tau, fitness, 1)
-            x_line = np.linspace(tau.min(), tau.max(), 100)
+            m, b = np.polyfit(metric_vals, fitness, 1)
+            x_line = np.linspace(metric_vals.min(), metric_vals.max(), 100)
             y_line = m * x_line + b
-            ax.line = ax.plot(
-                x_line,
-                y_line,
-                color="red",
-                linestyle="--",
-                linewidth=2,
-                alpha=0.7,
-                label=f"Trend (slope: {m:.2f})"
+            ax.plot(
+                x_line, y_line, color="red", linestyle="--",
+                linewidth=2, alpha=0.7, label=f"Trend (slope: {m:.2f})"
             )
 
-            x_padding = (self.max_tau - self.min_tau) * 0.05
-            y_padding = (self.max_fit - self.min_fit) * 0.05
+            # FIX FOR THE BUG: Extract min/max dynamically from the loaded array
+            x_min, x_max = metric_vals.min(), metric_vals.max()
+            y_min, y_max = fitness.min(), fitness.max()
 
-            global_xlim = (self.min_tau - x_padding, self.max_tau + x_padding)
-            global_ylim = (self.min_fit - y_padding, self.max_fit + y_padding)
+            x_padding = (x_max - x_min) * 0.05 if x_max > x_min else 0.1
+            y_padding = (y_max - y_min) * 0.05 if y_max > y_min else 0.1
 
-            # PC values
+            # Use global tau limits if requested, otherwise strictly fit to data
+            if metric == 'tau' and not use_normalized:
+                x_min, x_max = self.min_tau, self.max_tau
+                title_text = "Kendall's tau"
+            else:
+                title_text = f"Normalized {metric}" if use_normalized else metric
+
             ax.set(
-                title=f"Kendall's tau vs. fitness (p{p})",
-                xlabel=f"Kendall's tau",
-                ylabel=f"Fitness",
-                xlim=global_xlim,
-                ylim=global_ylim
+                title=f"{title_text} vs. Fitness (p{p})",
+                xlabel=title_text,
+                ylabel="Normalized Fitness (ELA Distance)" if use_normalized else "Fitness",
+                xlim=(x_min - x_padding, x_max + x_padding),
+                ylim=(y_min - y_padding, y_max + y_padding)
             )
 
+            ax.legend()
             plt.tight_layout()
-            plt.savefig(f"{self.save_folder_name}/{save_path}_p{p}.png", dpi=900)
+            plt.savefig(f"{self.save_folder_name}/{save_path}_{metric}_p{p}.png", dpi=900)
             plt.close()
 
 
 if __name__ == "__main__":
     log_dir = "../ELA_for_MECHBench/LLaMEA_ELA/exps_0704"
     save_folder_name = 'results'
-    aocc_path = '../ELA_for_MECHBench/LLaMEA_ELA/algo_results'
+    aocc_path = '../data_and_results/algo_results'
     analyzer = LLaMEAAnalyzer(
         log_dir=log_dir,
         save_folder_name=save_folder_name,
@@ -1275,4 +1513,17 @@ if __name__ == "__main__":
     log = analyzer.log
     df = analyzer.experiments_data
 
-    analyzer.run()
+    # analyzer.run(
+    #     progress_plots=False,
+    #     pca_plots=False,
+    #     diversity_plots=False,
+    #     get_proxy_standings=False,
+    #     compute_aocc=False,
+    #     plot_aocc=True,
+    #     compare_aocc=False,
+    #     kendall_fitness_scatter=False
+    # )
+
+    analyzer.compute_A12(aocc_path, 'A12_values')
+    metric_ = 'A12_RMSE'
+    analyzer.scatter_fitness_metric('A12_values', 'scatterplot_fitness', metric=metric_, use_normalized=True)
