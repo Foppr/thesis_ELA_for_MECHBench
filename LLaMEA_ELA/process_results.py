@@ -21,6 +21,7 @@ class LLaMEAAnalyzer:
                  original_stats_path='ela_feature_stats.csv'
                  ):
         self.log_dir = log_dir
+        print(self.log_dir)
         self.save_folder_name = save_folder_name
         if not os.path.exists(save_folder_name):
             os.mkdir(save_folder_name)
@@ -68,6 +69,223 @@ class LLaMEAAnalyzer:
         self.standings_total['p1'] = self.standings1
         self.standings_total['p2'] = self.standings2
         self.standings_total['p3'] = self.standings3
+
+        self.standings_ELA_values = {
+            'p1': {
+                'pod1': {
+                    'disp.ratio_mean_02': 0.5447, 'ela_distr.skewness': 0.1172, 'ela_meta.lin_simple.adj_r2': 0.2974,
+                    'ela_meta.lin_simple.intercept': 0.7985, 'ela_meta.lin_simple.coef.max': 1.0064,
+                    'ela_meta.quad_simple.adj_r2': 0.2831, 'ic.eps_ratio': 1.0282, 'ic.eps_s': 0.7826,
+                    'nbc.nb_fitness.cor': 0.3845, 'ela_level.mmce_qda_25': 0.5493, 'ela_level.lda_qda_25': 0.1464
+                },
+                'pod2': {
+                    'disp.ratio_mean_02': 0.5539, 'ela_distr.skewness': 0.1172, 'ela_meta.lin_simple.adj_r2': 0.2978,
+                    'ela_meta.lin_simple.intercept': 0.7999, 'ela_meta.lin_simple.coef.max': 1.0002,
+                    'ela_meta.quad_simple.adj_r2': 0.2834, 'ic.eps_ratio': 1.0282, 'ic.eps_s': 0.7739,
+                    'nbc.nb_fitness.cor': 0.3811, 'ela_level.mmce_qda_25': 0.5408, 'ela_level.lda_qda_25': 0.1464
+                },
+                'pod3': {
+                    'disp.ratio_mean_02': 0.5598, 'ela_distr.skewness': 0.117, 'ela_meta.lin_simple.adj_r2': 0.2986,
+                    'ela_meta.lin_simple.intercept': 0.8058, 'ela_meta.lin_simple.coef.max': 0.9788,
+                    'ela_meta.quad_simple.adj_r2': 0.2841, 'ic.eps_ratio': 1.0339, 'ic.eps_s': 0.7739,
+                    'nbc.nb_fitness.cor': 0.379, 'ela_level.mmce_qda_25': 0.5394, 'ela_level.lda_qda_25': 0.1484
+                },
+                'med1': {
+                    'disp.ratio_mean_02': 0.4905, 'ela_distr.skewness': 0.2042, 'ela_meta.lin_simple.adj_r2': 0.0259,
+                    'ela_meta.lin_simple.intercept': 0.1923, 'ela_meta.lin_simple.coef.max': 0.0105,
+                    'ela_meta.quad_simple.adj_r2': 0.2018, 'ic.eps_ratio': 0.9209, 'ic.eps_s': 0.6957,
+                    'nbc.nb_fitness.cor': 0.5843, 'ela_level.mmce_qda_25': 0.4775, 'ela_level.lda_qda_25': 0.2232
+                },
+                'med2': {
+                    'disp.ratio_mean_02': 0.339, 'ela_distr.skewness': 0.1205, 'ela_meta.lin_simple.adj_r2': 0.0325,
+                    'ela_meta.lin_simple.intercept': 0.6691, 'ela_meta.lin_simple.coef.max': 0.093,
+                    'ela_meta.quad_simple.adj_r2': 0.4356, 'ic.eps_ratio': 1.0904, 'ic.eps_s': 0.8957,
+                    'nbc.nb_fitness.cor': 0.0556, 'ela_level.mmce_qda_25': 0.8169, 'ela_level.lda_qda_25': 0.1194
+                },
+                'med3': {
+                    'disp.ratio_mean_02': 0.7059, 'ela_distr.skewness': 0.1174, 'ela_meta.lin_simple.adj_r2': 0.094,
+                    'ela_meta.lin_simple.intercept': 0.5307, 'ela_meta.lin_simple.coef.max': 0.396,
+                    'ela_meta.quad_simple.adj_r2': 0.0822, 'ic.eps_ratio': 1.0621, 'ic.eps_s': 0.8348,
+                    'nbc.nb_fitness.cor': 0.1426, 'ela_level.mmce_qda_25': 0.7676, 'ela_level.lda_qda_25': 0.1262
+                },
+                'worst1': {
+                    'disp.ratio_mean_02': 0.7326, 'ela_distr.skewness': -2.0357, 'ela_meta.lin_simple.adj_r2': 0.028,
+                    'ela_meta.lin_simple.intercept': 1.1077, 'ela_meta.lin_simple.coef.max': 0.0049,
+                    'ela_meta.quad_simple.adj_r2': 0.0069, 'ic.eps_ratio': 0.2486, 'ic.eps_s': -0.0174,
+                    'nbc.nb_fitness.cor': 0.8332, 'ela_level.mmce_qda_25': 0.8085, 'ela_level.lda_qda_25': 0.1202
+                },
+                'worst2': {
+                    'disp.ratio_mean_02': 0.1521, 'ela_distr.skewness': 2.0331, 'ela_meta.lin_simple.adj_r2': 0.0286,
+                    'ela_meta.lin_simple.intercept': -0.0043, 'ela_meta.lin_simple.coef.max': 0.0068,
+                    'ela_meta.quad_simple.adj_r2': 0.0078, 'ic.eps_ratio': 0.0678, 'ic.eps_s': 0.0522,
+                    'nbc.nb_fitness.cor': 1.0982, 'ela_level.mmce_qda_25': 0.6197, 'ela_level.lda_qda_25': 0.1717
+                },
+                'worst3': {
+                    'disp.ratio_mean_02': 0.5516, 'ela_distr.skewness': -0.0072, 'ela_meta.lin_simple.adj_r2': 0.4446,
+                    'ela_meta.lin_simple.intercept': 0.7292, 'ela_meta.lin_simple.coef.max': 1.2348,
+                    'ela_meta.quad_simple.adj_r2': 0.672, 'ic.eps_ratio': 0.8079, 'ic.eps_s': 0.9043,
+                    'nbc.nb_fitness.cor': 0.5462, 'ela_level.mmce_qda_25': -0.0535, 'ela_level.lda_qda_25': 8.9405
+                }
+            },
+            'p2': {
+                'pod1': {
+                    'disp.ratio_mean_02': 0.5813, 'ela_distr.skewness': 0.1255, 'ela_meta.lin_simple.adj_r2': 0.2426,
+                    'ela_meta.lin_simple.intercept': 0.4609, 'ela_meta.lin_simple.coef.max': 0.3901,
+                    'ela_meta.quad_simple.adj_r2': 0.2371, 'ic.eps_ratio': 0.9153, 'ic.eps_s': 0.6783,
+                    'nbc.nb_fitness.cor': 0.4554, 'ela_level.mmce_qda_25': 0.3549, 'ela_level.lda_qda_25': 0.2179
+                },
+                'pod2': {
+                    'disp.ratio_mean_02': 0.6136, 'ela_distr.skewness': 0.1108, 'ela_meta.lin_simple.adj_r2': 0.2464,
+                    'ela_meta.lin_simple.intercept': 0.4974, 'ela_meta.lin_simple.coef.max': 0.3916,
+                    'ela_meta.quad_simple.adj_r2': 0.2284, 'ic.eps_ratio': 0.9209, 'ic.eps_s': 0.687,
+                    'nbc.nb_fitness.cor': 0.4449, 'ela_level.mmce_qda_25': 0.3493, 'ela_level.lda_qda_25': 0.2193
+                },
+                'pod3': {
+                    'disp.ratio_mean_02': 0.6118, 'ela_distr.skewness': 0.1112, 'ela_meta.lin_simple.adj_r2': 0.2455,
+                    'ela_meta.lin_simple.intercept': 0.4954, 'ela_meta.lin_simple.coef.max': 0.3909,
+                    'ela_meta.quad_simple.adj_r2': 0.2275, 'ic.eps_ratio': 0.9153, 'ic.eps_s': 0.687,
+                    'nbc.nb_fitness.cor': 0.4414, 'ela_level.mmce_qda_25': 0.3535, 'ela_level.lda_qda_25': 0.2183
+                },
+                'med1': {
+                    'disp.ratio_mean_02': 0.525, 'ela_distr.skewness': 0.1294, 'ela_meta.lin_simple.adj_r2': 0.0262,
+                    'ela_meta.lin_simple.intercept': 0.5545, 'ela_meta.lin_simple.coef.max': 0.0223,
+                    'ela_meta.quad_simple.adj_r2': 0.0048, 'ic.eps_ratio': 0.7571, 'ic.eps_s': 0.9304,
+                    'nbc.nb_fitness.cor': 0.3323, 'ela_level.mmce_qda_25': 0.9282, 'ela_level.lda_qda_25': 0.1246
+                },
+                'med2': {
+                    'disp.ratio_mean_02': 0.5566, 'ela_distr.skewness': 0.1067, 'ela_meta.lin_simple.adj_r2': 0.0276,
+                    'ela_meta.lin_simple.intercept': 0.6409, 'ela_meta.lin_simple.coef.max': 0.0235,
+                    'ela_meta.quad_simple.adj_r2': 0.0056, 'ic.eps_ratio': 0.8531, 'ic.eps_s': 0.8435,
+                    'nbc.nb_fitness.cor': 0.2576, 'ela_level.mmce_qda_25': 0.9577, 'ela_level.lda_qda_25': 0.1199
+                },
+                'med3': {
+                    'disp.ratio_mean_02': 0.913, 'ela_distr.skewness': 0.1963, 'ela_meta.lin_simple.adj_r2': 0.0259,
+                    'ela_meta.lin_simple.intercept': 0.3646, 'ela_meta.lin_simple.coef.max': 0.0095,
+                    'ela_meta.quad_simple.adj_r2': 0.0503, 'ic.eps_ratio': 0.9718, 'ic.eps_s': 0.8435,
+                    'nbc.nb_fitness.cor': 0.2135, 'ela_level.mmce_qda_25': 0.8254, 'ela_level.lda_qda_25': 0.1179
+                },
+                'worst1': {
+                    'disp.ratio_mean_02': 0.557, 'ela_distr.skewness': 0.1495, 'ela_meta.lin_simple.adj_r2': 0.9391,
+                    'ela_meta.lin_simple.intercept': -0.1987, 'ela_meta.lin_simple.coef.max': 3.2852,
+                    'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': 0.9831, 'ic.eps_s': 0.7565,
+                    'nbc.nb_fitness.cor': 0.748, 'ela_level.mmce_qda_25': 0.0746, 'ela_level.lda_qda_25': 0.2817
+                },
+                'worst2': {
+                    'disp.ratio_mean_02': 0.557, 'ela_distr.skewness': 0.1495, 'ela_meta.lin_simple.adj_r2': 0.9391,
+                    'ela_meta.lin_simple.intercept': -0.1987, 'ela_meta.lin_simple.coef.max': 3.2852,
+                    'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': 0.9831, 'ic.eps_s': 0.7565,
+                    'nbc.nb_fitness.cor': 0.748, 'ela_level.mmce_qda_25': 0.0746, 'ela_level.lda_qda_25': 0.2817
+                },
+                'worst3': {
+                    'disp.ratio_mean_02': 0.557, 'ela_distr.skewness': 0.1495, 'ela_meta.lin_simple.adj_r2': 0.9389,
+                    'ela_meta.lin_simple.intercept': -0.199, 'ela_meta.lin_simple.coef.max': 3.2852,
+                    'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': 0.9831, 'ic.eps_s': 0.7565,
+                    'nbc.nb_fitness.cor': 0.7481, 'ela_level.mmce_qda_25': 0.0746, 'ela_level.lda_qda_25': 0.2817
+                }
+            },
+            'p3': {
+                'pod1': {
+                    'disp.ratio_mean_02': 0.9266, 'ela_distr.skewness': 0.1566, 'ela_meta.lin_simple.adj_r2': 0.1118,
+                    'ela_meta.lin_simple.intercept': 0.1934, 'ela_meta.lin_simple.coef.max': 0.5889,
+                    'ela_meta.quad_simple.adj_r2': 0.256, 'ic.eps_ratio': 1.0368, 'ic.eps_s': 0.9917,
+                    'nbc.nb_fitness.cor': 0.1944, 'ela_level.mmce_qda_25': 0.7792, 'ela_level.lda_qda_25': 0.1679
+                },
+                'pod2': {
+                    'disp.ratio_mean_02': 0.9628, 'ela_distr.skewness': 0.1564, 'ela_meta.lin_simple.adj_r2': 0.0953,
+                    'ela_meta.lin_simple.intercept': 0.2209, 'ela_meta.lin_simple.coef.max': 0.5579,
+                    'ela_meta.quad_simple.adj_r2': 0.2386, 'ic.eps_ratio': 1.0368, 'ic.eps_s': 1.0,
+                    'nbc.nb_fitness.cor': 0.1943, 'ela_level.mmce_qda_25': 0.7827, 'ela_level.lda_qda_25': 0.1687
+                },
+                'pod3': {
+                    'disp.ratio_mean_02': 0.9628, 'ela_distr.skewness': 0.1565, 'ela_meta.lin_simple.adj_r2': 0.0946,
+                    'ela_meta.lin_simple.intercept': 0.2221, 'ela_meta.lin_simple.coef.max': 0.5538,
+                    'ela_meta.quad_simple.adj_r2': 0.2426, 'ic.eps_ratio': 1.0368, 'ic.eps_s': 0.9917,
+                    'nbc.nb_fitness.cor': 0.1932, 'ela_level.mmce_qda_25': 0.7827, 'ela_level.lda_qda_25': 0.1689
+                },
+                'med1': {
+                    'disp.ratio_mean_02': 0.7889, 'ela_distr.skewness': 0.1569, 'ela_meta.lin_simple.adj_r2': 0.009,
+                    'ela_meta.lin_simple.intercept': 0.6076, 'ela_meta.lin_simple.coef.max': 0.1745,
+                    'ela_meta.quad_simple.adj_r2': 0.025, 'ic.eps_ratio': 1.0491, 'ic.eps_s': 1.0248,
+                    'nbc.nb_fitness.cor': 0.1625, 'ela_level.mmce_qda_25': 0.8121, 'ela_level.lda_qda_25': 0.1644
+                },
+                'med2': {
+                    'disp.ratio_mean_02': 0.6756, 'ela_distr.skewness': 0.1555, 'ela_meta.lin_simple.adj_r2': 0.0298,
+                    'ela_meta.lin_simple.intercept': 0.6383, 'ela_meta.lin_simple.coef.max': 0.3224,
+                    'ela_meta.quad_simple.adj_r2': 0.0309, 'ic.eps_ratio': 1.0245, 'ic.eps_s': 0.9835,
+                    'nbc.nb_fitness.cor': 0.1204, 'ela_level.mmce_qda_25': 0.8116, 'ela_level.lda_qda_25': 0.1645
+                },
+                'med3': {
+                    'disp.ratio_mean_02': 0.9679, 'ela_distr.skewness': 0.1568, 'ela_meta.lin_simple.adj_r2': 0.0204,
+                    'ela_meta.lin_simple.intercept': 0.5179, 'ela_meta.lin_simple.coef.max': 0.184,
+                    'ela_meta.quad_simple.adj_r2': 0.0211, 'ic.eps_ratio': 0.8528, 'ic.eps_s': 0.8843,
+                    'nbc.nb_fitness.cor': 0.2451, 'ela_level.mmce_qda_25': 0.8116, 'ela_level.lda_qda_25': 0.1645
+                },
+                'worst1': {
+                    'disp.ratio_mean_02': 0.0038, 'ela_distr.skewness': 0.9384, 'ela_meta.lin_simple.adj_r2': 0.0022,
+                    'ela_meta.lin_simple.intercept': 0.0075, 'ela_meta.lin_simple.coef.max': 0.0119,
+                    'ela_meta.quad_simple.adj_r2': 0.0201, 'ic.eps_ratio': 0.4908, 'ic.eps_s': 0.4298,
+                    'nbc.nb_fitness.cor': 0.9105, 'ela_level.mmce_qda_25': 0.7596, 'ela_level.lda_qda_25': 0.1799
+                },
+                'worst2': {
+                    'disp.ratio_mean_02': -0.1097, 'ela_distr.skewness': 0.1639, 'ela_meta.lin_simple.adj_r2': 0.2703,
+                    'ela_meta.lin_simple.intercept': 0.5183, 'ela_meta.lin_simple.coef.max': 3.3632,
+                    'ela_meta.quad_simple.adj_r2': 0.8505, 'ic.eps_ratio': 1.0061, 'ic.eps_s': 0.9669,
+                    'nbc.nb_fitness.cor': 0.1574, 'ela_level.mmce_qda_25': 0.5882, 'ela_level.lda_qda_25': 0.2796
+                },
+                'worst3': {
+                    'disp.ratio_mean_02': 0.5471, 'ela_distr.skewness': 0.1449, 'ela_meta.lin_simple.adj_r2': 0.77,
+                    'ela_meta.lin_simple.intercept': 0.1634, 'ela_meta.lin_simple.coef.max': 4.6152,
+                    'ela_meta.quad_simple.adj_r2': 0.9616, 'ic.eps_ratio': 0.9939, 'ic.eps_s': 0.9587,
+                    'nbc.nb_fitness.cor': 0.3481, 'ela_level.mmce_qda_25': 0.2056, 'ela_level.lda_qda_25': 0.1935
+                }
+            }
+        }
+
+        def define_PCA_space():
+            all_problem_data = []
+            print(self.log)
+            for p in self.log:
+                for config in self.log[p]:
+                    if 'total' not in config:
+                        for inds in self.log[p][config]:
+                            if 'total' in inds:
+                                for individual in self.log[p][config][inds]:
+                                    proxy_dic = individual['metadata']["Proxy min-max ELA values"]
+                                    all_problem_data.append(list(proxy_dic.values()))
+
+            # Shared, global PCA model
+            if all_problem_data:
+                shared_df = pd.DataFrame(all_problem_data, columns=self.features)
+                shared_pca = PCA(n_components=2)
+
+                # Find global PCA bounds
+                all_reduced = shared_pca.fit_transform(shared_df)
+                mb_data = [
+                    list(self.original_minmaxEla_p1.values()),
+                    list(self.original_minmaxEla_p2.values()),
+                    list(self.original_minmaxEla_p3.values())
+                ]
+                mb_df = pd.DataFrame(mb_data, columns=self.features)
+                all_mb_reduced = shared_pca.transform(mb_df)
+
+                pc1_min = min(all_reduced[:, 0].min(), all_mb_reduced[:, 0].min())
+                pc1_max = max(all_reduced[:, 0].max(), all_mb_reduced[:, 0].max())
+                pc2_min = min(all_reduced[:, 1].min(), all_mb_reduced[:, 1].min())
+                pc2_max = max(all_reduced[:, 1].max(), all_mb_reduced[:, 1].max())
+
+                # Padding
+                pc1_padding = (pc1_max - pc1_min) * 0.05
+                pc2_padding = (pc2_max - pc2_min) * 0.05
+
+                global_xlim = (pc1_min - pc1_padding, pc1_max + pc1_padding)
+                global_ylim = (pc2_min - pc2_padding, pc2_max + pc2_padding)
+
+            return shared_pca, global_xlim, global_ylim
+
+        self.load_logs()
+
+        self.pca, self.pca_x_lim, self.pca_y_lim = define_PCA_space()
+
 
     def run(self,
             progress_plots=True,
@@ -329,7 +547,9 @@ class LLaMEAAnalyzer:
                 ela_minmax.to_csv(save_name)
 
     def load_logs(self):
+        print(self.log_dir)
         for problem_ in os.listdir(self.log_dir):
+            print(problem_)
             problem_log = []  # Contains all individuals of this problem, across all configs and runs
             self.log[problem_] = {}
             self.experiments_data[problem_] = {}
@@ -471,6 +691,96 @@ class LLaMEAAnalyzer:
         plt.close()
 
         return pca_dic
+
+    def pca_proxy_standings(self, save_folder):
+        """
+        Generates 3 PCA plots (one per problem) comparing the MB target against
+        the 9 selected proxy functions (pod1-3, med1-3, worst1-3).
+
+        :param proxy_ela_dicts: Nested dictionary of the 9 proxies' ELA values per problem.
+                                Format: {'p1': {'pod1': {ela_dict}, ...}, 'p2': {...}, 'p3': {...}}
+        """
+        # Define the discrete light-to-dark color scheme
+        color_map = {
+            'pod1': '#a1d99b', 'pod2': '#31a354', 'pod3': '#005a32',  # Greens
+            'med1': '#9ecae1', 'med2': '#3182bd', 'med3': '#08519c',  # Blues
+            'worst1': '#fc9272', 'worst2': '#de2d26', 'worst3': '#a50f15'  # Reds
+        }
+
+        expl_var = self.pca.explained_variance_ratio_
+
+        for p in ['p1', 'p2', 'p3']:
+            if p not in self.standings_ELA_values:
+                continue
+
+            fig, ax = plt.subplots(figsize=(9, 6), dpi=300)
+
+            # 1. PLOT THE ORIGINAL MB TARGET
+            mb_vector = pd.DataFrame(columns=self.features)
+            if p == 'p1':
+                mb_vector.loc[0] = self.original_minmaxEla_p1.values()
+            elif p == 'p2':
+                mb_vector.loc[0] = self.original_minmaxEla_p2.values()
+            elif p == 'p3':
+                mb_vector.loc[0] = self.original_minmaxEla_p3.values()
+
+            mb_reduced = self.pca.transform(mb_vector)
+
+            ax.scatter(
+                mb_reduced[:, 0], mb_reduced[:, 1],
+                marker='*', s=450, color="gold", alpha=0.9,
+                edgecolors="black", linewidths=1.2,
+                label=f"MB{p[1]} (Target)", zorder=5
+            )
+
+            # 2. PLOT THE 9 PROXIES
+            proxies = self.standings_ELA_values[p]
+            for standing, ela_dict in proxies.items():
+                if standing not in color_map:
+                    continue
+
+                proxy_df = pd.DataFrame([ela_dict.values()], columns=self.features)
+                proxy_reduced = self.pca.transform(proxy_df)
+
+                # Scatter the proxy point
+                ax.scatter(
+                    proxy_reduced[:, 0], proxy_reduced[:, 1],
+                    color=color_map[standing],
+                    s=150, alpha=0.9,
+                    edgecolors="black", linewidths=0.8,
+                    label=standing, zorder=4
+                )
+
+                # Optional: Add a subtle text label slightly offset from the point
+                # to make visual identification instant without checking the legend
+                ax.annotate(
+                    standing,
+                    (proxy_reduced[0, 0], proxy_reduced[0, 1]),
+                    xytext=(6, 6), textcoords="offset points",
+                    fontsize=9, fontweight="bold", alpha=0.7
+                )
+
+            # 3. FORMAT AXES AND LEGEND
+            ax.set(
+                title=f"PCA Topology of Proxies vs. Real-World Target ({p.upper()})",
+                xlabel=f"1st Principal Component ({expl_var[0] * 100:.1f}%)",
+                ylabel=f"2nd Principal Component ({expl_var[1] * 100:.1f}%)",
+                xlim=self.pca_x_lim,
+                ylim=self.pca_y_lim
+            )
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            ax.grid(True, linestyle="--", alpha=0.4)
+
+            # Move legend outside the plot so it doesn't cover points
+            ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", frameon=True, title="Standings")
+
+            # 4. SAVE
+            plt.tight_layout()
+            filename = f"{self.save_folder_name}/{save_folder}/PCA_proxy_topology_{p}.png"
+            os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+            plt.savefig(filename, bbox_inches="tight")
+            plt.close()
 
     def plot_initial_diversity(self):
         # Get all initial parents and their min-maxed ELA values:
@@ -1285,6 +1595,119 @@ class LLaMEAAnalyzer:
             df_p.to_csv(filename)
             print(f"Saved {filename}")
 
+    def compute_AOCC_RMSE(self, path_aocc_results, save_path, use_t_stat=False):
+        """
+        Computes RMSE based on pairwise differences in Mean AOCC.
+        Format: index=standing (proxy), columns=[AOCC_RMSE, norm_AOCC_RMSE, fitness, norm_fitness].
+        """
+        aocc_df = pd.read_csv(path_aocc_results)
+        algos = sorted(['baxus', 'botorch', 'cmaes', 'de', 'one_plus_one', 'turbo1'])
+        pairs = list(itertools.combinations(algos, 2))  # 15 unique pairs
+
+        proxy_standings = ['pod1', 'pod2', 'pod3', 'med1', 'med2', 'med3', 'worst1', 'worst2', 'worst3']
+
+        for p in [1, 2, 3]:
+            prob_name = f'p{p}'
+            mb_standing = f'MB{p}'
+
+            # Isolate dataframe for current problem to speed up lookups
+            df_p = aocc_df[aocc_df['problem'] == prob_name]
+
+            # For computing the t-statistic:
+            def get_pairwise_t_stats(standing_name):
+                """Returns a length-15 array of t-statistics (SE-weighted differences)."""
+                df_s = df_p[df_p['standing'] == standing_name]
+                if df_s.empty:
+                    return None
+
+                algo_means = dict(zip(df_s['algo'], df_s['mean']))
+                algo_ses = dict(zip(df_s['algo'], df_s['SE']))
+
+                t_stats = []
+                for (algo1, algo2) in pairs:
+                    mean_diff = algo_means[algo1] - algo_means[algo2]
+
+                    # Calculate combined standard error (assuming independent samples)
+                    combined_se = np.sqrt(algo_ses[algo1] ** 2 + algo_ses[algo2] ** 2)
+
+                    # Prevent division by zero if an algorithm was entirely deterministic
+                    if combined_se == 0:
+                        combined_se = 1e-9
+
+                    t_stat = mean_diff / combined_se
+                    t_stats.append(t_stat)
+                return np.array(t_stats)
+
+            # For computing raw AOCC differences (no SE):
+            def get_pairwise_diffs(standing_name):
+                """Returns a length-15 array of Mean AOCC differences for a given standing."""
+                df_s = df_p[df_p['standing'] == standing_name]
+                if df_s.empty:
+                    return None
+
+                # Dictionary lookup is much faster/cleaner than chaining pandas filters
+                algo_means = dict(zip(df_s['algo'], df_s['mean']))
+
+                diffs = []
+                for (algo1, algo2) in pairs:
+                    # Calculate the margin of victory/defeat between the two algorithms
+                    diff = algo_means[algo1] - algo_means[algo2]
+                    diffs.append(diff)
+                return np.array(diffs)
+
+            if use_t_stat:
+                func = get_pairwise_t_stats
+            else:
+                func = get_pairwise_diffs
+
+            # 1. Get the Real-World (MB) pairwise differences
+            mb_diffs = func(mb_standing)
+            if mb_diffs is None:
+                continue
+
+            standings_p = self.standings_total[prob_name]
+            p_results = []
+
+            # 2. Compare against Proxies
+            for proxy in proxy_standings:
+                proxy_diffs = func(proxy)
+                if proxy_diffs is not None:
+                    # Compute RMSE between the 15 MB margins and the 15 Proxy margins
+                    rmse = np.sqrt(np.mean((mb_diffs - proxy_diffs) ** 2))
+
+                    try:
+                        fitness = standings_p.loc[standings_p['standing'] == proxy]['fitness'].values[0]
+                    except IndexError:
+                        fitness = np.nan
+
+                    p_results.append({
+                        'standing': proxy,
+                        'AOCC_RMSE': rmse,
+                        'fitness': fitness
+                    })
+
+            # 3. Normalize & Save Problem-Specific CSV
+            res_df = pd.DataFrame(p_results)
+
+            if len(res_df) > 1:
+                rmse_min, rmse_max = res_df['AOCC_RMSE'].min(), res_df['AOCC_RMSE'].max()
+                fit_min, fit_max = res_df['fitness'].min(), res_df['fitness'].max()
+
+                res_df['norm_AOCC_RMSE'] = (res_df['AOCC_RMSE'] - rmse_min) / (
+                            rmse_max - rmse_min) if rmse_max > rmse_min else 0
+                res_df['norm_fitness'] = (res_df['fitness'] - fit_min) / (fit_max - fit_min) if fit_max > fit_min else 0
+            else:
+                res_df['norm_AOCC_RMSE'] = 0.0
+                res_df['norm_fitness'] = 0.0
+
+            res_df.set_index('standing', inplace=True)
+
+            filename = f"{self.save_folder_name}/{save_path}_p{p}.csv"
+            os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+            res_df.to_csv(filename)
+            print(f"Saved {filename}")
+
+
     def plot_aocc_per_problem(self, df_wide):
         """Generates grouped error-bar plots of AOCC values (mean ± SE) per problem.
 
@@ -1413,7 +1836,7 @@ class LLaMEAAnalyzer:
     def scatter_fitness_metric(self, path_results, save_path, metric='tau', use_normalized=True):
         """
         Scatter plot comparing fitness against a performance metric.
-        :param metric: Base metric name (e.g., 'tau' or 'A12_RMSE').
+        :param metric: Base metric name ('tau', 'A12_RMSE' or 'AOCC_t_stat').
         :param use_normalized: If True, uses the [0, 1] normalized versions of the columns.
         """
         for p in [1, 2, 3]:
@@ -1500,16 +1923,17 @@ class LLaMEAAnalyzer:
 
 
 if __name__ == "__main__":
-    log_dir = "../ELA_for_MECHBench/LLaMEA_ELA/exps_0704"
+    log_dir = "../data_and_results/LLaMEA_results"
     save_folder_name = 'results'
-    aocc_path = '../data_and_results/algo_results'
+    algo_results = '../data_and_results/algo_results'
     analyzer = LLaMEAAnalyzer(
         log_dir=log_dir,
         save_folder_name=save_folder_name,
-        aocc_path=aocc_path
+        aocc_path=algo_results
     )
+    aocc_path = 'results/aocc_results.csv'
 
-    analyzer.load_logs()
+    # analyzer.load_logs()
     log = analyzer.log
     df = analyzer.experiments_data
 
@@ -1524,6 +1948,12 @@ if __name__ == "__main__":
     #     kendall_fitness_scatter=False
     # )
 
-    analyzer.compute_A12(aocc_path, 'A12_values')
-    metric_ = 'A12_RMSE'
-    analyzer.scatter_fitness_metric('A12_values', 'scatterplot_fitness', metric=metric_, use_normalized=True)
+    # analyzer.compute_A12(algo_results, 'A12_values')
+    # metric_ = 'A12_RMSE'
+    # analyzer.scatter_fitness_metric('A12_values', 'scatterplot_fitness', metric=metric_, use_normalized=True)
+
+    # analyzer.compute_AOCC_RMSE(aocc_path, 'AOCC_pairwise_diffs')
+    # metric_ = 'AOCC_pairwise_diff'
+    # analyzer.scatter_fitness_metric('AOCC_pairwise_diffs', 'scatterplot_fitness', metric=metric_, use_normalized=True)
+
+    analyzer.pca_proxy_standings(save_folder_name)
