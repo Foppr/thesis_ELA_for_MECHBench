@@ -9,6 +9,7 @@ from sklearn import metrics
 from sklearn.decomposition import PCA
 import seaborn as sns
 from matplotlib.lines import Line2D
+import matplotlib.lines as mlines
 from scipy.stats import kendalltau
 import pflacco.classical_ela_features as ela
 
@@ -21,7 +22,7 @@ class LLaMEAAnalyzer:
                  original_stats_path='ela_feature_stats.csv'
                  ):
         self.log_dir = log_dir
-        print(self.log_dir)
+        # print(self.log_dir)
         self.save_folder_name = save_folder_name
         if not os.path.exists(save_folder_name):
             os.mkdir(save_folder_name)
@@ -48,9 +49,33 @@ class LLaMEAAnalyzer:
         # self.MB2_ela_500d = pd.read_csv('../Folder_Points/500D/data_p2/ELA/ela_500d5_p2_seed1312.csv')
         # self.MB3_ela_500d = pd.read_csv('../Folder_Points/500D/data_p3/ELA/ela_500d15_p3_seed1312.csv')
 
-        self.original_minmaxEla_p1 = {'disp.ratio_mean_02': 0.3180841545512229, 'ela_distr.skewness': 0.1293188522940492, 'ela_meta.lin_simple.adj_r2': 0.2210812231592529, 'ela_meta.lin_simple.intercept': 0.7444454923627558, 'ela_meta.lin_simple.coef.max': 1.0, 'ela_meta.quad_simple.adj_r2': 0.2425517809797153, 'ic.eps_ratio': 1.0, 'ic.eps_s': 1.0, 'nbc.nb_fitness.cor': 0.5102519892845082, 'ela_level.mmce_qda_25': 0.2957746230906558, 'ela_level.lda_qda_25': 0.3331012892967914}
-        self.original_minmaxEla_p2 = {'disp.ratio_mean_02': 0.613775757719448, 'ela_distr.skewness': 0.1919105264092217, 'ela_meta.lin_simple.adj_r2': 0.2228005657527632, 'ela_meta.lin_simple.intercept': 0.4325753309513677, 'ela_meta.lin_simple.coef.max': 0.3115486529327629, 'ela_meta.quad_simple.adj_r2': 0.2579866624338019, 'ic.eps_ratio': 0.864406779661017, 'ic.eps_s': 0.7478260869565218, 'nbc.nb_fitness.cor': 0.6089279644868683, 'ela_level.mmce_qda_25': 0.225352085399721, 'ela_level.lda_qda_25': 0.4880185824214766}
-        self.original_minmaxEla_p3 = {'disp.ratio_mean_02': 0.8785028761364115, 'ela_distr.skewness': 0.1827705273439356, 'ela_meta.lin_simple.adj_r2': 0.0168121027022387, 'ela_meta.lin_simple.intercept': 0.2178719275405489, 'ela_meta.lin_simple.coef.max': 0.595020107122112, 'ela_meta.quad_simple.adj_r2': 0.4266757168517114, 'ic.eps_ratio': 1.0, 'ic.eps_s': 1.0, 'nbc.nb_fitness.cor': 0.3924693159004784, 'ela_level.mmce_qda_25': 0.7743123688965757, 'ela_level.lda_qda_25': 0.1753467427267984}
+        self.original_minmaxEla_p1 = {'disp.ratio_mean_02': 0.3180841545512229,
+                                      'ela_distr.skewness': 0.1293188522940492,
+                                      'ela_meta.lin_simple.adj_r2': 0.2210812231592529,
+                                      'ela_meta.lin_simple.intercept': 0.7444454923627558,
+                                      'ela_meta.lin_simple.coef.max': 1.0,
+                                      'ela_meta.quad_simple.adj_r2': 0.2425517809797153, 'ic.eps_ratio': 1.0,
+                                      'ic.eps_s': 1.0, 'nbc.nb_fitness.cor': 0.5102519892845082,
+                                      'ela_level.mmce_qda_25': 0.2957746230906558,
+                                      'ela_level.lda_qda_25': 0.3331012892967914}
+        self.original_minmaxEla_p2 = {'disp.ratio_mean_02': 0.613775757719448, 'ela_distr.skewness': 0.1919105264092217,
+                                      'ela_meta.lin_simple.adj_r2': 0.2228005657527632,
+                                      'ela_meta.lin_simple.intercept': 0.4325753309513677,
+                                      'ela_meta.lin_simple.coef.max': 0.3115486529327629,
+                                      'ela_meta.quad_simple.adj_r2': 0.2579866624338019,
+                                      'ic.eps_ratio': 0.864406779661017, 'ic.eps_s': 0.7478260869565218,
+                                      'nbc.nb_fitness.cor': 0.6089279644868683,
+                                      'ela_level.mmce_qda_25': 0.225352085399721,
+                                      'ela_level.lda_qda_25': 0.4880185824214766}
+        self.original_minmaxEla_p3 = {'disp.ratio_mean_02': 0.8785028761364115,
+                                      'ela_distr.skewness': 0.1827705273439356,
+                                      'ela_meta.lin_simple.adj_r2': 0.0168121027022387,
+                                      'ela_meta.lin_simple.intercept': 0.2178719275405489,
+                                      'ela_meta.lin_simple.coef.max': 0.595020107122112,
+                                      'ela_meta.quad_simple.adj_r2': 0.4266757168517114, 'ic.eps_ratio': 1.0,
+                                      'ic.eps_s': 1.0, 'nbc.nb_fitness.cor': 0.3924693159004784,
+                                      'ela_level.mmce_qda_25': 0.7743123688965757,
+                                      'ela_level.lda_qda_25': 0.1753467427267984}
 
         self.standings_total = {}
 
@@ -243,7 +268,7 @@ class LLaMEAAnalyzer:
 
         def define_PCA_space():
             all_problem_data = []
-            print(self.log)
+            # print(self.log)
             for p in self.log:
                 for config in self.log[p]:
                     if 'total' not in config:
@@ -286,7 +311,6 @@ class LLaMEAAnalyzer:
 
         self.pca, self.pca_x_lim, self.pca_y_lim = define_PCA_space()
 
-
     def run(self,
             progress_plots=True,
             pca_plots=True,
@@ -311,7 +335,8 @@ class LLaMEAAnalyzer:
             self.save_individual_legend(save_folder)
 
             print("\n--- Per-feature progression plots ---")
-            self.plot_feature_progression(global_max_fit=max_feat_fit, max_ind_bound=max_ind, save_folder=save_folder, clean_layout=True)
+            self.plot_feature_progression(global_max_fit=max_feat_fit, max_ind_bound=max_ind, save_folder=save_folder,
+                                          clean_layout=True)
             self.save_feature_legend(save_folder)
 
         if pca_plots:
@@ -467,7 +492,7 @@ class LLaMEAAnalyzer:
             new_ela_stats = ela_stats.copy()  # The copy stats that will be updated and output
             size_path = f'../Folder_Points/500D/by_size/{size}'
             if not size_path[-3:] == 'csv':
-                print(f'\n\n ++++ #### SIZE {size} #### ++++ \n\n')
+                # print(f'\n\n ++++ #### SIZE {size} #### ++++ \n\n')
 
                 os.listdir(f'{size_path}/ELA')
                 for problem_path in os.listdir(f'{size_path}/ELA'):
@@ -506,6 +531,7 @@ class LLaMEAAnalyzer:
 
                     new_ela_stats.to_csv(f'{size_path}/{size}_updated_ELA_stats.csv', index=False)
 
+    @staticmethod
     def min_max_ela(self):
         path = '../Folder_Points/500D/by_size'
         for size in os.listdir(path):
@@ -542,14 +568,115 @@ class LLaMEAAnalyzer:
                     columns={'normalized_value': 'value'})
 
                 ela_minmax = ela_minmax.set_index('feature')
-                print(ela_minmax.to_string())
+                # print(ela_minmax.to_string())
                 save_name = f'../Folder_Points/500D/data_{problem}/ELA_min_max/minmax_{p_ela_csv}'
                 ela_minmax.to_csv(save_name)
 
+    def export_bbob_target_ela(self, bbob_filepath):
+        """
+        Filters BBOB ELA features for fids [1, 6, 10, 15, 20] (iid=1, dim=5, normalization='minmax'),
+        computes the mean across seeds 1312-1326, and saves one 2-column CSV ('feature', 'value') per fid.
+        """
+        df = pd.read_csv(bbob_filepath)
+
+        target_fids = [1, 6, 10, 15, 20]
+        target_seeds = list(range(1312, 1327))  # 1312 through 1326 inclusive
+
+        # Identify ELA feature columns (uses self.features if available, otherwise excludes metadata)
+        metadata_cols = {
+            'fid', 'iid', 'dim', 'rep', 'seed_number',
+            'n_samples', 'sampling', 'normalization'
+        }
+        feature_cols = (
+            list(self.features)
+            if hasattr(self, 'features') and self.features is not None
+            else [c for c in df.columns if c not in metadata_cols]
+        )
+
+        # Apply global filters
+        df_filtered = df[
+            (df['fid'].isin(target_fids)) &
+            (df['iid'] == 1) &
+            (df['normalization'] == 'minmax') &
+            (df['dim'] == 5) &
+            (df['seed_number'].isin(target_seeds))
+            ].copy()
+
+        saved_files = {}
+        for fid in target_fids:
+            df_fid = df_filtered[df_filtered['fid'] == fid]
+
+            if len(df_fid) != len(target_seeds):
+                print(f"Warning: Expected {len(target_seeds)} seeds for fid={fid}, found {len(df_fid)}.")
+
+            # Compute mean across seeds and format into 2 columns: 'feature', 'value'
+            mean_series = df_fid[feature_cols].mean()
+            df_out = mean_series.reset_index()
+            df_out.columns = ['feature', 'value']
+
+            out_dir = '../Folder_Points/BBOB'
+            filename = os.path.join(out_dir, f"bbob_f{fid}_iid1_dim5_minmax.csv")
+            df_out.to_csv(filename, index=False)
+            saved_files[fid] = filename
+            print(f"Saved {filename}")
+
+        return saved_files
+
+    @staticmethod
+    def minmax_normalize_bbob_ela(bbob_filepath='../output_ela/ela_features_bbob.csv',
+                                  stats_filepath='ela_feature_stats.csv',
+                                  output_filepath='../output_ela/ela_features_bbob_minmax.csv'):
+        """
+        Min-max normalizes BBOB ELA features based on pre-computed feature statistics.
+        Matches features by name and dimension.
+        """
+        # Load data
+        df_bbob = pd.read_csv(bbob_filepath)
+        df_stats = pd.read_csv(stats_filepath)
+
+        # Create a quick lookup table indexed by (dimension, feature)
+        stats_lookup = df_stats.set_index(['dimension', 'feature'])[['min', 'max']]
+
+        # Identify metadata columns to exclude from normalization
+        metadata_cols = ['fid', 'iid', 'dim', 'rep', 'seed_number', 'n_samples', 'sampling', 'normalization']
+        feature_cols = [col for col in df_bbob.columns if col not in metadata_cols]
+
+        # Create a copy for the normalized output
+        df_norm = df_bbob.copy()
+
+        # Get unique dimensions present in the BBOB dataset
+        dimensions = df_bbob['dim'].unique()
+
+        for feature in feature_cols:
+            for dim in dimensions:
+                if dim == 15:  # Missing from stats
+                    dim = 20
+                if (dim, feature) in stats_lookup.index:
+                    f_min = stats_lookup.loc[(dim, feature), 'min']
+                    f_max = stats_lookup.loc[(dim, feature), 'max']
+
+                    # Mask for the current dimension
+                    mask = df_norm['dim'] == dim
+
+                    # Apply min-max normalization, guarding against division by zero
+                    if f_max > f_min:
+                        df_norm.loc[mask, feature] = (df_norm.loc[mask, feature] - f_min) / (f_max - f_min)
+                    else:
+                        df_norm.loc[mask, feature] = 0.0
+                else:
+                    print(
+                        f"Warning: Statistics for feature '{feature}' (dim {dim}) not found. Skipping normalization for this slice.")
+
+        # Save to CSV
+        df_norm.to_csv(output_filepath, index=False)
+        print(f"Normalized BBOB ELA features successfully saved to: {output_filepath}")
+
+        return df_norm
+
     def load_logs(self):
-        print(self.log_dir)
+        # print(self.log_dir)
         for problem_ in os.listdir(self.log_dir):
-            print(problem_)
+            # print(problem_)
             problem_log = []  # Contains all individuals of this problem, across all configs and runs
             self.log[problem_] = {}
             self.experiments_data[problem_] = {}
@@ -605,14 +732,20 @@ class LLaMEAAnalyzer:
         updated_stats = pd.read_csv(self.updated_stats_path)
         original_stats = pd.read_csv(self.original_stats_path)
 
-        updated_12 = updated_stats.loc[(updated_stats['dimension'] == 5) & (updated_stats['feature'].isin(self.features))]
-        original_12 = original_stats.loc[(original_stats['dimension'] == 5) & (original_stats['feature'].isin(self.features))]
-        updated_3 = updated_stats.loc[(updated_stats['dimension'] == 20) & (updated_stats['feature'].isin(self.features))]
-        original_3 = original_stats.loc[(original_stats['dimension'] == 20) & (original_stats['feature'].isin(self.features))]
+        updated_12 = updated_stats.loc[
+            (updated_stats['dimension'] == 5) & (updated_stats['feature'].isin(self.features))]
+        original_12 = original_stats.loc[
+            (original_stats['dimension'] == 5) & (original_stats['feature'].isin(self.features))]
+        updated_3 = updated_stats.loc[
+            (updated_stats['dimension'] == 20) & (updated_stats['feature'].isin(self.features))]
+        original_3 = original_stats.loc[
+            (original_stats['dimension'] == 20) & (original_stats['feature'].isin(self.features))]
 
         for dim, p in [(5, '1, 2'), (20, '3')]:
-            updated = updated_stats.loc[(updated_stats['dimension'] == dim) & (updated_stats['feature'].isin(self.features))]
-            original = original_stats.loc[(original_stats['dimension'] == dim) & (original_stats['feature'].isin(self.features))]
+            updated = updated_stats.loc[
+                (updated_stats['dimension'] == dim) & (updated_stats['feature'].isin(self.features))]
+            original = original_stats.loc[
+                (original_stats['dimension'] == dim) & (original_stats['feature'].isin(self.features))]
 
             original_min, original_max = original['min'], original['max']
             updated_min, updated_max = updated['min'], updated['max']
@@ -691,6 +824,117 @@ class LLaMEAAnalyzer:
         plt.close()
 
         return pca_dic
+
+    def plot_bbob_pca(self, bbob_filepath='../output_ela/ela_features_bbob_minmax.csv',
+                      save_folder="results",
+                      filter_fids=[]):
+        """
+        Creates a PCA space of all BBOB instances and generates 2D scatter plots for dim=5 and dim=15.
+        Filters for 'minmax' normalization, averages features over seeds, colors by fid, and sets markers by iid.
+        """
+        # 1. Load data and apply initial filters
+        df = pd.read_csv(bbob_filepath)
+        df = df[df['normalization'] == 'minmax'].copy()
+
+        # Filter for only a few fids
+        df = df[df['fid'].isin(filter_fids)].copy()
+
+        # Ensure output directory exists
+        os.makedirs(f"{self.save_folder_name}/{save_folder}", exist_ok=True)
+
+        # 2. Define marker list for up to 5 iids (with fallbacks just in case)
+        marker_list = ['o', 's', '^', 'D', 'v', 'P', 'X', '*', 'p', 'h']
+
+        # High-contrast colormap to support 25 distinct fids
+        cmap = plt.get_cmap('nipy_spectral')
+
+        # 3. Process and Plot per Dimension
+        for dim in [5, 15]:
+            df_dim = df[df['dim'] == dim]
+            if df_dim.empty:
+                print(f"Skipping dim {dim}: No data found.")
+                continue
+
+            # Aggregate: calculate the mean of the 11 features grouped by fid and iid (averaging over seeds)
+            agg_df = df_dim.groupby(['fid', 'iid'])[self.features].mean().reset_index()
+
+            # Drop any NaNs that would break the PCA
+            if agg_df[self.features].isna().any().any():
+                print(f"Warning: NaNs detected in aggregated features for dim {dim}. Dropping affected instances.")
+                agg_df = agg_df.dropna(subset=self.features)
+
+            if len(agg_df) < 2:
+                print(f"Skipping dim {dim}: Not enough valid instances for PCA.")
+                continue
+
+            # 4. Fit PCA
+            X = agg_df[self.features].to_numpy()
+            pca = PCA(n_components=2, random_state=42)
+            X_pca = pca.fit_transform(X)
+
+            agg_df['pca1'] = X_pca[:, 0]
+            agg_df['pca2'] = X_pca[:, 1]
+            expl_var = pca.explained_variance_ratio_
+
+            # 5. Prepare Plot
+            fig, ax = plt.subplots(figsize=(11, 7), dpi=300)
+
+            unique_fids = sorted(agg_df['fid'].unique())
+            unique_iids = sorted(agg_df['iid'].unique())
+
+            # Create mapping dictionaries for consistent colors and markers
+            color_map = {fid: cmap(i / max(1, len(unique_fids) - 1)) for i, fid in enumerate(unique_fids)}
+            marker_map = {iid: marker_list[i % len(marker_list)] for i, iid in enumerate(unique_iids)}
+
+            # 6. Scatter Points
+            for _, row in agg_df.iterrows():
+                ax.scatter(
+                    row['pca1'], row['pca2'],
+                    color=color_map[row['fid']],
+                    marker=marker_map[row['iid']],
+                    s=100, alpha=0.8, edgecolors='black', linewidths=0.6, zorder=3
+                )
+
+            # 7. Create Custom Legends
+            # FID Legend (Colors) - Placed outside top right
+            fid_handles = [
+                mlines.Line2D([], [], color=color_map[f], marker='o', linestyle='None',
+                              markersize=8, markeredgecolor='black', markeredgewidth=0.5, label=f'F{int(f)}')
+                for f in unique_fids
+            ]
+            legend_fid = ax.legend(
+                handles=fid_handles, title="Function ID (fid)",
+                bbox_to_anchor=(1.02, 1), loc='upper left', ncol=2, frameon=True
+            )
+            ax.add_artist(legend_fid)
+
+            # IID Legend (Markers) - Placed outside bottom right
+            iid_handles = [
+                mlines.Line2D([], [], color='gray', marker=marker_map[i], linestyle='None',
+                              markersize=8, markeredgecolor='black', markeredgewidth=0.5, label=f'IID {int(i)}')
+                for i in unique_iids
+            ]
+            ax.legend(
+                handles=iid_handles, title="Instance ID (iid)",
+                bbox_to_anchor=(1.02, 0), loc='lower left', frameon=True
+            )
+
+            # 8. Formatting
+            ax.set(
+                title=f"PCA of BBOB Instances (Dim {dim})",
+                xlabel=f"1st Principal Component ({expl_var[0] * 100:.1f}%)",
+                ylabel=f"2nd Principal Component ({expl_var[1] * 100:.1f}%)",
+            )
+            ax.grid(True, linestyle="--", alpha=0.4, zorder=0)
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+
+            # Save Figure
+            plt.tight_layout()
+            filename = f"{self.save_folder_name}/{save_folder}/PCA_BBOB_filtered_dim{dim}.png"
+            plt.savefig(filename, bbox_inches='tight')
+            plt.close()
+            print(f"Saved {filename}")
 
     def pca_proxy_standings(self, save_folder):
         """
@@ -1338,7 +1582,8 @@ class LLaMEAAnalyzer:
 
     # endregion PROGRESSION PLOTS
 
-    def save_feature_difficulty_ranking(self, exp_mapping, output_filename='llamea_tables/feature_difficulty_ranking.csv'):
+    def save_feature_difficulty_ranking(self, exp_mapping,
+                                        output_filename='llamea_tables/feature_difficulty_ranking.csv'):
         """
         Export table with best fitness per feature
         """
@@ -1581,7 +1826,7 @@ class LLaMEAAnalyzer:
 
                 # Prevent division by zero if values are identical
                 df_p['norm_A12_RMSE'] = (df_p['A12_RMSE'] - rmse_min) / (
-                            rmse_max - rmse_min) if rmse_max > rmse_min else 0
+                        rmse_max - rmse_min) if rmse_max > rmse_min else 0
                 df_p['norm_fitness'] = (df_p['fitness'] - fit_min) / (fit_max - fit_min) if fit_max > fit_min else 0
             else:
                 df_p['norm_A12_RMSE'] = 0.0
@@ -1594,6 +1839,121 @@ class LLaMEAAnalyzer:
             os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
             df_p.to_csv(filename)
             print(f"Saved {filename}")
+
+    def compute_A12_aocc(self, path_aocc_results, save_path):
+        """
+        Computes A12 effect size directly on the overall AOCC scores.
+        Calculates the RMSE between the real-world (MB) A12 values and proxy A12 values.
+        Saves 3 CSV files (one per problem) formatted for the scatter_fitness_metric plotter.
+        """
+        # 1. LOAD AOCC DATA
+        # Adjust path if 'path_aocc_results' already includes the folder or not
+        csv_path = f"{self.save_folder_name}/{path_aocc_results}" if not path_aocc_results.startswith(
+            self.save_folder_name) else path_aocc_results
+        df = pd.read_csv(csv_path)
+
+        # Identify seed columns dynamically
+        seed_cols = [c for c in df.columns if c.startswith('seed')]
+
+        proxy_standings = [
+            'pod1', 'pod2', 'pod3',
+            'med1', 'med2', 'med3',
+            'worst1', 'worst2', 'worst3'
+        ]
+
+        unique_problems = df['problem'].unique()
+
+        for p in unique_problems:
+            df_p = df[df['problem'] == p]
+
+            standings = df_p['standing'].unique()
+            mb_standing = next((s for s in standings if 'MB' in s), None)
+            if not mb_standing:
+                continue
+
+            # Get the sorted list of algorithms to ensure deterministic pairings
+            algos = sorted(df_p[df_p['standing'] == mb_standing]['algo'].unique())
+            pairs = list(itertools.combinations(algos, 2))  # 15 unique pairs
+
+            # 2. FUNCTION TO COMPUTE 15 A12 VALUES
+            def get_15_A12(standing_name):
+                a12_values = []
+                df_stand = df_p[df_p['standing'] == standing_name]
+
+                for (algo1, algo2) in pairs:
+                    row1 = df_stand[df_stand['algo'] == algo1]
+                    row2 = df_stand[df_stand['algo'] == algo2]
+
+                    # # Fallback if an algorithm crashed or is missing
+                    # if row1.empty or row2.empty:
+                    #     a12_values.append(0.5)
+                    #     continue
+
+                    # Extract the 15 seed AOCC values
+                    algo1_vals = row1[seed_cols].to_numpy().flatten()
+                    algo2_vals = row2[seed_cols].to_numpy().flatten()
+
+                    # A12 computation (Higher AOCC is better)
+                    wins = np.sum(algo1_vals > algo2_vals)
+                    ties = np.sum(algo1_vals == algo2_vals)
+                    n_seeds = len(seed_cols)
+
+                    a12 = (wins + 0.5 * ties) / n_seeds if n_seeds > 0 else 0.5
+                    a12_values.append(a12)
+
+                return np.array(a12_values)  # Array of exactly 15 values
+
+            # Calculate baseline A12 vector for the Real-World Target
+            mb_a12 = get_15_A12(mb_standing)
+
+            # Fetch ELA fitness values from class attribute
+            standings_p = self.standings_total.get(p) if hasattr(self, 'standings_total') else None
+
+            # 3. COMPUTE RMSE FOR PROXIES
+            p_results = []
+            for proxy in proxy_standings:
+                if proxy in standings:
+                    proxy_a12 = get_15_A12(proxy)
+                    rmse = np.sqrt(np.mean((mb_a12 - proxy_a12) ** 2))
+
+                    # Extract proxy fitness (ELA distance)
+                    fitness = np.nan
+                    if standings_p is not None:
+                        try:
+                            fitness = standings_p.loc[standings_p['standing'] == proxy]['fitness'].values[0]
+                        except IndexError:
+                            fitness = np.nan
+
+                    p_results.append({
+                        'standing': proxy,
+                        'A12_RMSE': rmse,
+                        'fitness': fitness
+                    })
+
+            # 4. FORMAT TO DATAFRAME & NORMALIZE
+            df_res = pd.DataFrame(p_results)
+            if not df_res.empty:
+                if len(df_res) > 1:
+                    rmse_min, rmse_max = df_res['A12_RMSE'].min(), df_res['A12_RMSE'].max()
+                    fit_min, fit_max = df_res['fitness'].min(), df_res['fitness'].max()
+
+                    # Safe Min-Max Normalization
+                    df_res['norm_A12_RMSE'] = (df_res['A12_RMSE'] - rmse_min) / (
+                            rmse_max - rmse_min) if rmse_max > rmse_min else 0
+                    df_res['norm_fitness'] = (df_res['fitness'] - fit_min) / (
+                            fit_max - fit_min) if fit_max > fit_min else 0
+                else:
+                    df_res['norm_A12_RMSE'] = 0.0
+                    df_res['norm_fitness'] = 0.0
+
+                df_res.set_index('standing', inplace=True)
+
+                # 5. SAVE PROBLEM-SPECIFIC CSV
+                p_num = p.replace('p', '')
+                filename = f"{self.save_folder_name}/{save_path}_p{p_num}.csv"
+                os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+                df_res.to_csv(filename)
+                print(f"Saved {filename}")
 
     def compute_AOCC_RMSE(self, path_aocc_results, save_path, use_t_stat=False):
         """
@@ -1694,7 +2054,7 @@ class LLaMEAAnalyzer:
                 fit_min, fit_max = res_df['fitness'].min(), res_df['fitness'].max()
 
                 res_df['norm_AOCC_RMSE'] = (res_df['AOCC_RMSE'] - rmse_min) / (
-                            rmse_max - rmse_min) if rmse_max > rmse_min else 0
+                        rmse_max - rmse_min) if rmse_max > rmse_min else 0
                 res_df['norm_fitness'] = (res_df['fitness'] - fit_min) / (fit_max - fit_min) if fit_max > fit_min else 0
             else:
                 res_df['norm_AOCC_RMSE'] = 0.0
@@ -1706,7 +2066,6 @@ class LLaMEAAnalyzer:
             os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
             res_df.to_csv(filename)
             print(f"Saved {filename}")
-
 
     def plot_aocc_per_problem(self, df_wide):
         """Generates grouped error-bar plots of AOCC values (mean ± SE) per problem.
@@ -1733,7 +2092,8 @@ class LLaMEAAnalyzer:
             mb_standings = [s for s in standings if "MB" in s]
             other_standings = [s for s in standings if "MB" not in s]
             # standing_order = mb_standings + sorted(other_standings)
-            standing_order = [f'MB{problem[1]}', 'pod1', 'pod2', 'pod3', 'med1', 'med2', 'med3', 'worst1', 'worst2', 'worst3']
+            standing_order = [f'MB{problem[1]}', 'pod1', 'pod2', 'pod3', 'med1', 'med2', 'med3', 'worst1', 'worst2',
+                              'worst3']
             # print(standing_order)
 
             unique_algos = sorted(sub_df["algo"].unique())
@@ -1803,7 +2163,8 @@ class LLaMEAAnalyzer:
             optimizers = {'botorch': {}, 'cmaes': {}, 'de': {}, 'one_plus_one': {}, 'turbo1': {}, 'baxus': {}}
             aocc_p = aocc_results.loc[(aocc_results['problem'] == f'p{p}')]
             for standing in [f'MB{p}', 'pod1', 'pod2', 'pod3', 'med1', 'med2', 'med3', 'worst1', 'worst2', 'worst3']:
-                aocc_p_standing = aocc_p.loc[(aocc_p['standing'] == standing)].sort_values(by='mean')[::-1].reset_index()
+                aocc_p_standing = aocc_p.loc[(aocc_p['standing'] == standing)].sort_values(by='mean')[
+                    ::-1].reset_index()
                 # From best to worst
                 for i, algo in aocc_p_standing[['algo']].iterrows():
                     rank = i + 1
@@ -1953,7 +2314,16 @@ if __name__ == "__main__":
     # analyzer.scatter_fitness_metric('A12_values', 'scatterplot_fitness', metric=metric_, use_normalized=True)
 
     # analyzer.compute_AOCC_RMSE(aocc_path, 'AOCC_pairwise_diffs')
-    # metric_ = 'AOCC_pairwise_diff'
-    # analyzer.scatter_fitness_metric('AOCC_pairwise_diffs', 'scatterplot_fitness', metric=metric_, use_normalized=True)
+    # analyzer.compute_A12_aocc(path_aocc_results='aocc_results.csv', save_path='results')
+    # metric_ = 'A12_RMSE'
+    # analyzer.scatter_fitness_metric(path_results='A12_values', save_path='scatterplot_fitness_norm_cuts', metric=metric_, use_normalized=True)
 
-    analyzer.pca_proxy_standings(save_folder_name)
+    # analyzer.pca_proxy_standings(save_folder_name)
+
+    # analyzer.minmax_normalize_bbob_ela()
+    # filter_fids = [1, 6, 10, 15, 20]
+    # analyzer.plot_bbob_pca(filter_fids=filter_fids)
+
+    analyzer.export_bbob_target_ela(
+        bbob_filepath="../output_ela/ela_features_bbob_minmax.csv"
+    )
