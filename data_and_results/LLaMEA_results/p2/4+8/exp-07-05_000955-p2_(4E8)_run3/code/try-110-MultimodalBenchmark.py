@@ -1,0 +1,36 @@
+import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+    
+    def f(self, x):
+        # Ensure x is within bounds
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Enhanced fractal component with recursive sine-cosine transformations
+        f1 = 0.4 * np.sum(np.sin(2.0 * np.pi * x) * np.cos(3.0 * np.pi * x) * np.sin(5.0 * np.pi * x))
+        
+        # Asymmetric polynomial coupling with variable exponents and cross-terms
+        f2 = 0.3 * np.sum((x**3 + 0.3 * x**4 + 0.05 * x**5) * np.abs(x) ** 0.7)
+        
+        # Improved dynamic noise modulation with multi-frequency interaction
+        noise = np.sin(0.15 * np.sum(x**2)) * np.cos(0.08 * np.sum(x)) * np.exp(-0.02 * np.sum(np.abs(x)))
+        f3 = 0.25 * np.sum(np.exp(-0.1 * np.abs(x)) * np.sin(12.0 * x) * noise)
+        
+        # Multi-scale interaction with log-scaled distances and enhanced sine modulation
+        f4 = 0.18 * np.sum(np.sin(np.log(np.abs(x) + 1.5)) * np.cos(np.log(np.abs(x) + 1.5)))
+        
+        # Saddle point distribution with hyperbolic and polynomial components
+        f5 = 0.22 * np.sum(np.tanh(x) * (x**2 - 1.0) * np.cos(4.0 * x))
+        
+        # Enhanced fractal-like structure using recursive polynomial transformations
+        f6 = 0.12 * np.sum((x**2 + 0.15 * x**3) * np.sin(5.0 * x) * np.cos(4.0 * x))
+        
+        # Cross-term coupling with exponential decay and sinusoidal perturbations
+        f7 = 0.15 * np.sum(np.exp(-0.4 * np.abs(x)) * np.sin(9.0 * x) * np.cos(7.0 * x))
+        
+        # Additional interaction term for increased complexity
+        f8 = 0.1 * np.sum(np.sin(0.5 * x) * np.cos(0.3 * x) * np.exp(-0.1 * x**2))
+        
+        return f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8

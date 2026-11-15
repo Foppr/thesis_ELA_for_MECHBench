@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1168, 
+	"function_name": "p1_seed1323_pod3_optbaxus", 
+	"maximization": false, 
+	"algorithm": {"name": "baxus_mechbench", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1168_p1_seed1323_pod3_optbaxus/IOHprofiler_f1168_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 150, "best": {"evals": 135, "y": -26.35633222126791, "x": [2.735644684382523, 4.999895866538722, -4.998394319959151, 1.973013593396253, 4.2273470928299375]}}
+		]}
+	]
+}

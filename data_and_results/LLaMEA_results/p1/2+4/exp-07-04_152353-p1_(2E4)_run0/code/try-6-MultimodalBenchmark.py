@@ -1,0 +1,32 @@
+import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Normalize input to [-1, 1] for better numerical stability
+        x_normalized = x / 5.0
+        
+        # Quadratic term with conditioning
+        f1 = np.sum(x_normalized**2)
+        
+        # Sinusoidal terms with multiple frequencies and amplitudes
+        f2 = np.sum(np.sin(10 * np.pi * x_normalized)**2 + 0.5 * np.sin(20 * np.pi * x_normalized)**2)
+        
+        # Gaussian-like terms with varying widths
+        f3 = np.sum(np.exp(-2 * x_normalized**2) * np.cos(3 * np.pi * x_normalized))
+        
+        # Interaction terms with non-linear coupling
+        interaction = 0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                interaction += (x_normalized[i]**2 + x_normalized[j]**2) * np.sin(3 * np.pi * (x_normalized[i] - x_normalized[j]))
+        
+        # Add a more complex global minimum structure
+        global_structure = np.sum(np.abs(x_normalized)**4 + 0.3 * np.abs(x_normalized)**6)
+        
+        # Combine all terms with adaptive weights
+        result = 0.4 * f1 + 0.3 * f2 + 0.2 * f3 + 0.05 * interaction + 0.05 * global_structure
+        
+        return result

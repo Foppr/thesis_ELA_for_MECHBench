@@ -81,6 +81,7 @@ def main():#p=2, dim=5, size=125):
     }
 
     outputs = problem_output_types[p]
+    print(f'I think it will search for OpenRadioss here')
     f = sob.get_problem(problem_id, dim, outputs, runner_options=runnerOptions)
     points = sampler(n_datapoints, seed=seed)
     points.to_csv(f"{filename_points}")

@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1121, 
+	"function_name": "mechbench_p3", 
+	"maximization": false, 
+	"algorithm": {"name": "one_plus_one_mechbench", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 15,
+		"path": "data_f1121_mechbench_p3/IOHprofiler_f1121_DIM15.dat",
+		"runs": [
+			{"instance": 1, "evals": 451, "best": {"evals": 378, "y": 1.3071854530960383, "x": [4.843579133629758, 4.377323364082398, 2.464551702766322, -3.50069599038335, 4.187278944068565, 4.868331858907314, -4.191129871014193, 4.62262547489925, -4.431928870986711, 4.580564729516113, -4.38636733107754, -3.8101887449156377, -4.697312953887382, 1.8573748427382766, 2.7898917274723924]}}
+		]}
+	]
+}

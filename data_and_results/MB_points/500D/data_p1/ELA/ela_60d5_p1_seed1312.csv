@@ -1,0 +1,12 @@
+feature,value
+disp.ratio_mean_02,0.904822380569275
+ela_distr.skewness,0.13889698016023155
+ela_meta.lin_simple.adj_r2,0.18070295037252526
+ela_meta.lin_simple.intercept,0.6815602882922797
+ela_meta.lin_simple.coef.max,0.30341506305831106
+ela_meta.quad_simple.adj_r2,0.21879499979352623
+ic.eps_ratio,-0.4754754754754753
+ic.eps_s,0.42542542542542516
+nbc.nb_fitness.cor,-0.43146771662766625
+ela_level.mmce_qda_25,0.1366666666666667
+ela_level.lda_qda_25,1.7804878048780484

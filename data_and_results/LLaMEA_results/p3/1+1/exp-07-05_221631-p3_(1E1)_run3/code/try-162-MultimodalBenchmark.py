@@ -1,0 +1,66 @@
+import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        # Precompute rotation matrix for added complexity
+        np.random.seed(42)  # For reproducibility
+        self.rotation_matrix = np.random.randn(dim, dim)
+        self.rotation_matrix, _ = np.linalg.qr(self.rotation_matrix)
+        # Additional random scaling for each dimension
+        self.scales = np.random.uniform(0.5, 2.0, dim)
+        # Adaptive noise parameters
+        self.noise_scale = 0.8
+        self.noise_frequency = 5.0
+        # Fractal-like modulation parameters
+        self.fractal_depth = 4
+        self.fractal_amplitude = 3.0
+        # Additional chaotic coupling parameters
+        self.chaotic_coupling_strength = 2.0
+        self.interaction_order = 5
+        
+    def f(self, x):
+        # Ensure x is within bounds
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Apply rotation and scaling
+        x_transformed = self.rotation_matrix @ x * self.scales
+        
+        # Base quadratic term (ellipsoid)
+        f_val = np.sum(x_transformed**2)
+        
+        # Add nested chaotic sine-wave perturbations with fractal structure
+        for i in range(self.dim):
+            # Base chaotic modulation
+            chaotic_mod = np.sin(7.0 * x_transformed[i] + 2.0 * np.sin(5.0 * x_transformed[i]))
+            # Nested fractal-like structure with increased depth
+            nested_mod = 0.0
+            for depth in range(self.fractal_depth):
+                nested_mod += np.sin((depth + 1) * 3.0 * x_transformed[i]) * np.cos((depth + 1) * 2.0 * x_transformed[i])
+            f_val += self.fractal_amplitude * (chaotic_mod + nested_mod)
+            
+        # Add complex interaction terms between dimensions with higher-order and chaotic coupling
+        for i in range(self.dim - self.interaction_order + 1):
+            # Higher-order interaction with fractal-like coupling
+            interaction = 1.5 * x_transformed[i] * x_transformed[i+1] * x_transformed[i+2] * x_transformed[i+3] * x_transformed[i+4]
+            fractal_coupling = np.sin(0.5 * x_transformed[i]) * np.cos(0.3 * x_transformed[i+1]) * np.sin(0.7 * x_transformed[i+2])
+            # Add chaotic coupling strength
+            f_val += interaction * fractal_coupling * self.chaotic_coupling_strength
+            
+        # Add a perturbed quartic term with chaotic modulation for increased complexity
+        f_val += 0.12 * np.sum((x_transformed**4) * (1.0 + 0.4 * np.sin(7.0 * x_transformed) + 0.2 * np.cos(4.0 * x_transformed)))
+        
+        # Add stochastic noise with adaptive variance and frequency
+        noise = np.random.normal(0, self.noise_scale, self.dim)
+        # Introduce frequency-dependent noise for increased ruggedness
+        freq_noise = np.sin(self.noise_frequency * x_transformed) * noise
+        f_val += np.sum(freq_noise * x_transformed)
+        
+        # Add a small constant to ensure positive fitness values
+        f_val += 0.15
+        
+        # Add a new component: exponential chaotic modulation with fractal perturbations
+        exp_mod = np.exp(-0.5 * np.sum(x_transformed**2)) * np.sin(3.0 * np.sum(x_transformed))
+        f_val += 0.3 * exp_mod
+        
+        return f_val

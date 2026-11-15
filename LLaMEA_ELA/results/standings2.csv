@@ -1,0 +1,689 @@
+,id,fitness,name,description,code,configspace,generation,feedback,error,parent_ids,operator,metadata,task_prompt,problem,ES_config,run,standing
+0,b9824a04-662a-48d1-b2fb-c0fbd11bf2c0,0.9199742617517248,HybridMultimodalBenchmark,"A highly multimodal optimization landscape combining Gaussian radial basis functions with chaotic sinusoidal perturbations, logarithmic conditioning, and novel cross-dimensional cubic interactions to create a severely ill-conditioned, multi-modal search space with complex basin structures and extreme fitness variations, with increased algorithmic challenge through enhanced polynomial coupling and modified chaotic components.","import numpy as np
+
+class HybridMultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        # Precompute Gaussian centers and weights for stability
+        np.random.seed(42)
+        self.centers = np.random.uniform(-5.0, 5.0, (15, dim))
+        self.weights = np.random.uniform(0.5, 2.5, 15)
+        # Additional cross-dimensional interaction terms
+        self.cross_weights = np.random.uniform(-0.5, 0.5, (dim, dim))
+        # Additional chaotic components for increased complexity
+        self.chaotic_coeffs = np.random.uniform(0.1, 1.0, (5, dim))
+    
+    def f(self, x):
+        # Ensure x is within bounds
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Gaussian radial basis function component
+        gaussian_sum = 0.0
+        for i in range(15):
+            center = self.centers[i]
+            weight = self.weights[i]
+            distance = np.sum((x - center) ** 2)
+            gaussian_sum += weight * np.exp(-distance / (2 * 0.3 ** 2))
+        
+        # Enhanced chaotic sinusoidal perturbation component with higher frequency terms
+        chaotic_sum = 0.0
+        for i in range(self.dim):
+            xi = x[i]
+            chaotic_sum += (np.sin(7 * xi) * np.cos(5 * xi) * np.sin(9 * xi) + 
+                           0.6 * np.sin(13 * xi) * np.cos(4 * xi) * np.sin(11 * xi) + 
+                           0.4 * np.sin(6 * xi) * np.cos(8 * xi) * np.sin(10 * xi) +
+                           0.2 * np.sin(15 * xi) * np.cos(3 * xi) * np.sin(12 * xi) +
+                           self.chaotic_coeffs[0, i] * np.sin(17 * xi) * np.cos(2 * xi) * np.sin(14 * xi) +
+                           self.chaotic_coeffs[1, i] * np.sin(19 * xi) * np.cos(6 * xi) * np.sin(16 * xi))
+        
+        # Logarithmic conditioning term with additional sine modulation
+        log_conditioning = 0.0
+        for i in range(self.dim):
+            xi = x[i]
+            log_conditioning += np.log(1 + np.abs(xi)) * (np.sin(xi) + 0.5 * np.sin(2 * xi))
+        
+        # Cross-dimensional cubic interaction terms
+        cross_term = 0.0
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if i != j:
+                    cross_term += self.cross_weights[i, j] * (x[i] ** 3) * x[j]
+        
+        # Additional quartic polynomial terms for increased complexity
+        quartic_term = 0.0
+        for i in range(self.dim):
+            quartic_term += 0.1 * (x[i] ** 4)
+        
+        # Quadratic basin component with conditioning
+        quadratic_term = np.sum(x**2) / self.dim
+        
+        # Combine all components with different weights
+        result = 0.3 * gaussian_sum + 0.25 * chaotic_sum + 0.15 * log_conditioning + 0.15 * cross_term + 0.1 * quartic_term + 0.05 * quadratic_term
+        
+        return result",,12,"The landscape 'HybridMultimodalBenchmark' had manhattan distance (fitness) 0.920. Lower is better.
+disp.ratio_mean_02: error -0.032
+ela_distr.skewness: error -0.066
+ela_meta.lin_simple.adj_r2: error 0.020
+ela_meta.lin_simple.intercept: error 0.028
+ela_meta.lin_simple.coef.max: error 0.079
+ela_meta.quad_simple.adj_r2: error -0.021
+ic.eps_ratio: error 0.051
+ic.eps_s: error -0.070
+nbc.nb_fitness.cor: error -0.154
+ela_level.mmce_qda_25: error 0.130
+ela_level.lda_qda_25: error -0.270
+",,['f8aaca7a-947c-422d-b032-a615b1803abc'],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 0.9169, 'ela_distr.skewness': 0.0939, 'ela_meta.lin_simple.adj_r2': 0.221, 'ela_meta.lin_simple.intercept': 0.405, 'ela_meta.lin_simple.coef.max': 0.1192, 'ela_meta.quad_simple.adj_r2': 0.2322, 'ic.eps_ratio': -0.7758, 'ic.eps_s': -0.035, 'nbc.nb_fitness.cor': -0.3811, 'ela_level.mmce_qda_25': 0.1168, 'ela_level.lda_qda_25': 1.6164}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.5813, 'ela_distr.skewness': 0.1255, 'ela_meta.lin_simple.adj_r2': 0.2426, 'ela_meta.lin_simple.intercept': 0.4609, 'ela_meta.lin_simple.coef.max': 0.3901, 'ela_meta.quad_simple.adj_r2': 0.2371, 'ic.eps_ratio': 0.9153, 'ic.eps_s': 0.6783, 'nbc.nb_fitness.cor': 0.4554, 'ela_level.mmce_qda_25': 0.3549, 'ela_level.lda_qda_25': 0.2179}, 'Distances': {'disp.ratio_mean_02': -0.029730671235675188, 'ela_distr.skewness': -1.5101866772199484, 'ela_meta.lin_simple.adj_r2': 0.020326863460094408, 'ela_meta.lin_simple.intercept': 0.02454330539098154, 'ela_meta.lin_simple.coef.max': 0.023909640571885854, 'ela_meta.quad_simple.adj_r2': -0.020977875297974957, 'ic.eps_ratio': 0.18018018018018023, 'ic.eps_s': -0.16016016016016002, 'nbc.nb_fitness.cor': -0.08377842685690429, 'ela_level.mmce_qda_25': 0.03680000000000011, 'ela_level.lda_qda_25': -1.6685616438356177}, 'Absolute distances': {'disp.ratio_mean_02': 0.029730671235675188, 'ela_distr.skewness': 1.5101866772199484, 'ela_meta.lin_simple.adj_r2': 0.020326863460094408, 'ela_meta.lin_simple.intercept': 0.02454330539098154, 'ela_meta.lin_simple.coef.max': 0.023909640571885854, 'ela_meta.quad_simple.adj_r2': 0.020977875297974957, 'ic.eps_ratio': 0.18018018018018023, 'ic.eps_s': 0.16016016016016002, 'nbc.nb_fitness.cor': 0.08377842685690429, 'ela_level.mmce_qda_25': 0.03680000000000011, 'ela_level.lda_qda_25': 1.6685616438356177}, 'Min-max distances': {'disp.ratio_mean_02': -0.03242759728989353, 'ela_distr.skewness': -0.06636330312507854, 'ela_meta.lin_simple.adj_r2': 0.019763615832751824, 'ela_meta.lin_simple.intercept': 0.028326927381469136, 'ela_meta.lin_simple.coef.max': 0.07858659779535249, 'ela_meta.quad_simple.adj_r2': -0.020842741947840387, 'ic.eps_ratio': 0.05084745762711862, 'ic.eps_s': -0.06956521739130428, 'nbc.nb_fitness.cor': -0.1535698300653029, 'ela_level.mmce_qda_25': 0.12957746935131975, 'ela_level.lda_qda_25': -0.27010350394429344}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.03242759728989353, 'ela_distr.skewness': 0.06636330312507854, 'ela_meta.lin_simple.adj_r2': 0.019763615832751824, 'ela_meta.lin_simple.intercept': 0.028326927381469136, 'ela_meta.lin_simple.coef.max': 0.07858659779535249, 'ela_meta.quad_simple.adj_r2': 0.020842741947840387, 'ic.eps_ratio': 0.05084745762711862, 'ic.eps_s': 0.06956521739130428, 'nbc.nb_fitness.cor': 0.1535698300653029, 'ela_level.mmce_qda_25': 0.12957746935131975, 'ela_level.lda_qda_25': 0.27010350394429344}, 'Raw manhattan distance (min-max normalized)': 0.9199742617517248, 'Penalized, niche distance': 0.9199742617517248, 'Niche radius': 0.0}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,4+8,exp-07-05_002057-p2_(4E8)_run4,pod1
+4,9876f31c-7761-48bf-ac4b-53877b0695ab,0.9532175315715677,HybridMultimodalBenchmark,"A highly multimodal optimization landscape combining Gaussian radial basis functions with chaotic sinusoidal perturbations, logarithmic conditioning, and novel cross-dimensional cubic interactions to create a severely ill-conditioned, multi-modal search space with complex basin structures and extreme fitness variations, with increased algorithmic challenge through enhanced polynomial coupling and modified chaotic components.","import numpy as np
+
+class HybridMultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        # Precompute Gaussian centers and weights for stability
+        np.random.seed(42)
+        self.centers = np.random.uniform(-5.0, 5.0, (15, dim))
+        self.weights = np.random.uniform(0.5, 2.5, 15)
+        # Additional cross-dimensional interaction terms
+        self.cross_weights = np.random.uniform(-0.5, 0.5, (dim, dim))
+        # Additional chaotic modulation parameters
+        self.chaotic_params = np.random.uniform(0.1, 2.0, 10)
+    
+    def f(self, x):
+        # Ensure x is within bounds
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Gaussian radial basis function component
+        gaussian_sum = 0.0
+        for i in range(15):
+            center = self.centers[i]
+            weight = self.weights[i]
+            distance = np.sum((x - center) ** 2)
+            gaussian_sum += weight * np.exp(-distance / (2 * 0.3 ** 2))
+        
+        # Enhanced chaotic sinusoidal perturbation component with more complex modulation
+        chaotic_sum = 0.0
+        for i in range(self.dim):
+            xi = x[i]
+            # Add more chaotic terms with varying frequencies and amplitudes
+            chaotic_sum += (self.chaotic_params[0] * np.sin(7 * xi) * np.cos(5 * xi) * np.sin(9 * xi) + 
+                           self.chaotic_params[1] * np.sin(13 * xi) * np.cos(4 * xi) * np.sin(11 * xi) + 
+                           self.chaotic_params[2] * np.sin(6 * xi) * np.cos(8 * xi) * np.sin(10 * xi) +
+                           self.chaotic_params[3] * np.sin(15 * xi) * np.cos(3 * xi) * np.sin(12 * xi) +
+                           self.chaotic_params[4] * np.sin(2 * xi) * np.cos(17 * xi) * np.sin(19 * xi) +
+                           self.chaotic_params[5] * np.sin(23 * xi) * np.cos(14 * xi) * np.sin(21 * xi) +
+                           self.chaotic_params[6] * np.sin(25 * xi) * np.cos(22 * xi) * np.sin(27 * xi) +
+                           self.chaotic_params[7] * np.sin(31 * xi) * np.cos(29 * xi) * np.sin(33 * xi) +
+                           self.chaotic_params[8] * np.sin(37 * xi) * np.cos(35 * xi) * np.sin(39 * xi) +
+                           self.chaotic_params[9] * np.sin(41 * xi) * np.cos(43 * xi) * np.sin(47 * xi))
+        
+        # Logarithmic conditioning term with additional sine modulation
+        log_conditioning = 0.0
+        for i in range(self.dim):
+            xi = x[i]
+            log_conditioning += np.log(1 + np.abs(xi)) * (np.sin(xi) + 0.5 * np.sin(2 * xi) + 0.3 * np.sin(3 * xi))
+        
+        # Cross-dimensional cubic interaction terms
+        cross_term = 0.0
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if i != j:
+                    cross_term += self.cross_weights[i, j] * (x[i] ** 3) * x[j]
+        
+        # Quadratic basin component with conditioning
+        quadratic_term = np.sum(x**2) / self.dim
+        
+        # Add a novel hyperbolic tangent component for additional complexity
+        tanh_component = 0.0
+        for i in range(self.dim):
+            tanh_component += np.tanh(x[i]) * np.sin(x[i])
+        
+        # Combine all components with different weights
+        result = 0.3 * gaussian_sum + 0.2 * chaotic_sum + 0.15 * log_conditioning + 0.15 * cross_term + 0.1 * quadratic_term + 0.1 * tanh_component
+        
+        return result",,12,"The landscape 'HybridMultimodalBenchmark' had manhattan distance (fitness) 0.953. Lower is better.
+disp.ratio_mean_02: error -0.000
+ela_distr.skewness: error -0.081
+ela_meta.lin_simple.adj_r2: error 0.024
+ela_meta.lin_simple.intercept: error 0.065
+ela_meta.lin_simple.coef.max: error 0.080
+ela_meta.quad_simple.adj_r2: error -0.030
+ic.eps_ratio: error 0.056
+ic.eps_s: error -0.061
+nbc.nb_fitness.cor: error -0.164
+ela_level.mmce_qda_25: error 0.124
+ela_level.lda_qda_25: error -0.269
+",,['11471fd0-9464-48ae-8b0b-637d7a6dd2c6'],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 0.9465, 'ela_distr.skewness': -0.2406, 'ela_meta.lin_simple.adj_r2': 0.2249, 'ela_meta.lin_simple.intercept': 0.4366, 'ela_meta.lin_simple.coef.max': 0.1196, 'ela_meta.quad_simple.adj_r2': 0.2234, 'ic.eps_ratio': -0.7558, 'ic.eps_s': -0.015, 'nbc.nb_fitness.cor': -0.3868, 'ela_level.mmce_qda_25': 0.1152, 'ela_level.lda_qda_25': 1.625}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.6136, 'ela_distr.skewness': 0.1108, 'ela_meta.lin_simple.adj_r2': 0.2464, 'ela_meta.lin_simple.intercept': 0.4974, 'ela_meta.lin_simple.coef.max': 0.3916, 'ela_meta.quad_simple.adj_r2': 0.2284, 'ic.eps_ratio': 0.9209, 'ic.eps_s': 0.687, 'nbc.nb_fitness.cor': 0.4449, 'ela_level.mmce_qda_25': 0.3493, 'ela_level.lda_qda_25': 0.2193}, 'Distances': {'disp.ratio_mean_02': -0.00017078466517039814, 'ela_distr.skewness': -1.8446864874659363, 'ela_meta.lin_simple.adj_r2': 0.02422202689352007, 'ela_meta.lin_simple.intercept': 0.05614524085652334, 'ela_meta.lin_simple.coef.max': 0.024354138148818094, 'ela_meta.quad_simple.adj_r2': -0.0297414669224772, 'ic.eps_ratio': 0.20020020020020024, 'ic.eps_s': -0.14014014014013998, 'nbc.nb_fitness.cor': -0.08946404684088455, 'ela_level.mmce_qda_25': 0.035200000000000106, 'ela_level.lda_qda_25': -1.6600000000000015}, 'Absolute distances': {'disp.ratio_mean_02': 0.00017078466517039814, 'ela_distr.skewness': 1.8446864874659363, 'ela_meta.lin_simple.adj_r2': 0.02422202689352007, 'ela_meta.lin_simple.intercept': 0.05614524085652334, 'ela_meta.lin_simple.coef.max': 0.024354138148818094, 'ela_meta.quad_simple.adj_r2': 0.0297414669224772, 'ic.eps_ratio': 0.20020020020020024, 'ic.eps_s': 0.14014014014013998, 'nbc.nb_fitness.cor': 0.08946404684088455, 'ela_level.mmce_qda_25': 0.035200000000000106, 'ela_level.lda_qda_25': 1.6600000000000015}, 'Min-max distances': {'disp.ratio_mean_02': -0.00018627686881111938, 'ela_distr.skewness': -0.08106248742956483, 'ela_meta.lin_simple.adj_r2': 0.023550846157545352, 'ela_meta.lin_simple.intercept': 0.0648006507364014, 'ela_meta.lin_simple.coef.max': 0.08004757970323012, 'ela_meta.quad_simple.adj_r2': -0.029549881072811146, 'ic.eps_ratio': 0.05649717514124297, 'ic.eps_s': -0.060869565217391286, 'nbc.nb_fitness.cor': -0.16399184116664628, 'ela_level.mmce_qda_25': 0.12394366633604498, 'ela_level.lda_qda_25': -0.26871756174187833}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.00018627686881111938, 'ela_distr.skewness': 0.08106248742956483, 'ela_meta.lin_simple.adj_r2': 0.023550846157545352, 'ela_meta.lin_simple.intercept': 0.0648006507364014, 'ela_meta.lin_simple.coef.max': 0.08004757970323012, 'ela_meta.quad_simple.adj_r2': 0.029549881072811146, 'ic.eps_ratio': 0.05649717514124297, 'ic.eps_s': 0.060869565217391286, 'nbc.nb_fitness.cor': 0.16399184116664628, 'ela_level.mmce_qda_25': 0.12394366633604498, 'ela_level.lda_qda_25': 0.26871756174187833}, 'Raw manhattan distance (min-max normalized)': 0.9532175315715677, 'Penalized, niche distance': 0.9532175315715677, 'Niche radius': 0.0}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,4+8,exp-07-05_002057-p2_(4E8)_run4,pod2
+10,9ab4faf3-546e-4780-8948-7479c28117ed,0.9552290143207453,HybridMultimodalBenchmark,"A highly multimodal optimization landscape combining Gaussian radial basis functions with chaotic sinusoidal perturbations, logarithmic conditioning, and novel cross-dimensional cubic interactions to create a severely ill-conditioned, multi-modal search space with complex basin structures and extreme fitness variations, with increased algorithmic challenge through enhanced polynomial coupling and modified chaotic components.","import numpy as np
+
+class HybridMultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        # Precompute Gaussian centers and weights for stability
+        np.random.seed(42)
+        self.centers = np.random.uniform(-5.0, 5.0, (15, dim))
+        self.weights = np.random.uniform(0.5, 2.5, 15)
+        # Additional cross-dimensional interaction terms
+        self.cross_weights = np.random.uniform(-0.5, 0.5, (dim, dim))
+    
+    def f(self, x):
+        # Ensure x is within bounds
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Gaussian radial basis function component
+        gaussian_sum = 0.0
+        for i in range(15):
+            center = self.centers[i]
+            weight = self.weights[i]
+            distance = np.sum((x - center) ** 2)
+            gaussian_sum += weight * np.exp(-distance / (2 * 0.3 ** 2))
+        
+        # Chaotic sinusoidal perturbation component with higher frequency terms
+        chaotic_sum = 0.0
+        for i in range(self.dim):
+            xi = x[i]
+            chaotic_sum += (np.sin(7 * xi) * np.cos(5 * xi) * np.sin(9 * xi) + 
+                           0.6 * np.sin(13 * xi) * np.cos(4 * xi) * np.sin(11 * xi) + 
+                           0.4 * np.sin(6 * xi) * np.cos(8 * xi) * np.sin(10 * xi) +
+                           0.2 * np.sin(15 * xi) * np.cos(3 * xi) * np.sin(12 * xi))
+        
+        # Logarithmic conditioning term with additional sine modulation
+        log_conditioning = 0.0
+        for i in range(self.dim):
+            xi = x[i]
+            log_conditioning += np.log(1 + np.abs(xi)) * (np.sin(xi) + 0.5 * np.sin(2 * xi))
+        
+        # Cross-dimensional cubic interaction terms
+        cross_term = 0.0
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if i != j:
+                    cross_term += self.cross_weights[i, j] * (x[i] ** 3) * x[j]
+        
+        # Quadratic basin component with conditioning
+        quadratic_term = np.sum(x**2) / self.dim
+        
+        # Combine all components with different weights
+        result = 0.35 * gaussian_sum + 0.25 * chaotic_sum + 0.2 * log_conditioning + 0.15 * cross_term + 0.05 * quadratic_term
+        
+        return result",,9,"The landscape 'HybridMultimodalBenchmark' had manhattan distance (fitness) 0.955. Lower is better.
+disp.ratio_mean_02: error -0.002
+ela_distr.skewness: error -0.081
+ela_meta.lin_simple.adj_r2: error 0.023
+ela_meta.lin_simple.intercept: error 0.063
+ela_meta.lin_simple.coef.max: error 0.079
+ela_meta.quad_simple.adj_r2: error -0.030
+ic.eps_ratio: error 0.051
+ic.eps_s: error -0.061
+nbc.nb_fitness.cor: error -0.168
+ela_level.mmce_qda_25: error 0.128
+ela_level.lda_qda_25: error -0.270
+",,['98faa248-7d21-4071-a762-f88d22d1e194'],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 0.9448, 'ela_distr.skewness': -0.2334, 'ela_meta.lin_simple.adj_r2': 0.2239, 'ela_meta.lin_simple.intercept': 0.4348, 'ela_meta.lin_simple.coef.max': 0.1194, 'ela_meta.quad_simple.adj_r2': 0.2225, 'ic.eps_ratio': -0.7758, 'ic.eps_s': -0.015, 'nbc.nb_fitness.cor': -0.3887, 'ela_level.mmce_qda_25': 0.1164, 'ela_level.lda_qda_25': 1.6186}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.6118, 'ela_distr.skewness': 0.1112, 'ela_meta.lin_simple.adj_r2': 0.2455, 'ela_meta.lin_simple.intercept': 0.4954, 'ela_meta.lin_simple.coef.max': 0.3909, 'ela_meta.quad_simple.adj_r2': 0.2275, 'ic.eps_ratio': 0.9153, 'ic.eps_s': 0.687, 'nbc.nb_fitness.cor': 0.4414, 'ela_level.mmce_qda_25': 0.3535, 'ela_level.lda_qda_25': 0.2183}, 'Distances': {'disp.ratio_mean_02': -0.0018524983589142119, 'ela_distr.skewness': -1.8375166968983654, 'ela_meta.lin_simple.adj_r2': 0.023295410822061685, 'ela_meta.lin_simple.intercept': 0.05441962512914239, 'ela_meta.lin_simple.coef.max': 0.024148200074632684, 'ela_meta.quad_simple.adj_r2': -0.03067030212970917, 'ic.eps_ratio': 0.18018018018018023, 'ic.eps_s': -0.14014014014013998, 'nbc.nb_fitness.cor': -0.09138447123929538, 'ela_level.mmce_qda_25': 0.03640000000000011, 'ela_level.lda_qda_25': -1.6664432989690736}, 'Absolute distances': {'disp.ratio_mean_02': 0.0018524983589142119, 'ela_distr.skewness': 1.8375166968983654, 'ela_meta.lin_simple.adj_r2': 0.023295410822061685, 'ela_meta.lin_simple.intercept': 0.05441962512914239, 'ela_meta.lin_simple.coef.max': 0.024148200074632684, 'ela_meta.quad_simple.adj_r2': 0.03067030212970917, 'ic.eps_ratio': 0.18018018018018023, 'ic.eps_s': 0.14014014014013998, 'nbc.nb_fitness.cor': 0.09138447123929538, 'ela_level.mmce_qda_25': 0.03640000000000011, 'ela_level.lda_qda_25': 1.6664432989690736}, 'Min-max distances': {'disp.ratio_mean_02': -0.0020205420283607722, 'ela_distr.skewness': -0.08074741976809204, 'ela_meta.lin_simple.adj_r2': 0.02264990617254914, 'ela_meta.lin_simple.intercept': 0.0628090122582442, 'ela_meta.lin_simple.coef.max': 0.07937069907183375, 'ela_meta.quad_simple.adj_r2': -0.03047273299472497, 'ic.eps_ratio': 0.05084745762711862, 'ic.eps_s': -0.060869565217391286, 'nbc.nb_fitness.cor': -0.1675120701752542, 'ela_level.mmce_qda_25': 0.12816901859750107, 'ela_level.lda_qda_25': -0.26976059040967526}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.0020205420283607722, 'ela_distr.skewness': 0.08074741976809204, 'ela_meta.lin_simple.adj_r2': 0.02264990617254914, 'ela_meta.lin_simple.intercept': 0.0628090122582442, 'ela_meta.lin_simple.coef.max': 0.07937069907183375, 'ela_meta.quad_simple.adj_r2': 0.03047273299472497, 'ic.eps_ratio': 0.05084745762711862, 'ic.eps_s': 0.060869565217391286, 'nbc.nb_fitness.cor': 0.1675120701752542, 'ela_level.mmce_qda_25': 0.12816901859750107, 'ela_level.lda_qda_25': 0.26976059040967526}, 'Raw manhattan distance (min-max normalized)': 0.9552290143207453, 'Penalized, niche distance': 0.9552290143207453, 'Niche radius': 0.0}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,4+8,exp-07-05_002057-p2_(4E8)_run4,pod3
+1506,c820f241-ec09-4be0-8401-04ac92bc8686,2.6450098479517843,ChaoticMultimodalBenchmark,"A highly complex multimodal landscape with enhanced chaotic interactions, fractional dimensions, and adaptive penalty mechanisms to increase optimization difficulty and algorithm discrimination.","import numpy as np
+
+class ChaoticMultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+    
+    def f(self, x):
+        # Normalize input to [-1, 1] for stability
+        x_norm = x / 5.0
+        
+        # Base polynomial terms with varying exponents
+        f1 = np.sum(x_norm**2)
+        f2 = 0.5 * np.sum(x_norm**3)
+        f3 = 0.3 * np.sum(x_norm**4)
+        f4 = 0.2 * np.sum(x_norm**5)
+        
+        # Sinusoidal components with non-uniform frequencies
+        freqs = np.arange(1, self.dim + 1) * np.pi
+        f5 = np.sum(np.sin(freqs * x_norm))
+        f6 = np.sum(np.cos(freqs * x_norm))
+        
+        # Chaotic interaction using sine and cosine combinations
+        f7 = np.sum(np.sin(x_norm * np.sin(x_norm)))
+        f8 = np.sum(np.cos(x_norm * np.cos(x_norm)))
+        
+        # Exponential decay with varying rates
+        rates = np.arange(1, self.dim + 1) * 0.2
+        f9 = np.sum(np.exp(-rates * np.abs(x_norm)))
+        
+        # Cross-dimensional interactions with non-linear coupling
+        f10 = 0.1 * np.sum(np.sin(x_norm[:-1] * x_norm[1:]))
+        f11 = 0.1 * np.sum(np.cos(x_norm[:-1] * x_norm[1:]))
+        
+        # High-frequency oscillation with amplitude modulation
+        f12 = np.sum(np.sin(20 * x_norm) * np.exp(-0.5 * x_norm**2))
+        
+        # Power-law interaction with varying exponents
+        f13 = 0.05 * np.sum(np.abs(x_norm)**(3.5 + np.sin(np.arange(self.dim)) * 2))
+        
+        # Additional chaotic sine-cosine interaction
+        f14 = 0.2 * np.sum(np.sin(15 * x_norm) * np.cos(12 * x_norm))
+        
+        # Modified exponential term with logarithmic scaling
+        f15 = 0.15 * np.sum(np.exp(-np.abs(x_norm) * np.log(1 + np.abs(x_norm))))
+        
+        # Combined polynomial and trigonometric term
+        f16 = 0.1 * np.sum((x_norm**2 + np.sin(x_norm))**2)
+        
+        # Fractional power term for added complexity
+        f17 = 0.08 * np.sum(np.abs(x_norm)**1.7)
+        
+        # Non-uniform frequency sine term
+        f18 = 0.25 * np.sum(np.sin(25 * x_norm * (1 + 0.1 * np.sin(x_norm))))
+        
+        # Gaussian-like penalty with adaptive variance
+        f19 = 0.3 * np.sum(np.exp(-0.5 * (x_norm / (1 + np.abs(x_norm) + 0.1))**2))
+        
+        # Mixed high-order and low-order interactions
+        f20 = 0.1 * np.sum(x_norm**6 * np.sin(x_norm))
+        
+        # Fractional dimensionality effect
+        f21 = 0.1 * np.sum(np.abs(x_norm)**(1.3 + 0.7 * np.sin(np.arange(self.dim) * 0.5)))
+        
+        # Adaptive chaotic coupling
+        f22 = 0.15 * np.sum(np.sin(x_norm * np.cos(x_norm * 2)) * np.exp(-0.1 * np.abs(x_norm)))
+        
+        # Multi-scale oscillation with dynamic frequency
+        f23 = 0.2 * np.sum(np.sin(30 * x_norm * np.log(1 + np.abs(x_norm))))
+        
+        # Enhanced penalty with asymmetric behavior
+        f24 = 0.25 * np.sum(np.exp(-0.3 * (x_norm**2 + 0.1 * np.abs(x_norm))))
+        
+        # Complex cross-term interactions
+        f25 = 0.05 * np.sum(np.sin(x_norm[:-2] * x_norm[1:-1] * x_norm[2:]))
+        
+        # Logarithmic polynomial interaction
+        f26 = 0.1 * np.sum(np.log(1 + np.abs(x_norm)) * x_norm**3)
+        
+        # Hyperbolic tangent based chaotic interaction
+        f27 = 0.12 * np.sum(np.tanh(x_norm * np.sin(x_norm)))
+        
+        # Fractional-order derivative inspired term
+        f28 = 0.08 * np.sum(np.abs(x_norm)**1.9 * np.cos(x_norm))
+        
+        # Multi-modal sine with varying amplitude
+        f29 = 0.18 * np.sum(np.sin(10 * x_norm + np.sin(5 * x_norm)) * np.exp(-0.2 * x_norm**2))
+        
+        # Adaptive scaling with exponential decay
+        f30 = 0.1 * np.sum(np.exp(-0.5 * np.abs(x_norm)) * np.sin(15 * x_norm))
+        
+        return f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 + f19 + f20 + f21 + f22 + f23 + f24 + f25 + f26 + f27 + f28 + f29 + f30",,43,"The landscape 'ChaoticMultimodalBenchmark' had manhattan distance (fitness) 2.645. Lower is better.
+disp.ratio_mean_02: error -0.089
+ela_distr.skewness: error -0.063
+ela_meta.lin_simple.adj_r2: error -0.197
+ela_meta.lin_simple.intercept: error 0.122
+ela_meta.lin_simple.coef.max: error -0.289
+ela_meta.quad_simple.adj_r2: error -0.253
+ic.eps_ratio: error -0.107
+ic.eps_s: error 0.183
+nbc.nb_fitness.cor: error -0.277
+ela_level.mmce_qda_25: error 0.703
+ela_level.lda_qda_25: error -0.363
+",,['b86db47d-cf99-4460-8a19-51ec41c2ace2'],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 0.8653, 'ela_distr.skewness': 0.1809, 'ela_meta.lin_simple.adj_r2': -0.0015, 'ela_meta.lin_simple.intercept': 0.486, 'ela_meta.lin_simple.coef.max': 0.0073, 'ela_meta.quad_simple.adj_r2': -0.0017, 'ic.eps_ratio': -1.3363, 'ic.eps_s': 0.5455, 'nbc.nb_fitness.cor': -0.4482, 'ela_level.mmce_qda_25': 0.2796, 'ela_level.lda_qda_25': 1.0401}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.525, 'ela_distr.skewness': 0.1294, 'ela_meta.lin_simple.adj_r2': 0.0262, 'ela_meta.lin_simple.intercept': 0.5545, 'ela_meta.lin_simple.coef.max': 0.0223, 'ela_meta.quad_simple.adj_r2': 0.0048, 'ic.eps_ratio': 0.7571, 'ic.eps_s': 0.9304, 'nbc.nb_fitness.cor': 0.3323, 'ela_level.mmce_qda_25': 0.9282, 'ela_level.lda_qda_25': 0.1246}, 'Distances': {'disp.ratio_mean_02': -0.08136874859798326, 'ela_distr.skewness': -1.4231617356841615, 'ela_meta.lin_simple.adj_r2': -0.2021704488126774, 'ela_meta.lin_simple.intercept': 0.10559924154619754, 'ela_meta.lin_simple.coef.max': -0.08799860090563405, 'ela_meta.quad_simple.adj_r2': -0.25484680112991903, 'ic.eps_ratio': -0.38038038038038047, 'ic.eps_s': 0.4204204204204204, 'nbc.nb_fitness.cor': -0.15092699765452428, 'ela_level.mmce_qda_25': 0.1996000000000001, 'ela_level.lda_qda_25': -2.24494277539342}, 'Absolute distances': {'disp.ratio_mean_02': 0.08136874859798326, 'ela_distr.skewness': 1.4231617356841615, 'ela_meta.lin_simple.adj_r2': 0.2021704488126774, 'ela_meta.lin_simple.intercept': 0.10559924154619754, 'ela_meta.lin_simple.coef.max': 0.08799860090563405, 'ela_meta.quad_simple.adj_r2': 0.25484680112991903, 'ic.eps_ratio': 0.38038038038038047, 'ic.eps_s': 0.4204204204204204, 'nbc.nb_fitness.cor': 0.15092699765452428, 'ela_level.mmce_qda_25': 0.1996000000000001, 'ela_level.lda_qda_25': 2.24494277539342}, 'Min-max distances': {'disp.ratio_mean_02': -0.08874986341888669, 'ela_distr.skewness': -0.06253909869942889, 'ela_meta.lin_simple.adj_r2': -0.1965684027401938, 'ela_meta.lin_simple.intercept': 0.12187853262488912, 'ela_meta.lin_simple.coef.max': -0.2892352411209562, 'ela_meta.quad_simple.adj_r2': -0.25320515241580477, 'ic.eps_ratio': -0.10734463276836148, 'ic.eps_s': 0.18260869565217397, 'nbc.nb_fitness.cor': -0.2766563452147413, 'ela_level.mmce_qda_25': 0.7028169261555259, 'ela_level.lda_qda_25': -0.36340695714082194}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.08874986341888669, 'ela_distr.skewness': 0.06253909869942889, 'ela_meta.lin_simple.adj_r2': 0.1965684027401938, 'ela_meta.lin_simple.intercept': 0.12187853262488912, 'ela_meta.lin_simple.coef.max': 0.2892352411209562, 'ela_meta.quad_simple.adj_r2': 0.25320515241580477, 'ic.eps_ratio': 0.10734463276836148, 'ic.eps_s': 0.18260869565217397, 'nbc.nb_fitness.cor': 0.2766563452147413, 'ela_level.mmce_qda_25': 0.7028169261555259, 'ela_level.lda_qda_25': 0.36340695714082194}, 'Raw manhattan distance (min-max normalized)': 2.6450098479517843, 'Penalized, niche distance': 2.6450098479517843, 'Niche radius': 0.0}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,1+1,exp-07-04_193304-p2_(1E1)_run0,med1
+1513,52e5662e-a1ef-4969-bd7c-5b4aa9052af6,2.6450447200702296,MultimodalSinusoidalBenchmark,"A highly multimodal optimization benchmark with chaotic sinusoidal interactions, multiple nested global minima, fractal-like structure, and enhanced dimensional coupling to significantly increase algorithmic challenge and test robust global optimization capabilities.","import numpy as np
+
+class MultimodalSinusoidalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        self.bounds = type('Bounds', (), {'lb': -5.0, 'ub': 5.0})()
+        
+    def f(self, x):
+        if len(x) != self.dim:
+            raise ValueError(""Input dimension mismatch"")
+        
+        # Base quadratic term with strong conditioning
+        f = np.sum(x**2) * 0.8
+        
+        # Add chaotic sinusoidal grid pattern with high-frequency interactions
+        for i in range(self.dim):
+            f += 0.3 * np.sin(11 * x[i]) * np.cos(9 * x[i]) * np.sin(5 * x[i])
+            
+        # Add nested multi-scale interactions with exponential coupling
+        for i in range(self.dim):
+            for j in range(i+1, min(i+5, self.dim)):  # Extended range for complexity
+                f += 0.15 * np.sin(4 * x[i] + 3 * x[j]) * np.cos(7 * x[i] - 2 * x[j]) * np.sin(2 * x[i] + x[j])
+                
+        # Add fractal-like self-similar structure with recursive pattern
+        for i in range(self.dim):
+            f += 0.08 * np.sin(15 * np.sin(4 * x[i])) * np.cos(10 * np.cos(3 * x[i])) * np.sin(6 * np.sin(2 * x[i]))
+            
+        # Add higher-order polynomial interactions with non-linear coupling
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                for k in range(j+1, min(j+4, self.dim)):
+                    f += 0.03 * x[i]**3 * np.sin(x[j] + x[k]) * np.cos(x[i] * x[j])
+                    
+        # Add multiple global minima at non-origin locations with varying scales
+        global_minima = np.array([[-3.0, 3.0], [3.0, -3.0], [-3.0, -3.0], [3.0, 3.0], 
+                                 [-1.5, 1.5], [1.5, -1.5], [-1.5, -1.5], [1.5, 1.5]])
+        if self.dim >= 2:
+            minima_term = 0
+            for min_point in global_minima:
+                if self.dim >= len(min_point):
+                    diff = x[:len(min_point)] - min_point
+                    minima_term += np.exp(-0.3 * np.sum(diff**2))
+            f += 0.4 * minima_term
+            
+        # Add noise component with non-uniform distribution for additional challenge
+        f += 0.02 * np.sum(np.sin(15 * x)**2 + np.cos(8 * x)**2)
+        
+        # Add dimensional coupling with cross-terms that increase complexity exponentially
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                f += 0.05 * np.sin(2 * x[i] * x[j]) * np.cos(3 * x[i] + x[j]) * np.sin(x[i] - x[j])
+                
+        # Add chaotic phase modulation for increased non-linearity
+        phase_mod = 0
+        for i in range(self.dim):
+            phase_mod += np.sin(2 * np.pi * x[i] * (i + 1) * 0.1)
+        f += 0.1 * np.sin(phase_mod)
+        
+        return f",,2,"The landscape 'MultimodalSinusoidalBenchmark' had manhattan distance (fitness) 2.645. Lower is better.
+disp.ratio_mean_02: error -0.057
+ela_distr.skewness: error -0.085
+ela_meta.lin_simple.adj_r2: error -0.195
+ela_meta.lin_simple.intercept: error 0.208
+ela_meta.lin_simple.coef.max: error -0.288
+ela_meta.quad_simple.adj_r2: error -0.252
+ic.eps_ratio: error -0.011
+ic.eps_s: error 0.096
+nbc.nb_fitness.cor: error -0.351
+ela_level.mmce_qda_25: error 0.732
+ela_level.lda_qda_25: error -0.368
+",,['121e3d79-7218-430a-858a-ade2c35eb8d9'],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 0.8943, 'ela_distr.skewness': -0.334, 'ela_meta.lin_simple.adj_r2': -0.0001, 'ela_meta.lin_simple.intercept': 0.5609, 'ela_meta.lin_simple.coef.max': 0.0076, 'ela_meta.quad_simple.adj_r2': -0.0008, 'ic.eps_ratio': -0.996, 'ic.eps_s': 0.3453, 'nbc.nb_fitness.cor': -0.489, 'ela_level.mmce_qda_25': 0.288, 'ela_level.lda_qda_25': 1.0111}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.5566, 'ela_distr.skewness': 0.1067, 'ela_meta.lin_simple.adj_r2': 0.0276, 'ela_meta.lin_simple.intercept': 0.6409, 'ela_meta.lin_simple.coef.max': 0.0235, 'ela_meta.quad_simple.adj_r2': 0.0056, 'ic.eps_ratio': 0.8531, 'ic.eps_s': 0.8435, 'nbc.nb_fitness.cor': 0.2576, 'ela_level.mmce_qda_25': 0.9577, 'ela_level.lda_qda_25': 0.1199}, 'Distances': {'disp.ratio_mean_02': -0.052393591654832816, 'ela_distr.skewness': -1.9380971034100187, 'ela_meta.lin_simple.adj_r2': -0.2007285311639195, 'ela_meta.lin_simple.intercept': 0.1805161415660242, 'ela_meta.lin_simple.coef.max': -0.0876451674331749, 'ela_meta.quad_simple.adj_r2': -0.2540139233372228, 'ic.eps_ratio': -0.040040040040039915, 'ic.eps_s': 0.22022022022022017, 'nbc.nb_fitness.cor': -0.19166446400580606, 'ela_level.mmce_qda_25': 0.20800000000000007, 'ela_level.lda_qda_25': -2.27388888888889}, 'Absolute distances': {'disp.ratio_mean_02': 0.052393591654832816, 'ela_distr.skewness': 1.9380971034100187, 'ela_meta.lin_simple.adj_r2': 0.2007285311639195, 'ela_meta.lin_simple.intercept': 0.1805161415660242, 'ela_meta.lin_simple.coef.max': 0.0876451674331749, 'ela_meta.quad_simple.adj_r2': 0.2540139233372228, 'ic.eps_ratio': 0.040040040040039915, 'ic.eps_s': 0.22022022022022017, 'nbc.nb_fitness.cor': 0.19166446400580606, 'ela_level.mmce_qda_25': 0.20800000000000007, 'ela_level.lda_qda_25': 2.27388888888889}, 'Min-max distances': {'disp.ratio_mean_02': -0.057146314568079504, 'ela_distr.skewness': -0.08516730249283173, 'ela_meta.lin_simple.adj_r2': -0.19516643993720348, 'ela_meta.lin_simple.intercept': 0.20834470141103012, 'ela_meta.lin_simple.coef.max': -0.28807357020147695, 'ela_meta.quad_simple.adj_r2': -0.25237763977876804, 'ic.eps_ratio': -0.011299435028248594, 'ic.eps_s': 0.09565217391304348, 'nbc.nb_fitness.cor': -0.3513300532272208, 'ela_level.mmce_qda_25': 0.7323943919857183, 'ela_level.lda_qda_25': -0.3680926975266089}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.057146314568079504, 'ela_distr.skewness': 0.08516730249283173, 'ela_meta.lin_simple.adj_r2': 0.19516643993720348, 'ela_meta.lin_simple.intercept': 0.20834470141103012, 'ela_meta.lin_simple.coef.max': 0.28807357020147695, 'ela_meta.quad_simple.adj_r2': 0.25237763977876804, 'ic.eps_ratio': 0.011299435028248594, 'ic.eps_s': 0.09565217391304348, 'nbc.nb_fitness.cor': 0.3513300532272208, 'ela_level.mmce_qda_25': 0.7323943919857183, 'ela_level.lda_qda_25': 0.3680926975266089}, 'Raw manhattan distance (min-max normalized)': 2.6450447200702296, 'Penalized, niche distance': 2.6450447200702296, 'Niche radius': 0.0}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,2+4,exp-07-04_212328-p2_(2E4)_run3,med2
+1519,f5fbb295-3ee5-4dfc-ab64-5e7a81d423a9,2.646846864752725,ChaoticOptimizationLandscape,"A chaotic optimization landscape combining sinusoidal, exponential, and polynomial components with non-separable high-dimensional interactions to create a highly complex and rugged search space.","import numpy as np
+
+class ChaoticOptimizationLandscape:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Ensure x is within bounds
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Base quadratic term for global minimum
+        f_value = np.sum(x**2)
+        
+        # Chaotic sinusoidal components with varying frequencies and amplitudes
+        for i in range(self.dim):
+            f_value += 0.5 * np.sin(10 * x[i]) * np.cos(15 * x[i]) * np.sin(20 * x[i])
+            
+        # Exponential modulation with polynomial interactions
+        for i in range(self.dim):
+            f_value += 0.3 * np.exp(-0.5 * x[i]**2) * np.sin(5 * x[i])
+            
+        # High-dimensional cross-variable interactions with chaotic behavior
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                f_value += 0.4 * np.sin(8 * x[i] + 3 * x[j]) * np.cos(6 * x[i] - 2 * x[j]) * np.exp(-0.1 * (x[i]**2 + x[j]**2))
+                
+        # Multi-scale chaotic components with varying amplitudes
+        f_value += 0.25 * np.sum(np.sin(25 * x) * np.cos(30 * x) * np.exp(-0.05 * x**2))
+        
+        # Polynomial chaos with sinusoidal modulation
+        for i in range(self.dim):
+            f_value += 0.35 * x[i]**9 * np.sin(7 * x[i])
+            
+        # Non-separable high-order interactions
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                for k in range(j+1, self.dim):
+                    f_value += 0.2 * np.sin(5 * x[i] + 4 * x[j] + 3 * x[k]) * np.cos(6 * x[i] - 2 * x[j] + x[k])
+                    
+        # Exponential decay with sinusoidal perturbations
+        f_value += 0.4 * np.sum(np.exp(-0.2 * x**2) * np.sin(12 * x))
+        
+        # Composite chaotic polynomial terms
+        for i in range(self.dim):
+            f_value += 0.2 * x[i]**10 * np.cos(4 * x[i]) * np.exp(-0.1 * x[i]**2)
+            
+        # Multi-modal exponential interactions
+        for i in range(self.dim):
+            f_value += 0.3 * np.exp(-x[i]**2) * np.sin(15 * x[i]) * np.cos(10 * x[i])
+            
+        # Complex cross-dimensional coupling with chaotic behavior
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                f_value += 0.25 * np.exp(-0.1 * (x[i] + x[j])**2) * np.sin(9 * x[i]) * np.cos(11 * x[j])
+                
+        # Higher-order chaotic polynomial with multi-scale sinusoidal modulation
+        f_value += 0.3 * np.sum(x**11 * np.sin(3 * x) * np.cos(5 * x))
+        
+        # Additional chaotic interaction terms
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                f_value += 0.3 * np.sin(12 * x[i]) * np.cos(14 * x[j]) * np.exp(-0.05 * (x[i]**2 + x[j]**2)) * np.sin(8 * x[i] + 6 * x[j])
+                
+        # Add noise to increase irregularity
+        noise = np.random.normal(0, 0.05, self.dim)
+        f_value += 0.1 * np.sum(noise * x)
+        
+        return f_value",,25,"The landscape 'ChaoticOptimizationLandscape' had manhattan distance (fitness) 2.647. Lower is better.
+disp.ratio_mean_02: error 0.299
+ela_distr.skewness: error 0.004
+ela_meta.lin_simple.adj_r2: error -0.197
+ela_meta.lin_simple.intercept: error -0.068
+ela_meta.lin_simple.coef.max: error -0.302
+ela_meta.quad_simple.adj_r2: error -0.208
+ic.eps_ratio: error 0.107
+ic.eps_s: error 0.096
+nbc.nb_fitness.cor: error -0.395
+ela_level.mmce_qda_25: error 0.600
+ela_level.lda_qda_25: error -0.370
+",,['cf8145b1-ca0e-4290-bd25-5afdcc34c141'],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 1.221, 'ela_distr.skewness': 1.7046, 'ela_meta.lin_simple.adj_r2': -0.0018, 'ela_meta.lin_simple.intercept': 0.3215, 'ela_meta.lin_simple.coef.max': 0.0034, 'ela_meta.quad_simple.adj_r2': 0.0442, 'ic.eps_ratio': -0.5756, 'ic.eps_s': 0.3453, 'nbc.nb_fitness.cor': -0.513, 'ela_level.mmce_qda_25': 0.2504, 'ela_level.lda_qda_25': 0.9984}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.913, 'ela_distr.skewness': 0.1963, 'ela_meta.lin_simple.adj_r2': 0.0259, 'ela_meta.lin_simple.intercept': 0.3646, 'ela_meta.lin_simple.coef.max': 0.0095, 'ela_meta.quad_simple.adj_r2': 0.0503, 'ic.eps_ratio': 0.9718, 'ic.eps_s': 0.8435, 'nbc.nb_fitness.cor': 0.2135, 'ela_level.mmce_qda_25': 0.8254, 'ela_level.lda_qda_25': 0.1179}, 'Distances': {'disp.ratio_mean_02': 0.2743749441311739, 'ela_distr.skewness': 0.10053263790375522, 'ela_meta.lin_simple.adj_r2': -0.2024703788343751, 'ela_meta.lin_simple.intercept': -0.05890246667984622, 'ela_meta.lin_simple.coef.max': -0.09189733196978306, 'ela_meta.quad_simple.adj_r2': -0.20900648478751666, 'ic.eps_ratio': 0.38038038038038025, 'ic.eps_s': 0.22022022022022017, 'nbc.nb_fitness.cor': -0.21574213389496377, 'ela_level.mmce_qda_25': 0.17040000000000016, 'ela_level.lda_qda_25': -2.286597444089458}, 'Absolute distances': {'disp.ratio_mean_02': 0.2743749441311739, 'ela_distr.skewness': 0.10053263790375522, 'ela_meta.lin_simple.adj_r2': 0.2024703788343751, 'ela_meta.lin_simple.intercept': 0.05890246667984622, 'ela_meta.lin_simple.coef.max': 0.09189733196978306, 'ela_meta.quad_simple.adj_r2': 0.20900648478751666, 'ic.eps_ratio': 0.38038038038038025, 'ic.eps_s': 0.22022022022022017, 'nbc.nb_fitness.cor': 0.21574213389496377, 'ela_level.mmce_qda_25': 0.17040000000000016, 'ela_level.lda_qda_25': 2.286597444089458}, 'Min-max distances': {'disp.ratio_mean_02': 0.29926402011557884, 'ela_distr.skewness': 0.0044177835917956765, 'ela_meta.lin_simple.adj_r2': -0.19686002184498977, 'ela_meta.lin_simple.intercept': -0.06798293341704958, 'ela_meta.lin_simple.coef.max': -0.30204965416616075, 'ela_meta.quad_simple.adj_r2': -0.2076601260124734, 'ic.eps_ratio': 0.10734463276836159, 'ic.eps_s': 0.09565217391304348, 'nbc.nb_fitness.cor': -0.39546556414534784, 'ela_level.mmce_qda_25': 0.6000000211267618, 'ela_level.lda_qda_25': -0.3701499336511624}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.29926402011557884, 'ela_distr.skewness': 0.0044177835917956765, 'ela_meta.lin_simple.adj_r2': 0.19686002184498977, 'ela_meta.lin_simple.intercept': 0.06798293341704958, 'ela_meta.lin_simple.coef.max': 0.30204965416616075, 'ela_meta.quad_simple.adj_r2': 0.2076601260124734, 'ic.eps_ratio': 0.10734463276836159, 'ic.eps_s': 0.09565217391304348, 'nbc.nb_fitness.cor': 0.39546556414534784, 'ela_level.mmce_qda_25': 0.6000000211267618, 'ela_level.lda_qda_25': 0.3701499336511624}, 'Raw manhattan distance (min-max normalized)': 2.646846864752725, 'Penalized, niche distance': 2.646846864752725, 'Niche radius': 0.0}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,1+1,exp-07-04_202054-p2_(1E1)_run1,med3
+2411,8c84a5a4-7d3a-407e-aaa3-1e71b7d1f233,5.785888451370523,MultimodalBenchmark,"A multimodal optimization benchmark function with multiple local minima and a global minimum at the origin, designed to test optimization algorithms' ability to escape local optima and converge to the global solution, featuring enhanced nonlinearity through modified sinusoidal components and cross-terms.","import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+    
+    def f(self, x):
+        # Normalize input to [-1, 1] range for stability
+        x_norm = x / 5.0
+        
+        # Sum of quadratic terms with different scales
+        f1 = np.sum(x_norm**2)
+        
+        # Sum of sinusoidal terms with different frequencies and added cross-terms
+        f2 = np.sum(np.sin(7 * np.pi * x_norm)**2) + 0.5 * np.sum(np.sin(3 * np.pi * x_norm)**2)
+        
+        # Sum of exponential terms with additional interaction
+        f3 = np.sum(np.exp(-x_norm**2)) + 0.3 * np.sum(x_norm[:-1] * x_norm[1:])
+        
+        # Combine terms with different weights
+        return 0.4 * f1 + 0.3 * f2 + 0.3 * f3",,1,"The landscape 'MultimodalBenchmark' had manhattan distance (fitness) 5.786. Lower is better.
+disp.ratio_mean_02: error -0.057
+ela_distr.skewness: error -0.042
+ela_meta.lin_simple.adj_r2: error 0.716
+ela_meta.lin_simple.intercept: error -0.631
+ela_meta.lin_simple.coef.max: error 2.974
+ela_meta.quad_simple.adj_r2: error 0.742
+ic.eps_ratio: error 0.119
+ic.eps_s: error 0.009
+nbc.nb_fitness.cor: error 0.139
+ela_level.mmce_qda_25: error -0.151
+ela_level.lda_qda_25: error -0.206
+",,['a983fc07-72ae-4b97-af4f-8af87eb1162b'],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 0.8946, 'ela_distr.skewness': 0.6387, 'ela_meta.lin_simple.adj_r2': 0.9373, 'ela_meta.lin_simple.intercept': -0.1665, 'ela_meta.lin_simple.coef.max': 1.0, 'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': -0.5355, 'ic.eps_s': 0.1451, 'nbc.nb_fitness.cor': -0.2214, 'ela_level.mmce_qda_25': 0.0372, 'ela_level.lda_qda_25': 2.0108}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.557, 'ela_distr.skewness': 0.1495, 'ela_meta.lin_simple.adj_r2': 0.9391, 'ela_meta.lin_simple.intercept': -0.1987, 'ela_meta.lin_simple.coef.max': 3.2852, 'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': 0.9831, 'ic.eps_s': 0.7565, 'nbc.nb_fitness.cor': 0.748, 'ela_level.mmce_qda_25': 0.0746, 'ela_level.lda_qda_25': 0.2817}, 'Distances': {'disp.ratio_mean_02': -0.05208329299389869, 'ela_distr.skewness': -0.9653726533870753, 'ela_meta.lin_simple.adj_r2': 0.7366768446327747, 'ela_meta.lin_simple.intercept': -0.5469718107611551, 'ela_meta.lin_simple.coef.max': 0.9047303540627218, 'ela_meta.quad_simple.adj_r2': 0.7468241607515596, 'ic.eps_ratio': 0.42042042042042027, 'ic.eps_s': 0.020020020020020096, 'nbc.nb_fitness.cor': 0.07587830405382903, 'ela_level.mmce_qda_25': -0.04279999999999991, 'ela_level.lda_qda_25': -1.2742473118279576}, 'Absolute distances': {'disp.ratio_mean_02': 0.05208329299389869, 'ela_distr.skewness': 0.9653726533870753, 'ela_meta.lin_simple.adj_r2': 0.7366768446327747, 'ela_meta.lin_simple.intercept': 0.5469718107611551, 'ela_meta.lin_simple.coef.max': 0.9047303540627218, 'ela_meta.quad_simple.adj_r2': 0.7468241607515596, 'ic.eps_ratio': 0.42042042042042027, 'ic.eps_s': 0.020020020020020096, 'nbc.nb_fitness.cor': 0.07587830405382903, 'ela_level.mmce_qda_25': 0.04279999999999991, 'ela_level.lda_qda_25': 1.2742473118279576}, 'Min-max distances': {'disp.ratio_mean_02': -0.056807868122097815, 'ela_distr.skewness': -0.04242211839884821, 'ela_meta.lin_simple.adj_r2': 0.7162638829541447, 'ela_meta.lin_simple.intercept': -0.6312935652438744, 'ela_meta.lin_simple.coef.max': 2.973682529196048, 'ela_meta.quad_simple.adj_r2': 0.7420133374736866, 'ic.eps_ratio': 0.11864406779661019, 'ic.eps_s': 0.008695652173913104, 'nbc.nb_fitness.cor': 0.1390885302620074, 'ela_level.mmce_qda_25': -0.15070423065859936, 'ela_level.lda_qda_25': -0.20627266909069353}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.056807868122097815, 'ela_distr.skewness': 0.04242211839884821, 'ela_meta.lin_simple.adj_r2': 0.7162638829541447, 'ela_meta.lin_simple.intercept': 0.6312935652438744, 'ela_meta.lin_simple.coef.max': 2.973682529196048, 'ela_meta.quad_simple.adj_r2': 0.7420133374736866, 'ic.eps_ratio': 0.11864406779661019, 'ic.eps_s': 0.008695652173913104, 'nbc.nb_fitness.cor': 0.1390885302620074, 'ela_level.mmce_qda_25': 0.15070423065859936, 'ela_level.lda_qda_25': 0.20627266909069353}, 'Raw manhattan distance (min-max normalized)': 5.785888451370523, 'Penalized, niche distance': 5.785888451370523, 'Niche radius': 0.0}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,4+8,exp-07-04_234959-p2_(4E8)_run1,worst1
+2412,44400052-7c3f-4ee6-9173-2030f3611dc0,5.785889842491943,MultimodalBenchmark,A multimodal optimization benchmark with enhanced global structure and improved conditioning to better challenge optimization algorithms' convergence and escape capabilities.,"import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+    
+    def f(self, x):
+        # Normalize input to [-1, 1] range for better conditioning
+        x_norm = x / 5.0
+        
+        # Sum of squares term (global minimum at origin)
+        f1 = np.sum(x_norm**2)
+        
+        # Multimodal term with multiple local minima
+        f2 = 0.1 * np.sum(np.cos(5 * np.pi * x_norm))
+        
+        # Additional challenging term with exponential decay
+        f3 = np.sum(np.abs(x_norm) ** 1.5) * np.exp(-0.5 * np.sum(x_norm**2))
+        
+        # Add a sinusoidal modulation to increase landscape complexity
+        f4 = 0.05 * np.sum(np.sin(3 * np.pi * x_norm) * np.cos(7 * np.pi * x_norm))
+        
+        return f1 + f2 + f3 + f4",,1,"The landscape 'MultimodalBenchmark' had manhattan distance (fitness) 5.786. Lower is better.
+disp.ratio_mean_02: error -0.057
+ela_distr.skewness: error -0.042
+ela_meta.lin_simple.adj_r2: error 0.716
+ela_meta.lin_simple.intercept: error -0.631
+ela_meta.lin_simple.coef.max: error 2.974
+ela_meta.quad_simple.adj_r2: error 0.742
+ic.eps_ratio: error 0.119
+ic.eps_s: error 0.009
+nbc.nb_fitness.cor: error 0.139
+ela_level.mmce_qda_25: error -0.151
+ela_level.lda_qda_25: error -0.206
+",,['a5d8bf00-a60c-4338-892b-f3e885f7186f'],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 0.8946, 'ela_distr.skewness': 0.6387, 'ela_meta.lin_simple.adj_r2': 0.9373, 'ela_meta.lin_simple.intercept': -0.1665, 'ela_meta.lin_simple.coef.max': 1.0, 'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': -0.5355, 'ic.eps_s': 0.1451, 'nbc.nb_fitness.cor': -0.2214, 'ela_level.mmce_qda_25': 0.0372, 'ela_level.lda_qda_25': 2.0108}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.557, 'ela_distr.skewness': 0.1495, 'ela_meta.lin_simple.adj_r2': 0.9391, 'ela_meta.lin_simple.intercept': -0.1987, 'ela_meta.lin_simple.coef.max': 3.2852, 'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': 0.9831, 'ic.eps_s': 0.7565, 'nbc.nb_fitness.cor': 0.748, 'ela_level.mmce_qda_25': 0.0746, 'ela_level.lda_qda_25': 0.2817}, 'Distances': {'disp.ratio_mean_02': -0.05208329299389869, 'ela_distr.skewness': -0.9653725708355942, 'ela_meta.lin_simple.adj_r2': 0.7366768125606533, 'ela_meta.lin_simple.intercept': -0.5469711917156386, 'ela_meta.lin_simple.coef.max': 0.9047309924671731, 'ela_meta.quad_simple.adj_r2': 0.7468241608398627, 'ic.eps_ratio': 0.42042042042042027, 'ic.eps_s': 0.020020020020020096, 'nbc.nb_fitness.cor': 0.07587832696909189, 'ela_level.mmce_qda_25': -0.04279999999999991, 'ela_level.lda_qda_25': -1.2742473118279576}, 'Absolute distances': {'disp.ratio_mean_02': 0.05208329299389869, 'ela_distr.skewness': 0.9653725708355942, 'ela_meta.lin_simple.adj_r2': 0.7366768125606533, 'ela_meta.lin_simple.intercept': 0.5469711917156386, 'ela_meta.lin_simple.coef.max': 0.9047309924671731, 'ela_meta.quad_simple.adj_r2': 0.7468241608398627, 'ic.eps_ratio': 0.42042042042042027, 'ic.eps_s': 0.020020020020020096, 'nbc.nb_fitness.cor': 0.07587832696909189, 'ela_level.mmce_qda_25': 0.04279999999999991, 'ela_level.lda_qda_25': 1.2742473118279576}, 'Min-max distances': {'disp.ratio_mean_02': -0.056807868122097815, 'ela_distr.skewness': -0.04242211477122454, 'ela_meta.lin_simple.adj_r2': 0.7162638517707264, 'ela_meta.lin_simple.intercept': -0.6312928507656445, 'ela_meta.lin_simple.coef.max': 2.973684627514243, 'ela_meta.quad_simple.adj_r2': 0.7420133375614208, 'ic.eps_ratio': 0.11864406779661019, 'ic.eps_s': 0.008695652173913104, 'nbc.nb_fitness.cor': 0.13908857226677118, 'ela_level.mmce_qda_25': -0.15070423065859936, 'ela_level.lda_qda_25': -0.20627266909069353}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.056807868122097815, 'ela_distr.skewness': 0.04242211477122454, 'ela_meta.lin_simple.adj_r2': 0.7162638517707264, 'ela_meta.lin_simple.intercept': 0.6312928507656445, 'ela_meta.lin_simple.coef.max': 2.973684627514243, 'ela_meta.quad_simple.adj_r2': 0.7420133375614208, 'ic.eps_ratio': 0.11864406779661019, 'ic.eps_s': 0.008695652173913104, 'nbc.nb_fitness.cor': 0.13908857226677118, 'ela_level.mmce_qda_25': 0.15070423065859936, 'ela_level.lda_qda_25': 0.20627266909069353}, 'Raw manhattan distance (min-max normalized)': 5.785889842491943, 'Penalized, niche distance': 5.785889842491943, 'Niche radius': 0.0}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,2+4,exp-07-04_220750-p2_(2E4)_run4,worst2
+2413,1c959d17-6419-40ad-ad7a-69966f1c72e5,5.785980865796322,MultimodalBenchmark,"A multimodal optimization benchmark function with multiple global minima and local optima, designed to test the ability of optimization algorithms to escape local minima and find global optima in high-dimensional spaces.","import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        self.global_min = 0.0
+        self.x_opt = np.zeros(dim)
+    
+    def f(self, x):
+        # Normalize input to [-5, 5] domain
+        x = np.array(x)
+        
+        # Shift and scale to [-1, 1] for the main function
+        x_scaled = x / 5.0
+        
+        # Calculate the multimodal function
+        # Sum of quadratic terms with different coefficients
+        # and sinusoidal terms to create multiple local minima
+        result = 0.0
+        
+        # Main quadratic terms
+        for i in range(self.dim):
+            result += (x_scaled[i] - 0.5)**2
+        
+        # Add sinusoidal terms for multimodality
+        for i in range(self.dim):
+            result += 0.1 * np.sin(5 * np.pi * x_scaled[i])
+        
+        # Add interaction terms between dimensions
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                result += 0.05 * np.sin(3 * np.pi * (x_scaled[i] + x_scaled[j]))
+        
+        # Add a global minimum at the origin
+        result += 0.5 * np.sum(x_scaled**2)
+        
+        return result",,0,"The landscape 'MultimodalBenchmark' had manhattan distance (fitness) 5.786. Lower is better.
+disp.ratio_mean_02: error -0.057
+ela_distr.skewness: error -0.042
+ela_meta.lin_simple.adj_r2: error 0.716
+ela_meta.lin_simple.intercept: error -0.632
+ela_meta.lin_simple.coef.max: error 2.974
+ela_meta.quad_simple.adj_r2: error 0.742
+ic.eps_ratio: error 0.119
+ic.eps_s: error 0.009
+nbc.nb_fitness.cor: error 0.139
+ela_level.mmce_qda_25: error -0.151
+ela_level.lda_qda_25: error -0.206
+",,[],,"{'Original ELA values (no min-max)': {'disp.ratio_mean_02': 0.9466, 'ela_distr.skewness': 1.6041, 'ela_meta.lin_simple.adj_r2': 0.2007, 'ela_meta.lin_simple.intercept': 0.3804, 'ela_meta.lin_simple.coef.max': 0.0953, 'ela_meta.quad_simple.adj_r2': 0.2532, 'ic.eps_ratio': -0.956, 'ic.eps_s': 0.1251, 'nbc.nb_fitness.cor': -0.2973, 'ela_level.mmce_qda_25': 0.08, 'ela_level.lda_qda_25': 3.285}, 'Proxy ELA values (no min-max)': {'disp.ratio_mean_02': 0.8946, 'ela_distr.skewness': 0.6394, 'ela_meta.lin_simple.adj_r2': 0.9372, 'ela_meta.lin_simple.intercept': -0.1668, 'ela_meta.lin_simple.coef.max': 1.0, 'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': -0.5355, 'ic.eps_s': 0.1451, 'nbc.nb_fitness.cor': -0.2214, 'ela_level.mmce_qda_25': 0.0372, 'ela_level.lda_qda_25': 2.0108}, 'Original min-max ELA values': {'disp.ratio_mean_02': 0.6138, 'ela_distr.skewness': 0.1919, 'ela_meta.lin_simple.adj_r2': 0.2228, 'ela_meta.lin_simple.intercept': 0.4326, 'ela_meta.lin_simple.coef.max': 0.3115, 'ela_meta.quad_simple.adj_r2': 0.258, 'ic.eps_ratio': 0.8644, 'ic.eps_s': 0.7478, 'nbc.nb_fitness.cor': 0.6089, 'ela_level.mmce_qda_25': 0.2254, 'ela_level.lda_qda_25': 0.488}, 'Proxy min-max ELA values': {'disp.ratio_mean_02': 0.557, 'ela_distr.skewness': 0.1495, 'ela_meta.lin_simple.adj_r2': 0.9389, 'ela_meta.lin_simple.intercept': -0.199, 'ela_meta.lin_simple.coef.max': 3.2852, 'ela_meta.quad_simple.adj_r2': 1.0, 'ic.eps_ratio': 0.9831, 'ic.eps_s': 0.7565, 'nbc.nb_fitness.cor': 0.7481, 'ela_level.mmce_qda_25': 0.0746, 'ela_level.lda_qda_25': 0.2817}, 'Distances': {'disp.ratio_mean_02': -0.05208329299389869, 'ela_distr.skewness': -0.964653255692654, 'ela_meta.lin_simple.adj_r2': 0.7365198459534767, 'ela_meta.lin_simple.intercept': -0.54718068583176, 'ela_meta.lin_simple.coef.max': 0.9047294274220676, 'ela_meta.quad_simple.adj_r2': 0.7468241608420281, 'ic.eps_ratio': 0.42042042042042027, 'ic.eps_s': 0.020020020020020096, 'nbc.nb_fitness.cor': 0.07589938694093581, 'ela_level.mmce_qda_25': -0.04279999999999991, 'ela_level.lda_qda_25': -1.2742473118279576}, 'Absolute distances': {'disp.ratio_mean_02': 0.05208329299389869, 'ela_distr.skewness': 0.964653255692654, 'ela_meta.lin_simple.adj_r2': 0.7365198459534767, 'ela_meta.lin_simple.intercept': 0.54718068583176, 'ela_meta.lin_simple.coef.max': 0.9047294274220676, 'ela_meta.quad_simple.adj_r2': 0.7468241608420281, 'ic.eps_ratio': 0.42042042042042027, 'ic.eps_s': 0.020020020020020096, 'nbc.nb_fitness.cor': 0.07589938694093581, 'ela_level.mmce_qda_25': 0.04279999999999991, 'ela_level.lda_qda_25': 1.2742473118279576}, 'Min-max distances': {'disp.ratio_mean_02': -0.056807868122097815, 'ela_distr.skewness': -0.04239050534863231, 'ela_meta.lin_simple.adj_r2': 0.7161112346328734, 'ela_meta.lin_simple.intercept': -0.6315346407169034, 'ela_meta.lin_simple.coef.max': 2.973679483498386, 'ela_meta.quad_simple.adj_r2': 0.7420133375635722, 'ic.eps_ratio': 0.11864406779661019, 'ic.eps_s': 0.008695652173913104, 'nbc.nb_fitness.cor': 0.13912717619404202, 'ela_level.mmce_qda_25': -0.15070423065859936, 'ela_level.lda_qda_25': -0.20627266909069353}, 'Absolute min-max distances': {'disp.ratio_mean_02': 0.056807868122097815, 'ela_distr.skewness': 0.04239050534863231, 'ela_meta.lin_simple.adj_r2': 0.7161112346328734, 'ela_meta.lin_simple.intercept': 0.6315346407169034, 'ela_meta.lin_simple.coef.max': 2.973679483498386, 'ela_meta.quad_simple.adj_r2': 0.7420133375635722, 'ic.eps_ratio': 0.11864406779661019, 'ic.eps_s': 0.008695652173913104, 'nbc.nb_fitness.cor': 0.13912717619404202, 'ela_level.mmce_qda_25': 0.15070423065859936, 'ela_level.lda_qda_25': 0.20627266909069353}, 'Raw manhattan distance (min-max normalized)': 5.785980865796322}","
+        Your task is to design a novel mathematical function to be used as a black-box optimization benchmark landscape.
+
+        Write a Python class with:
+        - an __init__(dim) function receiving the number of dimensions;
+        - a function f(x), where x is a real-valued NumPy array.
+
+        The function will be used as a minimization problem.
+        The function will be evaluated on the domain [-5.0, 5.0]^dim.
+
+        Return only the complete Python class.
+        ",p2,2+4,exp-07-04_205549-p2_(2E4)_run2,worst3

@@ -1,6 +1,6 @@
 gmsh>=4.13.1
 vtk>=9.3.1
-numpy>=2.0.1
+numpy>=2.0.1  # 1.25.1 in jdenobel
 requests>=2.31.0
 ioh>=0.3.19
-pandas>=3.0.2
+pandas>=3.0.2  # 2.0.3 in jdenobel

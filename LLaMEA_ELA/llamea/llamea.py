@@ -232,7 +232,8 @@ markdown code block labelled as diff:
 
         if self.log:
             modelname = self.model.replace(":", "_")
-            self.logger = ExperimentLogger(f"LLaMEA-{modelname}-{experiment_name}")
+            # self.logger = ExperimentLogger(f"LLaMEA-{modelname}-{experiment_name}")
+            self.logger = ExperimentLogger(f"{experiment_name}")
             self.llm.set_logger(self.logger)
         else:
             self.logger = None
@@ -389,20 +390,20 @@ This changing rate {(prob*100):.1f}% is a mandatory requirement, you cannot chan
 """
             self.mutation_prompts = [new_mutation_prompt]
 
-        # mutation_operator = random.choice(self.mutation_prompts)
-        # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
-        if isinstance(self.mutation_prompts, list):
-            mutation_operator = self.mutation_prompts[0]  # Just the length-1 list of a small mutation
-
-        else:
-            absolute_distances_minmax = individual.get_metadata('Absolute min-max distances')
-            sorted_distances = sorted(absolute_distances_minmax.items(), key=lambda item: item[1], reverse=True)
-            worst_feature, worst_score = sorted_distances[0][0], sorted_distances[0][1]
-            mutation_operator = self.mutation_prompts[worst_feature]
-            mutation_operator += f"Out of all features, this one has the worst score with an absolute distance of {worst_score} (after min-max normalization). Adjust the code to improve its score, while trying to keep all other features the same."
-            individual.add_metadata('Mutation operator', worst_feature)
-
-            print(f"Mutating worst feature {worst_feature} with min-max distance {worst_score}.")
+        mutation_operator = random.choice(self.mutation_prompts)
+        # # NEW: Instead of random mutation, mutate only to update the worst-performing feature.
+        # if isinstance(self.mutation_prompts, list):
+        #     mutation_operator = self.mutation_prompts[0]  # Just the length-1 list of a small mutation
+        #
+        # else:
+        #     absolute_distances_minmax = individual.get_metadata('Absolute min-max distances')
+        #     sorted_distances = sorted(absolute_distances_minmax.items(), key=lambda item: item[1], reverse=True)
+        #     worst_feature, worst_score = sorted_distances[0][0], sorted_distances[0][1]
+        #     mutation_operator = self.mutation_prompts[worst_feature]
+        #     mutation_operator += f"Out of all features, this one has the worst score with an absolute distance of {worst_score} (after min-max normalization). Adjust the code to improve its score, while trying to keep all other features the same."
+        #     individual.add_metadata('Mutation operator', worst_feature)
+        #
+        #     print(f"Mutating worst feature {worst_feature} with min-max distance {worst_score}.")
 
         individual.set_operator(mutation_operator)
 
@@ -637,9 +638,9 @@ With code:
             # Update population and the best solution
             self.population = self.selection(self.population, new_population)
 
-            # CHECK: Count how many individuals in the new parent population have a generation tag equal to current gen
-            successful_offspring = sum(1 for p in self.population if p.generation == self.generation)
-            print(f"Offspring Success Rate: {successful_offspring} / {self.n_offspring} entered the elite pool.")
+            # # CHECK: Count how many individuals in the new parent population have a generation tag equal to current gen
+            # successful_offspring = sum(1 for p in self.population if p.generation == self.generation)
+            # print(f"Offspring Success Rate: {successful_offspring} / {self.n_offspring} entered the elite pool.")
 
             self.update_best()
             self.logevent(

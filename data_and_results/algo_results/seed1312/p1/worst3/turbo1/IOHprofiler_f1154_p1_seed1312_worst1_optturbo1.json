@@ -1,0 +1,16 @@
+{
+	"version": "0.3.22", 
+	"suite": "unknown_suite", 
+	"function_id": 1154, 
+	"function_name": "p1_seed1312_worst1_optturbo1", 
+	"maximization": false, 
+	"algorithm": {"name": "turbo1_mechbench", "info": "algorithm_info"},
+	"attributes": ["evaluations", "raw_y"],
+	"scenarios": [
+		{"dimension": 5,
+		"path": "data_f1154_p1_seed1312_worst1_optturbo1/IOHprofiler_f1154_DIM5.dat",
+		"runs": [
+			{"instance": 1, "evals": 160, "best": {"evals": 143, "y": -208454.53956605738, "x": [-4.837974759644473, -0.1684395542987378, 3.7262821734434652, -4.999927920564263, 4.664292079536256]}}
+		]}
+	]
+}

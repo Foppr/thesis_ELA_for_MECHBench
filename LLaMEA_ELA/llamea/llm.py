@@ -339,7 +339,7 @@ class Ollama_LLM(LLM):
                 response = ollama.chat(
                     model=self.model,
                     messages=[{"role": "user", "content": big_message}],
-                    temperature=0.7
+                    # temperature=0.7
                 )
                 return response["message"]["content"]
 
