@@ -243,19 +243,19 @@ if __name__ == '__main__':
     dim = 5
 
     # Read variables dynamically from slurm:
-    problem_type = int(os.environ.get("PROBLEM_TYPE", 1))
+    fid = int(os.environ.get("fid", 1))
     ES_config = (os.environ.get("ES_CONFIG", "1E1"))
     print(ES_config)
     n_parents = int(ES_config[0])
     elitism = bool(1 if ES_config[1] == "E" else 0)
     n_offspring = int(ES_config[2])
-    problem = ELAForBBOB(fid=problem_type,
+    problem = ELAForBBOB(fid=fid,
                               size=500,  # <-- Optional edit: dataset size (30, 60, 125, 250 or 500)
                               features=features,
                          dim=dim)
 
     print(f"--- Launching Experiment ---")
-    print(f"Problem {problem_type} ({ES_config})")
+    print(f"fid {fid} ({ES_config})")
     print(f"------------------------------------------")
 
     ai_model = "qwen3-coder:30b"
@@ -265,8 +265,7 @@ if __name__ == '__main__':
     role_prompt = "You are a highly skilled computer scientist in the field optimization and benchmarking."
 
     for experiment_i in range(5):  # 5 runs
-    # for experiment_i in range(1):  # 1 run
-        experiment_name = f"p{problem_type}_({ES_config})_run{experiment_i}"
+        experiment_name = f"fid{fid}_({ES_config})_run{experiment_i}"
         print(f'Running experiment number {experiment_i}')
         es = LLaMEA(
             f=problem.evaluate_for_BBOB,
