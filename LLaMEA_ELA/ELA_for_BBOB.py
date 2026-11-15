@@ -23,6 +23,10 @@ def ela_distance(s1, s2):
     features1 = s1.metadata["Proxy min-max ELA values"]
     features2 = s2.metadata["Proxy min-max ELA values"]
 
+    # Turn into arrays
+    features1 = np.array(list(features1.values()))
+    features2 = np.array(list(features2.values()))
+
     # Replace NaN values with zeros
     features1 = np.nan_to_num(features1, nan=0.0)
     features2 = np.nan_to_num(features2, nan=0.0)
@@ -53,7 +57,7 @@ class ELAForBBOB(ELAproblem):
         self.dim = dim
         self.X = pd.read_csv(f'../Folder_Points/BBOB/1312/250d{self.dim}_seed1312.csv')
 
-        self.min_max_ela_df = pd.read_csv(f'../Folder_Points/BBOB/bbob_{fid}_iid1_dim{dim}_minmax.csv')
+        self.min_max_ela_df = pd.read_csv(f'../Folder_Points/BBOB/bbob_f{fid}_iid1_dim{dim}_minmax.csv', index_col=0)
 
         # New updated ela stats per size:
         self.ela_stats = pd.read_csv(f"../Folder_Points/500D/by_size/250d/250d_updated_ELA_stats.csv")
@@ -152,7 +156,7 @@ class ELAForBBOB(ELAproblem):
 
         proxy_ela_dic = ela_proxy.round(4).to_dict()['value']
         solution.add_metadata("Proxy ELA values (no min-max)", proxy_ela_dic)
-        print(f"PROXY ELA: \n{ela_proxy.to_string()}")
+        # print(f"PROXY ELA: \n{ela_proxy.to_string()}")
 
         # Min-max normalization on proxy ELA values:
         stats_filtered = self.ela_stats[
@@ -175,8 +179,8 @@ class ELAForBBOB(ELAproblem):
         proxy_ela_minmax_dic = ela_proxy_minmax.round(4).to_dict()['value']
         solution.add_metadata("Original min-max ELA values", original_ela_minmax_dic)
         solution.add_metadata("Proxy min-max ELA values", proxy_ela_minmax_dic)
-        print(f"ORIGINAL ELA MIN-MAX: \n{self.min_max_ela_df.to_string()}")
-        print(f"PROXY ELA MIN-MAX: \n{ela_proxy_minmax.to_string()}")
+        # print(f"ORIGINAL ELA MIN-MAX: \n{self.min_max_ela_df.to_string()}")
+        # print(f"PROXY ELA MIN-MAX: \n{ela_proxy_minmax.to_string()}")
 
         distances_minmax = {}
         abs_distances_minmax = {}
@@ -255,7 +259,7 @@ if __name__ == '__main__':
                          dim=dim)
 
     print(f"--- Launching Experiment ---")
-    print(f"fid {fid} ({ES_config})")
+    print(f"f{fid} ({ES_config})")
     print(f"------------------------------------------")
 
     ai_model = "qwen3-coder:30b"
@@ -265,7 +269,7 @@ if __name__ == '__main__':
     role_prompt = "You are a highly skilled computer scientist in the field optimization and benchmarking."
 
     for experiment_i in range(5):  # 5 runs
-        experiment_name = f"fid{fid}_({ES_config})_run{experiment_i}"
+        experiment_name = f"f{fid}_({ES_config})_run{experiment_i}"
         print(f'Running experiment number {experiment_i}')
         es = LLaMEA(
             f=problem.evaluate_for_BBOB,

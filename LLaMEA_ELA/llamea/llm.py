@@ -1,6 +1,7 @@
 """
 LLM modules to connect to different LLM providers. Also extracts code, name and description.
 """
+from __future__ import annotations
 
 import copy
 import logging
