@@ -1,9 +1,9 @@
 annotated-doc==0.0.4
-anyio==4.14.0
+# anyio==4.14.0
 asttokens==3.0.1
 autograd==1.8.0
 bayes-optim==0.3.0
-bnlearn==0.13.0
+bnlearn  # ==0.13.0
 botorch==0.17.2
 certifi==2026.2.25
 charset-normalizer==3.4.6
@@ -87,7 +87,7 @@ pandas==3.0.2
 parso==0.8.6
 patsy==1.0.2
 pexpect==4.9.0
-pgmpy==1.1.2
+pgmpy  # ==1.1.2
 pillow==12.1.1
 platformdirs==4.9.4
 pluggy==1.6.0
