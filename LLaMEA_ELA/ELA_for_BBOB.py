@@ -46,7 +46,7 @@ def ela_distance(s1, s2):
 
 
 class ELAForBBOB(ELAproblem):
-    def __init__(self, fid, size, features, dim):
+    def __init__(self, fid, size, features, dim, seed):
         """
         :param: problem_type (int): problem ID (1, 2, 3)
         :param: size (int): size of the problem (30, 60, 125, 250, 500) * D
@@ -55,12 +55,13 @@ class ELAForBBOB(ELAproblem):
         super().__init__()
 
         self.dim = dim
-        self.X = pd.read_csv(f'../Folder_Points/BBOB/1312/250d{self.dim}_seed1312.csv')
+        self.seed = seed
+        self.X = pd.read_csv(f'../Folder_point_new/BBOB/{self.seed}/250d{self.dim}_seed{seed}.csv')
 
-        self.min_max_ela_df = pd.read_csv(f'../Folder_Points/BBOB/bbob_f{fid}_iid1_dim{dim}_minmax.csv', index_col=0)
+        self.min_max_ela_df = pd.read_csv(f'../Folder_point_new/BBOB/bbob_f{fid}_iid1_dim{dim}_minmax.csv', index_col=0)
 
         # New updated ela stats per size:
-        self.ela_stats = pd.read_csv(f"../Folder_Points/500D/by_size/250d/250d_updated_ELA_stats.csv")
+        self.ela_stats = pd.read_csv(f"ela_feature_stats.csv")
 
         self.features = features
 
@@ -247,6 +248,7 @@ if __name__ == '__main__':
     dim = 5
 
     # Read variables dynamically from slurm:
+    seed = int(os.environ.get("seed", 1312))
     fid = int(os.environ.get("fid", 1))
     ES_config = (os.environ.get("ES_CONFIG", "1E1"))
     print(ES_config)
@@ -256,7 +258,8 @@ if __name__ == '__main__':
     problem = ELAForBBOB(fid=fid,
                               size=500,  # <-- Optional edit: dataset size (30, 60, 125, 250 or 500)
                               features=features,
-                         dim=dim)
+                         dim=dim,
+                         seed=seed)
 
     print(f"--- Launching Experiment ---")
     print(f"f{fid} ({ES_config})")
@@ -267,32 +270,33 @@ if __name__ == '__main__':
 
     # LLaMEA setup
     role_prompt = "You are a highly skilled computer scientist in the field optimization and benchmarking."
+    seeds = [1312, 1313, 1314, 1315, 1316]  # First 5/15 seeds for the loop
 
-    for experiment_i in range(5):  # 5 runs
-        experiment_name = f"f{fid}_({ES_config})_run{experiment_i}"
-        print(f'Running experiment number {experiment_i}')
-        es = LLaMEA(
-            f=problem.evaluate_for_BBOB,
-            minimization=True,  # IMPORTANT: Distance should be minimized (0 is best)
-            n_parents=n_parents,
-            n_offspring=n_offspring,
-            llm=llm,
-            role_prompt=role_prompt,
-            task_prompt=problem.task_prompt,
-            mutation_prompts=problem.mutation_prompts,
-            experiment_name=experiment_name,
-            elitism=elitism,  # False=,   True=+
-            HPO=False,
-            max_workers=4,
-            budget=100,
-            parallel_backend="loky",
-            niching="sharing",
-            distance_metric=ela_distance,
-            niche_radius=2.0,
-            adaptive_niche_radius=True,
-            eval_timeout=3600,
-        )
-        print(es.run())
+    # for seed in seeds:  # 5 runs
+    experiment_name = f"f{fid}_({ES_config})_seed{seed}"
+    print(f'Running experiment with seed {seed}')
+    es = LLaMEA(
+        f=problem.evaluate_for_BBOB,
+        minimization=True,  # IMPORTANT: Distance should be minimized (0 is best)
+        n_parents=n_parents,
+        n_offspring=n_offspring,
+        llm=llm,
+        role_prompt=role_prompt,
+        task_prompt=problem.task_prompt,
+        mutation_prompts=problem.mutation_prompts,
+        experiment_name=experiment_name,
+        elitism=elitism,  # False=,   True=+
+        HPO=False,
+        max_workers=4,
+        budget=100,
+        parallel_backend="loky",
+        niching="sharing",
+        distance_metric=ela_distance,
+        niche_radius=2.0,
+        adaptive_niche_radius=True,
+        eval_timeout=3600,
+    )
+    print(es.run())
 
 
 # Edit log function:

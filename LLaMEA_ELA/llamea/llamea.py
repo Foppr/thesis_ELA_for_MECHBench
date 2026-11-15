@@ -406,6 +406,7 @@ This changing rate {(prob*100):.1f}% is a mandatory requirement, you cannot chan
         #     print(f"Mutating worst feature {worst_feature} with min-max distance {worst_score}.")
 
         individual.set_operator(mutation_operator)
+        individual.add_metadata('Mutation operator', mutation_operator)
 
         task_prompt = (
             individual.task_prompt if self.adaptive_prompt else self.task_prompt

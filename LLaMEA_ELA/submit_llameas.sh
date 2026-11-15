@@ -2,7 +2,8 @@
 
 # --- PARAMETER CONFIGURATION ---
 # Easily edit these arrays later if you want to change problems or modes
-PROBLEMS=(1 2 3)
+seeds=(1312 1313 1314 1315 1316)
+fids=(1 6 10 15 20)
 ES_CONFIGS=("1E1" "2E4" "4E8")
 SLURM_FILE="ela.slurm"
 
@@ -12,17 +13,19 @@ CURRENT_DATE=$(date +%Y-%m-%d)
 
 echo "Launching LLaMEA batch submissions..."
 
-for p in "${PROBLEMS[@]}"; do
-    for c in "${ES_CONFIGS[@]}"; do
-        # Modified to start with the dynamic date variable
-        JOB_NAME="${CURRENT_DATE}_ela_p${p}_(${c})"
+for seed in "${seeds[@]}"; do
+    for fid in "${fids[@]}"; do
+        for c in "${ES_CONFIGS[@]}"; do
+            # Modified to start with the dynamic date variable
+            JOB_NAME="${CURRENT_DATE}_ela_f${fid}_(${c})_seed${seed}"
 
-        echo "Submitting: $JOB_NAME"
+            echo "Submitting: $JOB_NAME"
 
-        sbatch --job-name="$JOB_NAME" \
-               --export=ALL,PROBLEM_TYPE=$p,ES_CONFIG=$c \
-               $SLURM_FILE
+            sbatch --job-name="$JOB_NAME" \
+                   --export=ALL,seed=$seed,fid=$fid,ES_CONFIG=$c \
+                   $SLURM_FILE
+        done
     done
 done
 
-echo "All 9 jobs submitted successfully! Check status with 'squeue -u $USER'"
+echo "All 75 jobs submitted successfully! Check status with 'squeue -u $USER'"

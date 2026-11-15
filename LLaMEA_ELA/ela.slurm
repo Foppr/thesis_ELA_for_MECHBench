@@ -55,7 +55,7 @@ $HOME/ELA_for_MECHBench/ollama_system/bin/ollama show qwen3-coder:30b > /dev/nul
 echo "Activating virtual environment and launching Python experiment..."
 source $HOME/ELA_for_MECHBench/ela_env/bin/activate
 
-python3 ELA_for_MECHBench.py
+python3 ELA_for_BBOB.py
 
 echo "Stopping Ollama server process..."
 kill $SERVER_PID
