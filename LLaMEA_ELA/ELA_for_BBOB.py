@@ -295,6 +295,10 @@ if __name__ == '__main__':
         niche_radius=2.0,
         adaptive_niche_radius=True,
         eval_timeout=3600,
+        dim=dim,
+        fid=fid,
+        config=ES_config,
+        seed=seed
     )
     print(es.run())
 
