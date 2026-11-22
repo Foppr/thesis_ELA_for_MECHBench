@@ -572,7 +572,7 @@ class LLaMEAAnalyzer:
                 save_name = f'../Folder_Points/500D/data_{problem}/ELA_min_max/minmax_{p_ela_csv}'
                 ela_minmax.to_csv(save_name)
 
-    def export_bbob_target_ela(self, bbob_filepath):
+    def export_bbob_target_ela(self, bbob_filepath, dim):
         """
         Filters BBOB ELA features for fids [1, 6, 10, 15, 20] (iid=1, dim=5, normalization='minmax'),
         computes the mean across seeds 1312-1326, and saves one 2-column CSV ('feature', 'value') per fid.
@@ -614,8 +614,8 @@ class LLaMEAAnalyzer:
             df_out = mean_series.reset_index()
             df_out.columns = ['feature', 'value']
 
-            out_dir = '../Folder_Points/BBOB'
-            filename = os.path.join(out_dir, f"bbob_f{fid}_iid1_dim5_minmax.csv")
+            out_dir = '../Folder_point_new/BBOB'
+            filename = os.path.join(out_dir, f"bbob_f{fid}_iid1_dim{dim}_minmax.csv")
             df_out.to_csv(filename, index=False)
             saved_files[fid] = filename
             print(f"Saved {filename}")
@@ -2320,10 +2320,13 @@ if __name__ == "__main__":
 
     # analyzer.pca_proxy_standings(save_folder_name)
 
-    # analyzer.minmax_normalize_bbob_ela()
-    # filter_fids = [1, 6, 10, 15, 20]
-    # analyzer.plot_bbob_pca(filter_fids=filter_fids)
+    for dim in [5, 10, 20]:
+        analyzer.minmax_normalize_bbob_ela(bbob_filepath=f'../output_ela/ela_features_bbob_sobol_dim{dim}.csv',
+                                           output_filepath=f'../output_ela/ela_features_bbob_MINMAX_sobol_dim{dim}.csv')
+        filter_fids = [1, 6, 10, 15, 20]
+        # analyzer.plot_bbob_pca(filter_fids=filter_fids)
 
-    analyzer.export_bbob_target_ela(
-        bbob_filepath="../output_ela/ela_features_bbob_minmax.csv"
-    )
+        analyzer.export_bbob_target_ela(
+            bbob_filepath=f"../output_ela/ela_features_bbob_MINMAX_sobol_dim{dim}.csv",
+            dim=dim
+        )

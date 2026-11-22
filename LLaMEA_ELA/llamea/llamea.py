@@ -25,7 +25,6 @@ from .utils import (
     handle_timeout,
 )
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -41,35 +40,40 @@ class LLaMEA:
     """
 
     def __init__(
-        self,
-        f,
-        llm,
-        n_parents=5,
-        n_offspring=5,
-        role_prompt="",
-        task_prompt="",
-        example_prompt=None,
-        output_format_prompt=None,
-        experiment_name="",
-        elitism=True,
-        HPO=False,
-        mutation_prompts=None,
-        adaptive_mutation=False,
-        adaptive_prompt=False,
-        budget=100,
-        eval_timeout=3600,
-        max_workers=10,
-        parallel_backend="loky",
-        log=True,
-        minimization=False,
-        _random=False,
-        niching: Optional[str] = None,
-        distance_metric: Optional[Callable[[Solution, Solution], float]] = None,
-        niche_radius: Optional[float] = None,
-        adaptive_niche_radius: bool = False,
-        clearing_interval: Optional[int] = None,
-        evaluate_population=False,
-        diff_mode: bool = False,
+            self,
+            f,
+            llm,
+            n_parents=5,
+            n_offspring=5,
+            role_prompt="",
+            task_prompt="",
+            example_prompt=None,
+            output_format_prompt=None,
+            experiment_name="",
+            elitism=True,
+            HPO=False,
+            mutation_prompts=None,
+            adaptive_mutation=False,
+            adaptive_prompt=False,
+            budget=100,
+            eval_timeout=3600,
+            max_workers=10,
+            parallel_backend="loky",
+            log=True,
+            minimization=False,
+            _random=False,
+            niching: Optional[str] = None,
+            distance_metric: Optional[Callable[[Solution, Solution], float]] = None,
+            niche_radius: Optional[float] = None,
+            adaptive_niche_radius: bool = False,
+            clearing_interval: Optional[int] = None,
+            evaluate_population=False,
+            diff_mode: bool = False,
+
+            dim=5,
+            fid=1,
+            config="1E1",
+            seed=1312
     ):
         """
         Initializes the LLaMEA instance with provided parameters. Note that by default LLaMEA maximizes the objective.
@@ -154,12 +158,12 @@ class RandomSearch:
     def __call__(self, func):
         for i in range(self.budget):
             x = np.random.uniform(func.bounds.lb, func.bounds.ub)
-            
+
             f = func(x)
             if f < self.f_opt:
                 self.f_opt = f
                 self.x_opt = x
-            
+
         return self.f_opt, self.x_opt
 ```
 """
@@ -233,7 +237,12 @@ markdown code block labelled as diff:
         if self.log:
             modelname = self.model.replace(":", "_")
             # self.logger = ExperimentLogger(f"LLaMEA-{modelname}-{experiment_name}")
-            self.logger = ExperimentLogger(f"{experiment_name}")
+            self.logger = ExperimentLogger(name=f"{experiment_name}",
+                                           dim=dim,
+                                           fid=fid,
+                                           config=config,
+                                           seed=seed
+                                           )
             self.llm.set_logger(self.logger)
         else:
             self.logger = None
@@ -254,9 +263,9 @@ markdown code block labelled as diff:
             {
                 "role": "user",
                 "content": self.role_prompt
-                + self.task_prompt
-                + self.example_prompt
-                + self.output_format_prompt,
+                           + self.task_prompt
+                           + self.example_prompt
+                           + self.output_format_prompt,
             },
         ]
         try:
@@ -376,7 +385,8 @@ Provide an improved / rephrased / augmented task prompt only. The intent of the 
             list: A list of dictionaries simulating a conversation with the language model for the next evolutionary step.
         """
         # Generate the current population summary
-        population_summary = "\n".join([ind.get_summary() for ind in self.population])  # EVERY SOLUTION DESCRIPTION + FITNESS SCORE
+        population_summary = "\n".join(
+            [ind.get_summary() for ind in self.population])  # EVERY SOLUTION DESCRIPTION + FITNESS SCORE
         solution = individual.code
         description = individual.description
         feedback = individual.feedback
@@ -384,9 +394,9 @@ Provide an improved / rephrased / augmented task prompt only. The intent of the 
             num_lines = len(solution.split("\n"))
             prob = discrete_power_law_distribution(num_lines, 1.5)
             new_mutation_prompt = f"""Refine the strategy of the selected solution to improve it. 
-Make sure you only change {(prob*100):.1f}% of the code, which means if the code has 100 lines, you can only change {prob*100} lines, and the rest of the lines should remain unchanged. 
-This input code has {num_lines} lines, so you can only change {max(1, int(prob*num_lines))} lines, the rest {num_lines-max(1, int(prob*num_lines))} lines should remain unchanged. 
-This changing rate {(prob*100):.1f}% is a mandatory requirement, you cannot change more or less than this rate.
+Make sure you only change {(prob * 100):.1f}% of the code, which means if the code has 100 lines, you can only change {prob * 100} lines, and the rest of the lines should remain unchanged. 
+This input code has {num_lines} lines, so you can only change {max(1, int(prob * num_lines))} lines, the rest {num_lines - max(1, int(prob * num_lines))} lines should remain unchanged. 
+This changing rate {(prob * 100):.1f}% is a mandatory requirement, you cannot change more or less than this rate.
 """
             self.mutation_prompts = [new_mutation_prompt]
 
@@ -508,8 +518,8 @@ With code:
             niches = []
             for ind in population:
                 if all(
-                    self.distance_metric(ind, winner) >= self.niche_radius
-                    for winner in niches
+                        self.distance_metric(ind, winner) >= self.niche_radius
+                        for winner in niches
                 ):
                     niches.append(ind)
                 else:
@@ -622,7 +632,7 @@ With code:
             except Exception as e:
                 print(f"Exception in collecting new population: {e}")
                 if len(new_population) == 0:
-                    new_population = new_offspring_population #just continue with the unevolved individuals
+                    new_population = new_offspring_population  # just continue with the unevolved individuals
 
             if self.evaluate_population:
                 new_population = self.evaluate_population_fitness(new_population)

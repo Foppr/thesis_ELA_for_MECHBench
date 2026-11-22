@@ -24,7 +24,13 @@ def convert_to_serializable(data):
 
 
 class ExperimentLogger:
-    def __init__(self, name=""):
+    def __init__(self,
+                 name="",
+                 dim=5,
+                 fid=1,
+                 config="1E1",
+                 seed=1312,
+                 ):
         """
         Initializes an instance of the ExperimentLogger.
         Sets up a new logging directory named with the current date and time.
@@ -32,10 +38,10 @@ class ExperimentLogger:
         Args:
             name (str): The name of the experiment.
         """
-        self.dirname = self.create_log_dir(name)
+        self.dirname = self.create_log_dir(name, dim, fid, config, seed)
         self.attempt = 0
 
-    def create_log_dir(self, name=""):
+    def create_log_dir(self, name, dim, fid, config, seed):
         """
         Creates a new directory for logging experiments based on the current date and time.
         Also creates subdirectories for IOH experimenter data and code files.
@@ -47,7 +53,15 @@ class ExperimentLogger:
         today = datetime.today().strftime("%m-%d_%H%M%S")
         # dirname = f"exp-{today}-{name}"
 
-        dirname = f"logs/exp-{today}-{name}"  # Add logs subdirectory (NEEDS TO BE MADE FIRST)
+        # Make parent directories
+        try: os.mkdir(f'logs/{dim}')
+        except Exception: pass
+        try: os.mkdir(f'logs/{dim}/{fid}')
+        except Exception: pass
+        try: os.mkdir(f'logs/{dim}/{fid}/{config}')
+        except Exception: pass
+
+        dirname = f"logs/{dim}/{fid}/{config}/exp-{today}-{name}"  # Add logs subdirectory (NEEDS TO BE MADE FIRST)
         os.mkdir(dirname)
         os.mkdir(f"{dirname}/configspace")
         os.mkdir(f"{dirname}/code")

@@ -25,7 +25,7 @@ import pflacco.classical_ela_features as ela
 
 # Edit these defaults here or override them on the command line.
 FUNCTION_IDS = list(range(1, 25))
-DIMENSIONS = [10, 20]
+DIMENSIONS = [5, 10, 20]
 SEEDS = list(range(1312, 1327))  # Random seeds for reproducibility.
 
 # # Small:
@@ -35,8 +35,6 @@ SEEDS = list(range(1312, 1327))  # Random seeds for reproducibility.
 
 INSTANCE_IDS = list(range(1, 6))
 SAMPLE_MULTIPLIER = 250  # Number of sample points = multiplier * dimension.
-OUTPUT_CSV = Path(__file__).resolve().parent / 'output_ela' / 'ela_features_bbob_dim10_dim20.csv'
-
 
 def generate_sample(dimension: int, n_samples: int, seed: int,
                     method: str = 'lhs') -> np.ndarray:
@@ -133,8 +131,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--n-samples', type=int, default=None,
                         help='Fixed sample count, overriding multiplier * dimension.')
     parser.add_argument('--sampling', choices=['lhs', 'sobol', 'random'], default='sobol')
+<<<<<<< HEAD
     parser.add_argument('--normalization', choices=['both', 'raw', 'minmax'], default='both')
     parser.add_argument('--output', type=Path, default=OUTPUT_CSV)
+=======
+    parser.add_argument('--normalization', choices=['both', 'raw', 'minmax'], default='minmax')
+    # parser.add_argument('--output', type=Path, default=OUTPUT_CSV)
+>>>>>>> c387e020a2a1dd167ae2e9ca9258f1b3b31978b1
     args = parser.parse_args()
     if any(fid < 1 or fid > 24 for fid in args.fids):
         parser.error('BBOB function IDs must be between 1 and 24.')
@@ -155,9 +158,10 @@ def main() -> None:
     args = parse_args()
     modes = ['raw', 'minmax'] if args.normalization == 'both' else [args.normalization]
     rows = []
-    args.output.parent.mkdir(parents=True, exist_ok=True)
+    # args.output.parent.mkdir(parents=True, exist_ok=True)
     # Checkpoint after each (dimension, seed) to retain completed batches.
     for dim in args.dimensions:
+        OUTPUT_CSV = Path(__file__).resolve().parent / 'output_ela' / f'ela_features_bbob_dim{dim}.csv'
         n_samples = args.n_samples if args.n_samples is not None else args.multiplier * dim
         for repetition, seed in enumerate(args.seeds):
             X = generate_sample(dim, n_samples, seed, args.sampling)
@@ -176,8 +180,8 @@ def main() -> None:
                         rows.append({**features, **metadata})
                     print(f'Computed fid={fid}, iid={iid}, dim={dim}, seed={seed}, n={n_samples}',
                           flush=True)
-            pd.DataFrame(rows).to_csv(args.output, index=False)
-            print(f'Saved {len(rows)} rows to {args.output.resolve()}', flush=True)
+            pd.DataFrame(rows).to_csv(OUTPUT_CSV, index=False)
+            print(f'Saved {len(rows)} rows to {OUTPUT_CSV}', flush=True)
 
 
 if __name__ == '__main__':
