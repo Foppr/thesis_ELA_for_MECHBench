@@ -245,9 +245,8 @@ if __name__ == '__main__':
         'ela_level.lda_qda_25'
     ]
 
-    dim = 5
-
     # Read variables dynamically from slurm:
+    dim = int(os.environ.get("dim", 5))
     seed = int(os.environ.get("seed", 1312))
     fid = int(os.environ.get("fid", 1))
     ES_config = (os.environ.get("ES_CONFIG", "1E1"))
@@ -295,6 +294,10 @@ if __name__ == '__main__':
         niche_radius=2.0,
         adaptive_niche_radius=True,
         eval_timeout=3600,
+        dim=dim,
+        fid=fid,
+        config=ES_config,
+        seed=seed
     )
     print(es.run())
 

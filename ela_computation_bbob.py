@@ -50,6 +50,8 @@ def generate_sample(dimension: int, n_samples: int, seed: int,
         raise ValueError('Require dimension >= 2, n_samples >= 2, seed >= 0.')
     if method == 'lhs':
         unit_sample = qmc.LatinHypercube(d=dimension, seed=seed).random(n_samples)
+    elif method == 'sobol':
+        unit_sample = qmc.Sobol(d=dimension, seed=seed).random(n_samples)
     elif method == 'random':
         unit_sample = np.random.default_rng(seed).random((n_samples, dimension))
     else:
@@ -130,7 +132,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--multiplier', type=int, default=SAMPLE_MULTIPLIER)
     parser.add_argument('--n-samples', type=int, default=None,
                         help='Fixed sample count, overriding multiplier * dimension.')
-    parser.add_argument('--sampling', choices=['lhs', 'random'], default='lhs')
+    parser.add_argument('--sampling', choices=['lhs', 'sobol', 'random'], default='sobol')
     parser.add_argument('--normalization', choices=['both', 'raw', 'minmax'], default='both')
     parser.add_argument('--output', type=Path, default=OUTPUT_CSV)
     args = parser.parse_args()
