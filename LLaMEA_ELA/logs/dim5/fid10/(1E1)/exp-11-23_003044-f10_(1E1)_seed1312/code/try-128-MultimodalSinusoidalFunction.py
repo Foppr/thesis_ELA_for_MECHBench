@@ -1,0 +1,38 @@
+import numpy as np
+
+class MultimodalSinusoidalFunction:
+    def __init__(self, dim):
+        self.dim = dim
+        self.bounds = type('Bounds', (), {'lb': -5.0, 'ub': 5.0})()
+        
+    def f(self, x):
+        # Ensure input is a numpy array and has correct dimension
+        if not isinstance(x, np.ndarray):
+            x = np.array(x)
+        if len(x) != self.dim:
+            raise ValueError(f"Input dimension mismatch: expected {self.dim}, got {len(x)}")
+        
+        # Normalize input to [-1, 1] for easier computation
+        x_norm = x / 5.0
+        
+        # Create a multimodal landscape with sinusoidal components
+        result = 0.0
+        for i in range(self.dim):
+            # Base quadratic term with sinusoidal modulation
+            result += (x[i] ** 2) * (1 + 0.1 * np.sin(10 * x[i]))
+            
+            # Add sinusoidal modulation that creates multiple local minima
+            result += 2 * np.sin(3 * x[i]) * np.cos(2 * x[i])
+            
+            # Add interaction terms between dimensions
+            for j in range(i+1, self.dim):
+                result += 0.5 * np.sin(x[i] + x[j]) * np.cos(x[i] - x[j])
+                
+        # Add a global scaling factor and ensure proper conditioning
+        result = result * (1 + 0.1 * np.sum(np.abs(x_norm)))
+        
+        # Add a more complex multimodal component
+        for i in range(self.dim):
+            result += 0.3 * np.sin(5 * x[i]) * np.cos(4 * x[i]) * np.sin(2 * x[i])
+            
+        return result

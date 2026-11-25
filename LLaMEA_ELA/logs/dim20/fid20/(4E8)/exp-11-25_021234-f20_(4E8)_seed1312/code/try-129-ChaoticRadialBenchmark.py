@@ -1,0 +1,64 @@
+import numpy as np
+
+class ChaoticRadialBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Ensure x is within bounds
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Radial quadratic component with exponential decay
+        r = np.sqrt(np.sum(x**2))
+        f1 = np.exp(-0.1 * r) * (0.5 * r**2)
+        
+        # Chaotic sine potentials along each dimension with varying frequencies
+        f2 = 0.0
+        for i in range(self.dim):
+            freq = 5.0 + 3.0 * np.sin(0.4 * i)
+            f2 += np.sin(freq * x[i]) * np.exp(-0.05 * x[i]**2)
+            
+        # Cross-dimensional interaction terms with adaptive coupling strengths
+        f3 = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                coupling = 0.4 + 0.6 * np.sin(0.7 * (i - j))
+                f3 += coupling * np.sin(x[i]) * np.cos(x[j]) * np.exp(-0.02 * (x[i]**2 + x[j]**2))
+                
+        # Multi-scale harmonic oscillations with amplitude modulation and phase shifts
+        f4 = 0.0
+        for i in range(self.dim):
+            freq = 1.0 + 3.0 * np.sin(0.2 * i)
+            amp = 1.0 + 0.7 * np.cos(0.3 * i)
+            phase = 0.5 * np.sin(0.6 * i)
+            f4 += amp * np.sin(freq * x[i] + phase) * np.exp(-0.1 * np.abs(x[i]))
+            
+        # Asymmetric penalty near boundaries with logarithmic scaling
+        f5 = 0.0
+        for i in range(self.dim):
+            if x[i] < 0:
+                penalty = 2.5 * np.log(1.0 - x[i]/5.0)
+            else:
+                penalty = 2.5 * np.log(1.0 + x[i]/5.0)
+            f5 += penalty * np.exp(-0.03 * x[i]**2)
+            
+        # Saddle-point inducing cross-terms with random phase shifts and adaptive weights
+        f6 = 0.0
+        for i in range(self.dim):
+            phase = np.random.uniform(0, 2*np.pi)
+            for j in range(i+1, self.dim):
+                weight = 0.5 + 0.5 * np.sin(0.3 * (i + j))
+                f6 += weight * np.sin(x[i] + phase) * np.cos(x[j]) * np.exp(-0.05 * (x[i]**2 + x[j]**2))
+                
+        # Global irregularity through radial polynomial terms with varying exponents
+        f7 = 0.0
+        for i in range(self.dim):
+            exp = 3.0 + 2.0 * np.sin(0.5 * i)
+            f7 += 0.1 * x[i]**exp - 0.4 * x[i]**2
+            
+        # Additional chaotic component with fractal-like characteristics
+        f8 = 0.0
+        for i in range(self.dim):
+            f8 += np.sin(15.0 * x[i]) * np.cos(7.0 * x[i]) * np.exp(-0.01 * x[i]**2)
+            
+        return f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8

@@ -1,0 +1,118 @@
+import numpy as np
+
+class MultimodalRadialOscillationBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        np.random.seed(42)
+        # Initialize parameters for chaotic sine components with modified frequencies
+        self.sin_freq = np.random.uniform(5.0, 30.0, dim)
+        self.sin_amp = np.random.uniform(2.0, 6.0, dim)
+        self.sin_phase = np.random.uniform(0.0, 2*np.pi, dim)
+        # Initialize parameters for radial basis functions
+        self.rbf_centers = np.random.uniform(-4.5, 4.5, (dim, dim))
+        self.rbf_widths = np.random.uniform(0.3, 3.0, dim)
+        self.rbf_weights = np.random.uniform(-2.5, 2.5, dim)
+        # Initialize polynomial interaction coefficients
+        self.poly_coeffs = np.random.uniform(-2.0, 2.0, (dim, dim))
+        # Additional chaotic parameters for enhanced complexity
+        self.chaos_factor = np.random.uniform(0.7, 2.0, dim)
+        self.oscillation_amplitude = np.random.uniform(1.5, 4.0, dim)
+        self.oscillation_frequency = np.random.uniform(3.0, 12.0, dim)
+        # Quaternion-inspired harmonic components
+        self.quat_freq = np.random.uniform(2.0, 5.0, dim)
+        self.quat_amp = np.random.uniform(1.0, 3.0, dim)
+        # Dynamic coupling parameters
+        self.coupling_strength = np.random.uniform(0.5, 2.0, (dim, dim))
+        self.adaptive_freq = np.random.uniform(1.0, 2.5, dim)
+        # Hyper-chaotic parameters for increased complexity
+        self.hyper_chaos_factor = np.random.uniform(1.0, 3.0, dim)
+        self.hyper_freq = np.random.uniform(4.0, 15.0, dim)
+        self.hyper_amp = np.random.uniform(0.5, 2.5, dim)
+        # Additional cross-dimensional interaction terms
+        self.cross_interaction_coeffs = np.random.uniform(-0.5, 0.5, (dim, dim, dim))
+        # New parameters for improved fitness and structure
+        self.fractal_dim = np.random.uniform(0.1, 0.9, dim)
+        self.memory_factor = np.random.uniform(0.3, 1.2, dim)
+        self.adaptive_scaling = np.random.uniform(0.5, 2.0, dim)
+        
+    def f(self, x):
+        # Ensure x is within bounds [-5, 5]
+        x = np.clip(x, -5.0, 5.0)
+        
+        result = 0.0
+        
+        # Chaotic sinusoidal components with enhanced irregularity
+        for i in range(self.dim):
+            # Base chaotic sine term
+            result += self.sin_amp[i] * np.sin(self.sin_freq[i] * x[i] + self.sin_phase[i])
+            # Additional chaotic oscillation component
+            result += self.oscillation_amplitude[i] * np.cos(self.oscillation_frequency[i] * x[i])
+            # Chaos injection for irregularity
+            result += self.chaos_factor[i] * np.sin(x[i]**3)
+            # Quaternion-inspired harmonic components
+            result += self.quat_amp[i] * np.sin(self.quat_freq[i] * x[i]**2) * np.cos(self.quat_freq[i] * x[i])
+            # Hyper-chaotic components for increased complexity
+            result += self.hyper_amp[i] * np.sin(self.hyper_freq[i] * x[i]**4) + self.hyper_chaos_factor[i] * np.cos(x[i]**5)
+            
+        # Modified radial basis functions with enhanced non-linearity
+        for i in range(self.dim):
+            rbf_sum = 0.0
+            for j in range(self.dim):
+                distance = (x[j] - self.rbf_centers[i][j])**2
+                rbf_sum += np.exp(-distance / (2 * self.rbf_widths[i]**2))
+            result += self.rbf_weights[i] * rbf_sum
+            
+        # Enhanced polynomial interactions with cross-dimensional terms
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                interaction = self.poly_coeffs[i][j] * x[i] * x[j]
+                result += interaction
+                
+        # Higher-order polynomial terms with increased complexity
+        for i in range(self.dim):
+            result += 0.5 * x[i]**6 - 1.2 * x[i]**5 + 1.0 * x[i]**4 - 0.8 * x[i]**3 + 0.5 * x[i]**2 - 0.1 * x[i]
+            
+        # Cross-dimensional interaction terms with cubic behavior (enhanced)
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                result += 0.3 * x[i]**3 * x[j] + 0.2 * x[i] * x[j]**3  # Increased coefficients
+                
+        # Dynamic coupling terms between dimensions
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if i != j:
+                    result += self.coupling_strength[i][j] * np.sin(x[i] * x[j]) * np.cos(self.adaptive_freq[i] * x[i])
+                    
+        # Add quaternion-inspired global scaling factor
+        result *= (1.0 + 0.5 * np.sum(np.sin(x**2) * np.cos(x**3)))
+        
+        # Add higher-order cross-dimensional interactions
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if i != j:
+                    for k in range(self.dim):
+                        if k != i and k != j:
+                            result += self.cross_interaction_coeffs[i][j][k] * x[i]**2 * x[j] * x[k]
+                            
+        # Add hyper-chaotic noise term
+        noise_term = 0.0
+        for i in range(self.dim):
+            noise_term += np.sin(self.hyper_freq[i] * x[i]) * np.cos(self.hyper_chaos_factor[i] * x[i]**2)
+        result += 0.2 * noise_term
+        
+        # Add memory-dependent term to improve robustness and fitness
+        memory_term = 0.0
+        for i in range(self.dim):
+            memory_term += self.memory_factor[i] * np.sin(x[i] * self.fractal_dim[i]) * np.cos(x[i]**3)
+        result += 0.15 * memory_term
+        
+        # Add adaptive scaling factor to enhance problem difficulty
+        scaling_term = 0.0
+        for i in range(self.dim):
+            scaling_term += self.adaptive_scaling[i] * np.log(1 + np.abs(x[i]))
+        result *= (1.0 + 0.3 * scaling_term)
+        
+        # Add Gaussian noise to increase robustness testing
+        result += np.random.normal(0, 0.2)
+        
+        return result

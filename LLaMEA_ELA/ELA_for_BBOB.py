@@ -191,19 +191,19 @@ class ELAForBBOB(ELAproblem):
 
             # Grab the actual scalar float values from column 0 ('value')
             proxy_val_minmax = ela_proxy_minmax.iloc[i, 0]
-            print(f"proxy_val_minmax for {feature_name}: {proxy_val_minmax}\n")
+            # print(f"proxy_val_minmax for {feature_name}: {proxy_val_minmax}\n")
             original_val_minmax = self.min_max_ela_df.iloc[i, 0]
-            print(f"original_val_minmax for {feature_name}: {original_val_minmax}\n")
+            # print(f"original_val_minmax for {feature_name}: {original_val_minmax}\n")
 
             pairwise_distance_minmax = proxy_val_minmax - original_val_minmax
-            print(f"pairwise_distance_minmax for {feature_name}: {pairwise_distance_minmax}\n\n")
+            # print(f"pairwise_distance_minmax for {feature_name}: {pairwise_distance_minmax}\n\n")
 
             # solution.add_metadata(f"Distance to {feature_name}", round(pairwise_distance, 3))
             distances_minmax[feature_name] = pairwise_distance_minmax
             abs_distances_minmax[feature_name] = abs(pairwise_distance_minmax)
             # feedback += f"{feature_name}: {pairwise_distance: .3f} (Original value: {original_val: .3f}, proxy value: {proxy_val: .3f}) \n"
 
-        print(f"\nabs_distances_minmax: {abs_distances_minmax}\n")
+        # print(f"\nabs_distances_minmax: {abs_distances_minmax}\n")
         solution.add_metadata('Min-max distances', distances_minmax)
         solution.add_metadata('Absolute min-max distances', abs_distances_minmax)
 
@@ -287,7 +287,7 @@ if __name__ == '__main__':
         elitism=elitism,  # False=,   True=+
         HPO=False,
         max_workers=4,
-        budget=100,
+        budget=300,
         parallel_backend="loky",
         niching="sharing",
         distance_metric=ela_distance,

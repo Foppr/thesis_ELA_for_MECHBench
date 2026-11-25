@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 feature,value
 disp.ratio_mean_02,0.17267841045398355
 ela_distr.skewness,0.16349954066369793
@@ -11,17 +10,3 @@ ic.eps_s,0.4838095238095239
 nbc.nb_fitness.cor,0.5846927739816992
 ela_level.mmce_qda_25,0.19849762436024493
 ela_level.lda_qda_25,0.22465733338660285
-=======
-feature,value
-disp.ratio_mean_02,0.17267841045398355
-ela_distr.skewness,0.16349954066369793
-ela_meta.lin_simple.adj_r2,0.6123577532067365
-ela_meta.lin_simple.intercept,0.24217167199885042
-ela_meta.lin_simple.coef.max,0.3021916889294764
-ela_meta.quad_simple.adj_r2,0.758982687000371
-ic.eps_ratio,0.7547008547008549
-ic.eps_s,0.4838095238095239
-nbc.nb_fitness.cor,0.5846927739816992
-ela_level.mmce_qda_25,0.19849762436024493
-ela_level.lda_qda_25,0.22465733338660285
->>>>>>> c387e020a2a1dd167ae2e9ca9258f1b3b31978b1

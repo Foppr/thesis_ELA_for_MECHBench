@@ -1,0 +1,48 @@
+import numpy as np
+
+class MultiModalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Scale input to [-1, 1] range
+        x_scaled = x / 5.0
+        
+        # Chaotic Gaussian peaks with asymmetric widths and heights
+        peaks = np.sum(0.8 * np.exp(-3.0 * (x_scaled - 0.2)**2) * 
+                      np.exp(-0.5 * (x_scaled - 0.2)**4) + 
+                      0.3 * np.exp(-5.0 * (x_scaled + 0.5)**2) * 
+                      np.exp(-0.3 * (x_scaled + 0.5)**6) + 
+                      0.2 * np.exp(-7.0 * (x_scaled - 0.9)**2) * 
+                      np.exp(-0.4 * (x_scaled - 0.9)**5) + 
+                      0.1 * np.exp(-2.0 * (x_scaled + 0.8)**2) * 
+                      np.exp(-0.6 * (x_scaled + 0.8)**3))
+        
+        # Chaotic sinusoidal modulation with fractal-like frequencies
+        sin_mod = np.sum(np.sin(20.0 * x_scaled + np.sin(15.0 * x_scaled)) + 
+                        0.7 * np.sin(25.0 * x_scaled**2 + np.cos(18.0 * x_scaled)) + 
+                        0.5 * np.sin(30.0 * x_scaled**3 + np.sin(22.0 * x_scaled**2)))
+        
+        # Exponentially weighted dimensionality with chaotic phase shifts
+        dim_scaling = np.sum(np.exp(-0.8 * np.abs(x_scaled)) * 
+                           (1.0 + 0.5 * np.sin(5.0 * x_scaled + np.cos(3.0 * x_scaled))))
+        
+        # Complex cross-dimensional interaction terms with chaotic coupling
+        cross_terms = np.sum((x_scaled[:-1]**2 + x_scaled[1:]**2)**1.5 * 
+                           np.sin(4.0 * (x_scaled[:-1] + x_scaled[1:])) + 
+                           (x_scaled[:-2]**3 + x_scaled[2:]**3) * 
+                           np.cos(3.0 * (x_scaled[:-2] - x_scaled[2:])) + 
+                           0.5 * (x_scaled[:-1]**4 + x_scaled[1:]**4) * 
+                           np.sin(6.0 * (x_scaled[:-1] - x_scaled[1:]))
+        )
+        
+        # Multi-scale chaotic harmonics with time-varying phase
+        harmonics = np.sum(np.sin(8.0 * x_scaled + 0.3 * np.sin(12.0 * x_scaled)) * 
+                         np.cos(10.0 * x_scaled + 0.4 * np.cos(15.0 * x_scaled)) + 
+                         0.9 * np.sin(14.0 * x_scaled**2 + 0.2 * np.sin(20.0 * x_scaled)) * 
+                         np.cos(16.0 * x_scaled**2 + 0.3 * np.cos(25.0 * x_scaled)) + 
+                         0.6 * np.sin(22.0 * x_scaled**3 + 0.1 * np.sin(30.0 * x_scaled)) * 
+                         np.cos(24.0 * x_scaled**3 + 0.2 * np.cos(35.0 * x_scaled)))
+        
+        # Asymmetric chaotic landscape with weighted sum of components
+        return 0.4 * peaks + 0.3 * sin_mod + 0.15 * dim_scaling + 0.1 * cross_terms + 0.05 * harmonics + 2.1

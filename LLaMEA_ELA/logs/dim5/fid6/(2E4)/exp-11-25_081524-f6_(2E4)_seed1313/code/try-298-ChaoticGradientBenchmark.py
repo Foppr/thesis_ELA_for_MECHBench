@@ -1,0 +1,97 @@
+import numpy as np
+
+class ChaoticGradientBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        self.t = 0.0
+        self.logistic_r = 3.9 + 0.1 * np.sin(0.5 * self.t)
+        
+    def f(self, x):
+        self.t += 0.01
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Chaotic gradient components with logistic map dynamics
+        result = 0.0
+        for i in range(self.dim):
+            xi = x[i]
+            # Enhanced chaotic modulation with stronger coupling
+            chaos_factor = 1.0 + 0.6 * np.sin(3.0 * self.t + i * 1.2) * np.cos(1.5 * self.t)
+            result += (xi**2 - 4.0 * xi + 4.0) * chaos_factor
+            
+        # Improved periodic attractor landscape with stronger frequency coupling
+        freq_mod = 1.0 + 0.5 * np.sin(1.3 * self.t)  # Slight frequency change
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.8 * (xi**2) * np.cos(freq_mod * xi + 0.5 * self.t)
+            
+        # Enhanced dynamic curvature with stronger time-varying effects
+        curv_factor = 0.8 + 0.6 * np.sin(2.1 * self.t)  # Slight frequency change
+        for i in range(self.dim):
+            xi = x[i]
+            result += curv_factor * (xi**3 - 3.0 * xi) * np.exp(-xi**2/2.5)
+            
+        # Strengthened saddle point configuration with more complex coupling
+        for i in range(0, self.dim, 2):
+            if i + 1 < self.dim:
+                xi = x[i]
+                xj = x[i+1]
+                result += 0.6 * (xi**2 - xj**2) * np.sin(0.9 * (xi + xj))  # Slight change
+                
+        # Enhanced multi-scale periodicity with stronger phase coupling
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.5 * np.sin(14.0 * xi + 0.2 * self.t) * np.cos(5.5 * xi + 0.3 * self.t)  # Changed frequencies
+            
+        # Refined basin depth with more controlled scaling
+        scale_factor = 1.5 + 0.8 * np.sin(0.95 * self.t)  # Slight change
+        result += scale_factor * np.sum((x**4) * np.exp(-x**2/1.2))
+        
+        # Enhanced coupled logistic dynamics in the landscape
+        for i in range(self.dim):
+            xi = x[i]
+            logistic_val = self.logistic_r * xi * (1.0 - xi)
+            result += 0.15 * logistic_val * np.sin(3.2 * xi + 0.5 * self.t)  # Slight change
+            
+        # Strengthened oscillating harmonic components
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.3 * (xi**2) * np.sin(10.5 * xi + 0.4 * self.t) * np.cos(5.5 * xi + 0.2 * self.t)  # Changed frequencies
+            
+        # Additional harmonic interference terms for increased complexity
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.12 * np.sin(6.5 * xi + 0.25 * self.t) * np.cos(2.8 * xi + 0.15 * self.t)  # Changed frequencies
+            
+        # Mutation: Slight adjustment to curvature and interaction terms
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.08 * (xi**4 - 2*xi**2) * np.sin(3.6 * xi + 0.15 * self.t)  # Slight change
+            
+        # Mutation: Reduced coupling strength in harmonic interference
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.09 * np.sin(5.2 * xi + 0.25 * self.t) * np.cos(2.1 * xi + 0.15 * self.t)  # Changed frequencies
+            
+        # Additional chaotic interference terms
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.1 * np.sin(20.5 * xi + 0.3 * self.t) * np.cos(8.5 * xi + 0.2 * self.t)  # Changed frequencies
+            
+        # Enhanced multi-modal structure with stronger local minima
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.25 * (xi**6 - 3*xi**4 + 3*xi**2) * np.exp(-xi**2/4.2)  # Slight change
+            
+        # Increased dimensionality coupling with cross-terms
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                xi = x[i]
+                xj = x[j]
+                result += 0.05 * (xi**2 + xj**2) * np.sin(0.35 * (xi - xj))  # Slight change
+                
+        # Mutation: Further modified interaction coefficients and harmonic frequencies
+        for i in range(self.dim):
+            xi = x[i]
+            result += 0.11 * np.sin(7.0 * xi + 0.28 * self.t) * np.cos(3.0 * xi + 0.18 * self.t)  # Changed frequencies
+            
+        return result

@@ -54,14 +54,14 @@ class ExperimentLogger:
         # dirname = f"exp-{today}-{name}"
 
         # Make parent directories
-        try: os.mkdir(f'logs/{dim}')
+        try: os.mkdir(f'logs/dim{dim}')
         except Exception: pass
-        try: os.mkdir(f'logs/{dim}/{fid}')
+        try: os.mkdir(f'logs/dim{dim}/fid{fid}')
         except Exception: pass
-        try: os.mkdir(f'logs/{dim}/{fid}/{config}')
+        try: os.mkdir(f'logs/dim{dim}/fid{fid}/({config})')
         except Exception: pass
 
-        dirname = f"logs/{dim}/{fid}/{config}/exp-{today}-{name}"  # Add logs subdirectory (NEEDS TO BE MADE FIRST)
+        dirname = f"logs/dim{dim}/fid{fid}/({config})/exp-{today}-{name}"  # Add logs subdirectory (NEEDS TO BE MADE FIRST)
         os.mkdir(dirname)
         os.mkdir(f"{dirname}/configspace")
         os.mkdir(f"{dirname}/code")

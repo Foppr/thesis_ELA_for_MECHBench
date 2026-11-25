@@ -17,11 +17,11 @@ import traceback
 import numpy as np
 import pandas as pd
 
-from llamea import LLaMEA, OpenAI_LLM, Ollama_LLM
+from llamea import LLaMEA, Ollama_LLM
 
 import xgboost as xgb
-from pflacco.classical_ela_features import *
-from pflacco.sampling import create_initial_sample
+import pflacco
+import pflacco.classical_ela_features as ela
 import joblib
 
 from dataclasses import dataclass
@@ -348,15 +348,15 @@ Give a novel Python class with an optimization landscape function and a short de
 
                 ela_meta_scaled = calculate_ela_meta(X_scaled, y_scaled)
                 #ela_level = calculate_ela_level(X, y)
-                ela_distr_scaled = calculate_ela_distribution(X_scaled, y_scaled)
+                ela_distr_scaled = ela.calculate_ela_distribution(X_scaled, y_scaled)
                 
-                nbc_scaled = calculate_nbc(X_scaled, y_scaled)
+                nbc_scaled = ela.calculate_nbc(X_scaled, y_scaled)
                 
-                disp_scaled = calculate_dispersion(X_scaled, y_scaled)
+                disp_scaled = ela.calculate_dispersion(X_scaled, y_scaled)
                 
-                pca_scaled = calculate_pca(X_scaled, y_scaled)
+                pca_scaled = ela.calculate_pca(X_scaled, y_scaled)
                 
-                ic_scaled = calculate_information_content(X_scaled, y_scaled)
+                ic_scaled = ela.calculate_information_content(X_scaled, y_scaled)
                 
                 all_features_scaled = {**ela_meta_scaled, **ela_distr_scaled, **nbc_scaled, **disp_scaled, **pca_scaled, **ic_scaled}
                 

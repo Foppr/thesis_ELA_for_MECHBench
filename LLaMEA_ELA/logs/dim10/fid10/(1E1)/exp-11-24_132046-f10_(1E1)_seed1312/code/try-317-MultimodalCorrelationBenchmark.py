@@ -1,0 +1,43 @@
+import numpy as np
+
+class MultimodalCorrelationBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Normalize input to [-1, 1] range
+        x_norm = x / 5.0
+        
+        # Periodic peak structure with varying amplitudes
+        periodic_peaks = np.sum(2.0 * np.cos(3 * np.pi * x_norm) * np.sin(5 * np.pi * x_norm) + 
+                               1.5 * np.cos(7 * np.pi * x_norm) * np.sin(9 * np.pi * x_norm))
+        
+        # Gaussian valley structure with adaptive width
+        gaussian_valleys = np.sum(np.exp(-0.5 * (x_norm**2) / (0.5 + 0.5 * np.sin(2 * np.pi * x_norm))))
+        
+        # Cross-dimensional correlation with chaotic interaction
+        cross_dim_corr = np.sum(np.sin(np.pi * (x_norm[:-1] + x_norm[1:])) * 
+                               np.cos(np.pi * (x_norm[:-1] - x_norm[1:])) * 
+                               (1 + 0.3 * np.sin(4 * np.pi * x_norm[:-1])) * 
+                               (1 + 0.2 * np.cos(3 * np.pi * x_norm[1:])))
+        
+        # Multi-scale harmonic modulation
+        harmonic_modulation = np.sum(np.sin(10 * x_norm) * np.cos(8 * x_norm) * 
+                                    (1 + 0.25 * np.sin(6 * x_norm)) * 
+                                    (1 + 0.2 * np.cos(4 * x_norm)))
+        
+        # Power-law conditioned regions
+        power_law_regions = np.sum(np.abs(x_norm)**1.3 * (1 + 0.4 * np.sin(12 * x_norm)))
+        
+        # Fractal-like correlation structure
+        fractal_corr = np.sum(np.exp(-np.abs(x_norm[:-1] - x_norm[1:]) / (0.1 + 0.1 * np.cos(5 * x_norm[:-1]))))
+        
+        # Adaptive conditioning with local scaling
+        adaptive_conditioning = np.sum((1 + 0.5 * np.sin(2 * x_norm)) * 
+                                     np.exp(-0.3 * x_norm**2) * 
+                                     (1 + 0.3 * np.cos(3 * x_norm)))
+        
+        # Combined landscape with different curvature regions
+        return 1.5 * (periodic_peaks + gaussian_valleys + cross_dim_corr + 
+                     harmonic_modulation + power_law_regions + fractal_corr + 
+                     adaptive_conditioning)

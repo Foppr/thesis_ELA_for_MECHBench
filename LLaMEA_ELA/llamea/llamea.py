@@ -13,7 +13,7 @@ import traceback
 from typing import Callable, Optional
 
 import numpy as np
-from ConfigSpace import ConfigurationSpace
+# from ConfigSpace import ConfigurationSpace
 from joblib import Parallel, delayed
 
 from .loggers import ExperimentLogger

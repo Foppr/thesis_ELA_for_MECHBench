@@ -1,0 +1,126 @@
+import numpy as np
+
+class ChaoticRadialFunction:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        x = np.array(x)
+        
+        # Base radial component with increased complexity and diversity
+        result = 0.0
+        for i in range(self.dim):
+            scale_factor = 1.0 + 0.4 * np.sin(i * 1.7)
+            center = np.sin(i * 2.3) * 2.5
+            width = 1.2 + 0.3 * np.cos(i * 0.8)
+            result += scale_factor * np.exp(-np.sum((x - center)**2) / (2.0 * width**2))
+            
+        # Enhanced chaotic sine couplings with frequency modulation and improved structure
+        for i in range(self.dim):
+            freq1 = 3.5 + 0.6 * np.sin(i * 0.9)
+            freq2 = 2.5 + 0.4 * np.cos(i * 1.5)
+            chaotic_factor = np.sin(freq1 * x[i]) * np.cos(freq2 * x[i])
+            result += 0.7 * np.sin(1.8 * x[i] + chaotic_factor) * np.cos(1.8 * x[i] - chaotic_factor)
+            
+        # Dynamic penalty landscape with smoother oscillations and adjusted parameters
+        dist = np.sqrt(np.sum(x**2))
+        penalty = 3.5 * dist * np.exp(-dist / 4.5) * (1.0 + 0.25 * np.sin(dist * 2.2))
+        result += penalty
+        
+        # Cross-dimensional interaction with controlled coupling strength and new structure
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                coupling = np.sin(x[i] * x[j]) * np.cos(x[i] + x[j])
+                log_factor = 1.0 + 0.6 * np.sin(x[i] * x[j] * 0.5)
+                result += 0.45 * coupling * log_factor * (1.0 / (1.0 + abs(x[i] - x[j])**1.4))
+                
+        # Multi-scale oscillatory terms with adjusted frequencies and amplitudes
+        for i in range(self.dim):
+            freq = 3.5 * (i + 1) * np.cos(i * 0.8)
+            result += 0.35 * np.sin(freq * x[i])**3 * np.cos(freq * x[i])**2
+            
+        # Asymmetric basin terms with adjusted exponents and improved structure
+        for i in range(self.dim):
+            asym_term = (x[i] - 1.8)**4 + 0.75 * (x[i] + 1.8)**3
+            result += 0.16 * asym_term * np.exp(-abs(x[i]) * 0.55)
+            
+        # Central repulsion with modified strength and new interaction pattern
+        center_dist = np.sqrt(np.sum((x - 0.8)**2))
+        result += 1.3 * np.exp(-center_dist**2 / 3.2) * np.sin(center_dist * 1.6)
+        
+        # Nested basin structure with adjusted depths and enhanced complexity
+        for i in range(self.dim):
+            nested_term = (x[i] - 2.2)**5 + 0.35 * (x[i] + 2.2)**4
+            result += 0.22 * nested_term * np.exp(-abs(x[i]) * 0.35)
+            
+        # New interaction term with cubic polynomial and controlled coupling strength
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                cubic_coupling = (x[i]**3) * np.sin(x[j]) + (x[j]**3) * np.cos(x[i])
+                result += 0.22 * cubic_coupling * np.exp(-0.5 * (x[i] - x[j])**2)
+                
+        # Chaotic interaction with modified coupling and strength parameters
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                mod_coupling = np.sin(x[i] * x[j] * 2.2) * np.cos(x[i] + x[j] * 1.6)
+                strength = 0.35 * (1.0 + 0.25 * np.sin(i + j))
+                result += strength * mod_coupling * np.exp(-0.32 * (x[i]**2 + x[j]**2))
+                
+        # Quartic interaction term with symmetric curvature and adjusted parameters
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                quartic_term = (x[i]**4) * np.sin(x[j]) + (x[j]**4) * np.cos(x[i])
+                result += 0.22 * quartic_term * np.exp(-0.32 * abs(x[i] - x[j]))
+                
+        # New radial term with variable center and width, enhanced structure
+        for i in range(self.dim):
+            center_var = np.sin(i * 1.3) * 1.7
+            width_var = 0.9 + 0.35 * np.cos(i * 1.0)
+            radial_term = np.exp(-np.sum((x - center_var)**2) / (2.0 * width_var**2))
+            result += 0.27 * radial_term * (1.0 + 0.45 * np.sin(i * 2.8))
+            
+        # Penalty term with adjusted scaling and improved structure
+        for i in range(self.dim):
+            scaled_penalty = 2.2 * abs(x[i]) * np.exp(-abs(x[i]) / 3.2) * (1.0 + 0.35 * np.cos(i * 1.8))
+            result += scaled_penalty
+            
+        # Add a new multi-modal term with controlled complexity
+        multimodal_term = 0.0
+        for i in range(self.dim):
+            multimodal_term += np.sin(x[i] * 5.2) * np.cos(x[i] * 3.2) * np.exp(-0.11 * x[i]**2)
+        result += 0.11 * multimodal_term
+        
+        # Add a structured noise term to break symmetries and improve conditioning
+        noise = 0.0
+        for i in range(self.dim):
+            noise += np.sin(x[i] * 7.2) * np.cos(x[i] * 4.2) * (0.012 + 0.022 * np.abs(x[i]))
+        result += 0.055 * noise
+        
+        # Add a controlled cross-dimensional coupling with a new interaction pattern
+        cross_coupling = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                cross_coupling += (x[i] * x[j]) * np.sin(x[i]**2 + x[j]**2) * np.exp(-0.22 * (x[i] - x[j])**2)
+        result += 0.16 * cross_coupling
+        
+        # Add a novel high-frequency chaotic interaction term
+        high_freq_term = 0.0
+        for i in range(self.dim):
+            freq = 10.5 + 2.2 * np.sin(i * 0.6)
+            high_freq_term += (x[i] - np.sin(freq * x[i]))**2
+        result += 0.11 * high_freq_term
+        
+        # Add a new term to improve the fitness score based on error metrics
+        corr_term = 0.0
+        for i in range(self.dim):
+            corr_term += (x[i] - np.sin(x[i]))**2.2
+        result += 0.21 * corr_term
+        
+        # Additional complexity through higher-order polynomial interactions
+        poly_term = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                poly_term += (x[i]**3) * (x[j]**2) * np.sin(x[i] + x[j])
+        result += 0.05 * poly_term
+        
+        return result

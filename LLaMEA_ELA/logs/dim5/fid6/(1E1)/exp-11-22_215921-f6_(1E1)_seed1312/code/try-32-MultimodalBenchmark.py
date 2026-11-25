@@ -1,0 +1,44 @@
+import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Normalize input to [-1, 1] range for stability
+        x_norm = x / 5.0
+        
+        # Base quadratic term for global attraction
+        quadratic = np.sum(x_norm ** 2)
+        
+        # Enhanced hyperchaotic sinusoidal oscillations with increased frequency and amplitude modulation
+        chaotic = 2.0 * np.sum(np.sin(15 * np.pi * x_norm * np.exp(-0.6 * x_norm**2)) ** 4)
+        
+        # Multiple adaptive Gaussian peaks with varying widths, positions, and interaction terms
+        gaussian1 = 1.5 * np.sum(np.exp(-10 * (x_norm - 0.25 * np.sin(7 * x_norm)) ** 2))
+        gaussian2 = 1.0 * np.sum(np.exp(-7 * (x_norm + 0.4 * np.cos(6 * x_norm)) ** 2))
+        gaussian3 = 0.8 * np.sum(np.exp(-12 * (x_norm - 0.4 * np.tan(5 * x_norm)) ** 2))
+        
+        # Complex non-separable cross-term interactions with spiral coupling
+        cross_term = 0.7 * np.sum(x_norm[:-1] * x_norm[1:] * np.sin(8 * np.pi * x_norm[:-1] * x_norm[1:]) * 
+                                np.exp(-0.5 * (x_norm[:-1]**2 + x_norm[1:]**2)))
+        
+        # Additional high-frequency oscillatory component with logarithmic modulation
+        high_freq = 1.0 * np.sum(np.cos(18 * np.pi * x_norm * np.exp(-0.2 * x_norm**2)) ** 3)
+        
+        # New complex interaction term with spiral pattern and exponential coupling
+        interaction_term = 0.6 * np.sum(np.sin(10 * np.pi * x_norm) * np.cos(7 * np.pi * x_norm) * 
+                                       (x_norm[:-1] + x_norm[1:]) ** 3 * np.exp(-0.3 * (x_norm[:-1]**2 + x_norm[1:]**2)))
+        
+        # New peak family with logarithmic decay and trigonometric modulation
+        log_peak = 1.2 * np.sum(np.exp(-8 * (x_norm - 0.3 * np.log(1 + np.abs(x_norm)) * np.sin(4 * x_norm)) ** 2))
+        
+        # Novel spiral-shaped component for increased landscape complexity
+        spiral_term = 0.5 * np.sum((x_norm[:-1]**2 + x_norm[1:]**2) * np.sin(12 * np.pi * np.arctan2(x_norm[1:], x_norm[:-1])) ** 2)
+        
+        # Dimension-dependent conditioning factor to increase problem difficulty
+        condition_factor = 1.0 + 0.8 * np.log(self.dim + 1)
+        
+        # Combine all terms with different weights and scaling
+        return condition_factor * (quadratic + chaotic + gaussian1 + gaussian2 + gaussian3 + 
+                                 cross_term + high_freq + interaction_term + log_peak + spiral_term)

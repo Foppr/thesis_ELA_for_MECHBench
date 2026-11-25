@@ -1,0 +1,48 @@
+import numpy as np
+
+class ChaoticMultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Ensure x is within bounds [-5, 5]
+        x = np.clip(x, -5.0, 5.0)
+        
+        # Base quadratic term
+        result = np.sum(x**2)
+        
+        # Enhanced chaotic sinusoidal terms with stronger frequency modulation and amplitude scaling
+        for i in range(self.dim):
+            freq = 5 * (i + 1) ** 1.7
+            amp = 0.5 * (i + 1) ** -0.6
+            result += amp * np.sin(freq * x[i]) * np.cos(freq * x[i] * 0.8)
+            
+        # Higher-order polynomial interaction terms with non-linear coupling
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                interaction = (x[i]**4 + x[j]**4) * np.exp(-0.15 * (x[i] - x[j])**2)
+                result += 0.15 * interaction
+                
+        # Dynamic saddle-point structure with multi-scale competing minima
+        for i in range(self.dim):
+            result += 0.3 * (np.sin(2.5 * x[i]) * np.cos(3.5 * x[i]) + 
+                           0.6 * np.sin(4.5 * x[i]) * np.cos(2.5 * x[i]))
+            
+        # Multi-scale oscillation with exponential decay and increased frequency
+        for i in range(self.dim):
+            result += 0.15 * np.sin(12 * x[i]) * np.exp(-0.07 * x[i]**2)
+            
+        # Asymmetric penalty with more complex critical point arrangement
+        critical_points = np.array([1.2, -1.8, 2.2, -2.8, 0.5, -0.9])
+        if self.dim >= 6:
+            penalties = []
+            for i in range(6):
+                if i < self.dim:
+                    penalties.append((x[i] - critical_points[i])**5)
+            result += 0.1 * np.sum(penalties)
+            
+        # Additional chaotic modulation term to increase landscape irregularity
+        chaos_mod = 0.05 * np.sin(np.sum(x**2) * 0.3)
+        result += chaos_mod
+        
+        return result

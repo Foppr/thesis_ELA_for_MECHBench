@@ -1,0 +1,80 @@
+import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Normalize input to [-1, 1] range for stability
+        x_normalized = x / 5.0
+        
+        # Enhanced global quadratic basin term with dynamic coefficient
+        quadratic_term = 0.15 * np.sum(x_normalized**2)
+        
+        # Sinusoidal oscillations with exponentially increasing frequency and quintic interaction
+        sin_term = 0.0
+        for i in range(self.dim):
+            freq = 2 ** (i + 1) * np.pi
+            sin_term += np.sin(freq * x_normalized[i]) * np.exp(-0.5 * (x_normalized[i] - 0.1)**2) + 0.06 * x_normalized[i]**5
+        
+        # Additional multimodal component with mixed interactions and chaotic noise
+        multivariate_sin = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                multivariate_sin += np.sin(7 * np.pi * x_normalized[i]) * np.sin(4 * np.pi * x_normalized[j]) + 0.035 * x_normalized[i]**2 * x_normalized[j]**3
+        
+        # Add quintic interaction terms for increased complexity
+        quintic_term = 0.0
+        for i in range(self.dim):
+            quintic_term += 0.015 * x_normalized[i]**5
+        
+        # Multiple global minimum shifts with different offsets
+        shift_term = 0.0
+        shifts = [0.2, 0.4, 0.6, 0.8]
+        for k, shift in enumerate(shifts[:self.dim]):
+            shift_term += 0.035 * np.sum((x_normalized - shift)**5)
+        
+        # Add chaotic noise component to increase conditioning difficulty
+        noise = 0.0
+        for i in range(self.dim):
+            noise += 0.025 * np.sin(13 * x_normalized[i]) * np.cos(17 * x_normalized[i])
+        
+        # Adaptive parameter modulation based on dimensionality with enhanced scaling
+        adaptive_factor = 1.0 + 0.15 * np.sin(np.pi * self.dim / 10.0)
+        
+        # Add a new component with exponential decay and varying amplitudes
+        exp_decay_term = 0.0
+        for i in range(self.dim):
+            exp_decay_term += 0.045 * np.exp(-2.0 * (x_normalized[i] - 0.3)**2) * np.sin(5 * np.pi * x_normalized[i])
+        
+        # Add a new component with hyperbolic tangent interactions
+        tanh_term = 0.0
+        for i in range(self.dim):
+            tanh_term += 0.025 * np.tanh(3.0 * x_normalized[i]) * np.sin(8 * np.pi * x_normalized[i])
+        
+        # Add a new component with logarithmic and trigonometric interactions
+        log_trig_term = 0.0
+        for i in range(self.dim):
+            log_trig_term += 0.02 * np.log(1 + np.abs(x_normalized[i])) * np.cos(6 * np.pi * x_normalized[i])
+        
+        # Add a new component with higher-order polynomial and periodic interactions
+        poly_periodic_term = 0.0
+        for i in range(self.dim):
+            poly_periodic_term += 0.03 * x_normalized[i]**6 * np.sin(9 * np.pi * x_normalized[i])
+        
+        # Add a new component with Gaussian mixture and fractal-like behavior
+        gaussian_mixture = 0.0
+        for i in range(self.dim):
+            gaussian_mixture += 0.035 * np.exp(-0.5 * (x_normalized[i] - 0.2)**2) * np.sin(11 * np.pi * x_normalized[i])
+        
+        # Add a new component with enhanced chaotic behavior and cross-terms
+        chaotic_cross_term = 0.0
+        for i in range(self.dim):
+            chaotic_cross_term += 0.02 * np.sin(19 * x_normalized[i]) * np.cos(23 * x_normalized[i]) * (x_normalized[i]**4)
+        
+        # Add a new component with multi-scale oscillations and dynamic amplitude
+        multiscale_term = 0.0
+        for i in range(self.dim):
+            multiscale_term += 0.018 * np.sin(31 * x_normalized[i]) * np.exp(-0.3 * x_normalized[i]**2) * np.cos(37 * x_normalized[i])
+        
+        return adaptive_factor * (quadratic_term + sin_term + multivariate_sin + quintic_term + shift_term + noise + exp_decay_term + tanh_term + log_trig_term + poly_periodic_term + gaussian_mixture + chaotic_cross_term + multiscale_term)

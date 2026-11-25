@@ -1,0 +1,41 @@
+import numpy as np
+
+class MultimodalBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        
+    def f(self, x):
+        # Normalize input to [-1, 1] for stability
+        x_norm = x / 5.0
+        
+        # Quadratic term with conditioning
+        f1 = np.sum(x_norm**2)
+        
+        # High-frequency sinusoidal terms with multiple local minima
+        f2 = np.sum(np.sin(20 * np.pi * x_norm)**8)
+        
+        # Exponential barrier terms to create rugged landscape
+        f3 = np.sum(np.exp(-x_norm**2) - 1.0)
+        
+        # Mixed polynomial and trigonometric terms for additional complexity
+        f4 = np.sum(x_norm**7 * np.cos(6 * np.pi * x_norm))
+        
+        # Add a global repulsion term to prevent easy convergence
+        f5 = 0.4 * np.sum(np.abs(x_norm)**0.25)
+        
+        # Additional high-frequency component for increased complexity
+        f6 = 0.15 * np.sum(np.sin(25 * x_norm**2) * np.cos(8 * x_norm))
+        
+        # Add a new chaotic term with modified logistic map-like behavior
+        f7 = 0.3 * np.sum(np.sin(np.pi * x_norm * np.sin(15 * x_norm))**4)
+        
+        # Add a fourth-order polynomial with random coefficients for extra ruggedness
+        f8 = 0.05 * np.sum((x_norm**4 + 0.5 * x_norm**3 - 0.3 * x_norm**2 + 0.1 * x_norm)**2)
+        
+        # Introduce a new chaotic logistic-like component with different parameters for better fitness
+        f9 = 0.25 * np.sum(np.sin(3 * np.pi * x_norm * np.sin(10 * x_norm**2))**6)
+        
+        # Add a new sinusoidal modulation with variable frequency
+        f10 = 0.1 * np.sum(np.sin(12 * x_norm * np.cos(5 * x_norm))**3)
+        
+        return f1 + 0.4 * f2 + 0.2 * f3 + 0.1 * f4 + 0.08 * f5 + 0.05 * f6 + 0.1 * f7 + 0.03 * f8 + 0.07 * f9 + 0.04 * f10

@@ -1,0 +1,94 @@
+import numpy as np
+
+class MultimodalRadialOscillationBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        np.random.seed(42)
+        # Initialize parameters for chaotic sine components with modified frequencies
+        self.sin_freq = np.random.uniform(5.0, 30.0, dim)
+        self.sin_amp = np.random.uniform(2.5, 7.0, dim)
+        self.sin_phase = np.random.uniform(0.0, 2*np.pi, dim)
+        # Initialize parameters for radial basis functions
+        self.rbf_centers = np.random.uniform(-4.5, 4.5, (dim, dim))
+        self.rbf_widths = np.random.uniform(0.3, 3.5, dim)
+        self.rbf_weights = np.random.uniform(-3.0, 3.0, dim)
+        # Initialize polynomial interaction coefficients
+        self.poly_coeffs = np.random.uniform(-2.5, 2.5, (dim, dim))
+        # Additional chaotic parameters for enhanced complexity
+        self.chaos_factor = np.random.uniform(0.5, 2.5, dim)
+        self.oscillation_amplitude = np.random.uniform(1.0, 5.0, dim)
+        self.oscillation_frequency = np.random.uniform(2.0, 15.0, dim)
+        # Hyper-chaotic coupling terms
+        self.hyper_chaos_coeffs = np.random.uniform(-0.6, 0.6, (dim, dim))
+        self.frequency_modulation = np.random.uniform(0.7, 2.0, dim)
+        self.cubic_interaction_strength = np.random.uniform(0.2, 1.0, dim)
+        # Quaternion-inspired harmonic components
+        self.quaternion_coeffs = np.random.uniform(-1.5, 1.5, (dim, dim, dim))
+        self.modulation_depth = np.random.uniform(0.8, 2.2, dim)
+        self.hyperchaos_mixing = np.random.uniform(0.3, 0.9, dim)
+        
+    def f(self, x):
+        # Ensure x is within bounds [-5, 5]
+        x = np.clip(x, -5.0, 5.0)
+        
+        result = 0.0
+        
+        # Chaotic sinusoidal components with enhanced irregularity
+        for i in range(self.dim):
+            # Base chaotic sine term
+            result += self.sin_amp[i] * np.sin(self.sin_freq[i] * x[i] + self.sin_phase[i])
+            # Additional chaotic oscillation component
+            result += self.oscillation_amplitude[i] * np.cos(self.oscillation_frequency[i] * x[i])
+            # Chaos injection for irregularity
+            result += self.chaos_factor[i] * np.sin(x[i]**3)
+            # Frequency modulation term
+            result += 0.5 * np.sin(self.frequency_modulation[i] * x[i]**2)
+            
+        # Modified radial basis functions with enhanced non-linearity
+        for i in range(self.dim):
+            rbf_sum = 0.0
+            for j in range(self.dim):
+                distance = (x[j] - self.rbf_centers[i][j])**2
+                rbf_sum += np.exp(-distance / (2 * self.rbf_widths[i]**2))
+            result += self.rbf_weights[i] * rbf_sum
+            
+        # Enhanced polynomial interactions with cross-dimensional terms
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                interaction = self.poly_coeffs[i][j] * x[i] * x[j]
+                result += interaction
+                
+        # Higher-order polynomial terms with increased complexity
+        for i in range(self.dim):
+            result += 0.3 * x[i]**5 - 0.8 * x[i]**4 + 0.7 * x[i]**3 - 0.2 * x[i]**2 + 0.2 * x[i]
+            
+        # Cross-dimensional interaction terms with cubic behavior (enhanced)
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                result += 0.25 * x[i]**3 * x[j] + 0.2 * x[i] * x[j]**3  # Increased coefficients
+                
+        # Hyper-chaotic coupling terms between dimensions
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if i != j:
+                    result += self.hyper_chaos_coeffs[i][j] * np.sin(x[i]) * np.cos(x[j])
+                    
+        # Cubic interaction strength modulation
+        for i in range(self.dim):
+            result += self.cubic_interaction_strength[i] * x[i]**6
+            
+        # Add quaternion-inspired harmonic components
+        for i in range(self.dim):
+            for j in range(dim):
+                for k in range(dim):
+                    if i != j and j != k:
+                        result += self.quaternion_coeffs[i][j][k] * np.sin(x[j]) * np.cos(x[k]) * x[i]
+                        
+        # Add dynamic modulation with hyperchaos mixing
+        for i in range(self.dim):
+            result *= (1.0 + self.hyperchaos_mixing[i] * np.sin(x[i]**2) * np.cos(x[i]))
+            
+        # Add Gaussian noise to increase robustness testing
+        result += np.random.normal(0, 0.2)
+        
+        return result

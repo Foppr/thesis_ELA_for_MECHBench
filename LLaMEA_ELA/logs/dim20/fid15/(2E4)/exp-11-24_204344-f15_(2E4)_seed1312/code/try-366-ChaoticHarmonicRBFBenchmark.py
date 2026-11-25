@@ -1,0 +1,96 @@
+import numpy as np
+
+class ChaoticHarmonicRBFBenchmark:
+    def __init__(self, dim):
+        self.dim = dim
+        # Initialize chaotic system parameters with higher complexity
+        self.chebyshev_coeffs = np.random.randn(dim, 12)
+        self.rbf_centers = np.random.uniform(-4.8, 4.8, (dim, 9))
+        self.rbf_widths = np.random.uniform(0.1, 3.5, (dim, 9))
+        self.harmonic_freqs = np.random.uniform(0.2, 12.0, dim)
+        self.harmonic_amplitudes = np.random.uniform(0.1, 6.0, dim)
+        # Additional fractal-like recursive parameters with increased depth
+        self.fractal_depth = np.random.randint(4, 10, dim)
+        self.fractal_weights = np.random.uniform(0.02, 1.5, (dim, 6))
+        # Spectral modulation parameters
+        self.spectral_freqs = np.random.uniform(0.05, 2.5, dim)
+        self.spectral_amps = np.random.uniform(0.3, 4.0, dim)
+        # New chaotic modulation parameters
+        self.new_chaos_params = np.random.uniform(0.1, 3.0, (dim, 5))
+        
+    def f(self, x):
+        x = np.array(x)
+        
+        # Chaotic component using Chebyshev polynomials with higher degree and more terms
+        chaotic_term = 0.0
+        for i in range(self.dim):
+            coeffs = self.chebyshev_coeffs[i]
+            T_x = np.cos(coeffs[0] * np.arccos(np.clip(x[i], -1, 1)))
+            chaotic_term += coeffs[1] * T_x + coeffs[2] * T_x**2 + coeffs[3] * T_x**3 + \
+                           coeffs[4] * T_x**4 + coeffs[5] * T_x**5 + coeffs[6] * T_x**6 + \
+                           coeffs[7] * T_x**7 + coeffs[8] * T_x**8 + coeffs[9] * T_x**9 + \
+                           coeffs[10] * T_x**10 + coeffs[11] * T_x**11
+        
+        # Radial basis function component with more centers and fractal-like scaling
+        rbf_term = 0.0
+        for i in range(self.dim):
+            for j in range(9):
+                center = self.rbf_centers[i, j]
+                width = self.rbf_widths[i, j]
+                # Fractal-like recursive scaling with higher complexity and more terms
+                scale_factor = np.sum([self.fractal_weights[i, k] * np.sin((j+1) * x[i] * (k+1) + k*0.5 + 
+                                     self.new_chaos_params[i, 0] * np.cos(x[i] * (k+1))) 
+                                     for k in range(6)])
+                rbf_term += np.exp(-0.5 * ((x[i] - center) / width)**2) * scale_factor
+        
+        # Harmonic oscillation component with multiple frequencies and fractal coupling
+        harmonic_term = 0.0
+        for i in range(self.dim):
+            freq1 = self.harmonic_freqs[i]
+            amp1 = self.harmonic_amplitudes[i]
+            freq2 = freq1 * np.sin(x[i] * 0.3) + 1.0
+            amp2 = amp1 * np.cos(x[i] * 0.7) + 1.0
+            # Additional spectral modulation and new chaotic components
+            spec_mod = self.spectral_amps[i] * np.sin(self.spectral_freqs[i] * x[i])
+            chaos_mod = self.new_chaos_params[i, 1] * np.sin(x[i] * self.new_chaos_params[i, 2])
+            harmonic_term += (amp1 * np.sin(freq1 * x[i]) + amp2 * np.cos(freq2 * x[i] * 0.7)) * \
+                            (1.0 + 0.3 * spec_mod) * (1.0 + 0.1 * chaos_mod)
+        
+        # Coupling between dimensions using fractal-like recursive terms with increased complexity
+        coupling_term = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                # Recursive fractal coupling with depth-dependent interaction and additional chaos
+                recursive_factor = 1.0
+                for k in range(min(self.fractal_depth[i], self.fractal_depth[j])):
+                    recursive_factor *= np.sin(x[i] * x[j] * (k+1) + np.cos(x[i] + x[j])) * \
+                                       np.cos(x[i] + x[j] * (k+1)) * \
+                                       np.sin(x[i] * self.new_chaos_params[i, 3] + 
+                                              x[j] * self.new_chaos_params[j, 4])
+                coupling_term += recursive_factor * (i + j) * 0.15
+        
+        # Gradient-enhanced component with non-uniform scaling and chaotic modulation
+        grad_term = 0.0
+        for i in range(self.dim):
+            # Chaotic modulation of gradient term with more complex interactions
+            modulator = np.sin(x[i] * 3.0) * np.cos(x[i] * 1.5) + 1.5 + 0.2 * np.sin(x[i] * 7.0) + \
+                        self.new_chaos_params[i, 0] * np.cos(x[i] * 5.0)
+            grad_term += (x[i]**2) * np.exp(-0.1 * x[i]**2) * np.sin(x[i] * 2) * modulator
+        
+        # Spectral coupling term between dimensions
+        spectral_coupling = 0.0
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                spectral_coupling += (self.spectral_amps[i] * np.sin(self.spectral_freqs[i] * x[i]) *
+                                    self.spectral_amps[j] * np.sin(self.spectral_freqs[j] * x[j]))
+        
+        # Fractal-like recursive structure in final combination with new chaotic interactions
+        total = 0.18 * chaotic_term + 0.20 * rbf_term + 0.22 * harmonic_term + \
+                0.18 * coupling_term + 0.16 * grad_term + 0.06 * spectral_coupling
+        
+        # Global modulation using a nonlinear transformation with fractal characteristics and new chaotic components
+        global_mod = 1.0 + 0.5 * np.sin(np.sum(x) * 0.5) * np.cos(np.sum(x) * 0.2) * \
+                     np.sin(np.sum(x**2) * 0.1) * (1.0 + 0.1 * np.sin(np.sum(np.abs(x)) * 3.0)) * \
+                     (1.0 + 0.05 * np.cos(np.sum(x * self.new_chaos_params[:, 0]) * 2.0))
+        
+        return total * global_mod
